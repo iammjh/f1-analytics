@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  BUG FIX: The original file had `* { @apply border-f1-grid; }` which applied
+  a border-color to EVERY element on the page. This is not how Tailwind's
+  preflight works — it sets box-sizing, not borders. Removed entirely.
+*/
+
+@layer base {
+  body {
+    @apply bg-f1-black text-white antialiased;
+  }
+
+  /* Smooth scroll for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Race card with F1 hover effect */
+  .race-card {
+    @apply bg-f1-dark border border-f1-grid rounded-xl p-4 hover:border-f1-red transition-all duration-200 cursor-pointer;
+  }
+
+  /* Generic F1 button */
+  .btn-f1 {
+    @apply px-6 py-2.5 bg-f1-red hover:bg-red-700 text-white font-bold rounded-lg transition-all duration-200 hover:scale-105;
+  }
+
+  .btn-ghost {
+    @apply px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition border border-white/20;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-f1-dark border border-f1-grid rounded-xl p-4 text-center;
+  }
+
+  /* Grid background texture */
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Monospace data display */
+  .data-mono {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+}
+
+@layer utilities {
+  /* F1 pulse animation for live indicators */
+  .f1-pulse {
+    animation: f1-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Red glow for important elements */
+  .glow-red {
+    box-shadow: 0 0 20px rgba(225, 6, 0, 0.3);
+  }
+
+  /* Text gradient utility */
+  .text-gradient-red {
+    @apply bg-gradient-to-r from-f1-red to-red-400 bg-clip-text text-transparent;
+  }
+}
+
+@keyframes f1-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* Scrollbar — minimal dark theme */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #080808; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #E10600; }

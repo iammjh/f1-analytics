@@ -1,0 +1,70 @@
+# Dependencies
+**/node_modules/
+
+# Build outputs
+.next/
+.next-dev/
+.next-build/
+out/
+dist/
+build/
+coverage/
+
+# Runtime/cache/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+.tmp/
+tmp/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Private keys/certificates/credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+*.asc
+id_rsa
+id_rsa.pub
+*_rsa
+*_dsa
+*.ovpn
+
+# Local database / dev data
+*.sqlite
+*.sqlite3
+*.db
+
+# IDE/editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Next.js / TypeScript
+*.tsbuildinfo
+
+# Docker env overrides
+.docker/*.env
+*.local
