@@ -2943,6 +2943,108 @@ function CircuitsPage({ season, isMobile }) {
   );
 }
 
+const F1_TV_URL = "https://f1tv.formula1.com/";
+const F1_TV_INFO_URL = "https://www.formula1.com/en-us/subscribe-to-f1-tv";
+const F1_BROADCAST_INFO_URL = "https://www.formula1.com/en/information/f1-broadcast-information.45y3LNsT1D6VoK0ZmX8ciJ";
+
+function splitDriverName(fullName = "") {
+  const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return { firstName:"", lastName:"" };
+  if (parts.length === 1) return { firstName:parts[0], lastName:"" };
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
+}
+
+function formatEventDateTime(value) {
+  if (!value) return "Start time unavailable";
+  try {
+    return new Date(value).toLocaleString("en-US", {
+      weekday:"short",
+      month:"short",
+      day:"numeric",
+      hour:"2-digit",
+      minute:"2-digit",
+    });
+  } catch {
+    return "Start time unavailable";
+  }
+}
+
+function getLiveStatusMeta(status) {
+  if (status === "live") {
+    return {
+      label:"Live Now",
+      accent:"#E10600",
+      chipBg:"#E1060014",
+      chipBorder:"#E1060033",
+      summary:"Official watch links and current timing snapshot",
+    };
+  }
+
+  if (status === "recent") {
+    return {
+      label:"Recent Session",
+      accent:"#FFD700",
+      chipBg:"#FFD70014",
+      chipBorder:"#FFD70033",
+      summary:"Latest completed session with official replay/watch options",
+    };
+  }
+
+  if (status === "upcoming") {
+    return {
+      label:"Upcoming Race",
+      accent:"#27F4D2",
+      chipBg:"#27F4D214",
+      chipBorder:"#27F4D233",
+      summary:"Countdown, official watch options, and next race planning",
+    };
+  }
+
+  return {
+    label:"Unavailable",
+    accent:"#888",
+    chipBg:"#88888814",
+    chipBorder:"#88888833",
+    summary:"Official links are available even when live timing is offline",
+  };
+}
+
+function ActionLinkCard({href, eyebrow, title, body, accent}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        background:"#111",
+        border:`1px solid ${accent}22`,
+        borderRadius:10,
+        padding:"14px 16px",
+        textDecoration:"none",
+        display:"block",
+        transition:"transform 0.18s, box-shadow 0.18s, border-color 0.18s",
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = `0 8px 24px ${accent}18`;
+        e.currentTarget.style.borderColor = `${accent}55`;
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.borderColor = `${accent}22`;
+      }}
+    >
+      <div style={{fontSize:10,color:accent,textTransform:"uppercase",letterSpacing:1.3,fontWeight:700,marginBottom:8}}>{eyebrow}</div>
+      <div style={{fontSize:16,fontWeight:800,color:"#fff",marginBottom:6}}>{title}</div>
+      <div style={{fontSize:12,color:"#777",lineHeight:1.5}}>{body}</div>
+    </a>
+  );
+}
+
 function LivePage() {
   const [liveData,setLiveData]=useState(null); 
   const [loading,setLoading]=useState(true);
@@ -3011,85 +3113,205 @@ function LivePage() {
   if(error) return <Empty icon="⚠️" msg={error}/>;
   if(!liveData) return <Empty msg="No live race data available"/>;
 
+  const statusMeta = getLiveStatusMeta(liveData.status);
   const heading = liveData.session?.meetingName || gpName(liveData.nextRace?.raceName || "Upcoming Race");
   const subtitle = liveData.status === "upcoming"
     ? liveData.nextRace?.circuitName || "Next race schedule"
     : [liveData.session?.sessionName, liveData.session?.circuit].filter(Boolean).join(" · ");
+  const sessionLabel = liveData.session?.sessionName || "No live session";
+  const locationLabel =
+    liveData.status === "upcoming"
+      ? [liveData.nextRace?.locality, liveData.nextRace?.country].filter(Boolean).join(" · ")
+      : [liveData.session?.circuit, liveData.session?.country].filter(Boolean).join(" · ");
+  const leader = liveData.leaderboard?.[0] || null;
+  const heroStats = liveData.status === "upcoming"
+    ? [
+        ["Round", liveData.nextRace?.round ? `R${liveData.nextRace.round}` : "—", "#27F4D2"],
+        ["Race", gpName(liveData.nextRace?.raceName || "Next"), "#fff"],
+        ["Start", countdown ? `${pad2(countdown.d)}d ${pad2(countdown.h)}h` : "Scheduled", "#FFD700"],
+      ]
+    : [
+        ["Leader", leader?.code || "—", leader?.teamColor || "#fff"],
+        ["Drivers", liveData.leaderboard?.length || 0, "#27F4D2"],
+        ["Laps Tracked", liveData.lapSeries?.length || 0, "#FFD700"],
+      ];
 
   return (
     <div>
-      <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:24,marginBottom:20}}>
-        <div style={{display:"inline-flex",padding:"6px 12px",borderRadius:999,border:"1px solid #E1060033",background:"#E1060012",fontSize:10,color:"#E10600",textTransform:"uppercase",letterSpacing:1.6,fontWeight:700,marginBottom:12}}>
-          {liveData.status}
-        </div>
-        <div style={{fontSize:28,fontWeight:700,marginBottom:8,color:"#fff"}}>{heading}</div>
-        <div style={{fontSize:13,color:"#888",marginBottom:8}}>{subtitle || "Latest timing summary"}</div>
-        <div style={{fontSize:12,color:"#666"}}>{liveData.message}</div>
-      </div>
-
-      {!!liveData.nextRace && (
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:24,marginBottom:20}}>
-          <div style={{fontSize:11,color:"#666",textTransform:"uppercase",letterSpacing:1.4,marginBottom:8,fontWeight:700}}>Next Scheduled Race</div>
-          <div style={{fontSize:22,fontWeight:700,color:"#fff",marginBottom:6}}>{gpName(liveData.nextRace.raceName)}</div>
-          <div style={{fontSize:12,color:"#888",marginBottom:16}}>
-            {[liveData.nextRace.circuitName, liveData.nextRace.country].filter(Boolean).join(" • ")}
+      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.35fr) minmax(300px,0.85fr)",gap:18,marginBottom:20,alignItems:"stretch"}}>
+        <div style={{background:"linear-gradient(135deg, #101010 0%, #0a0a0a 58%, #070707 100%)",border:`1px solid ${statusMeta.accent}22`,borderRadius:14,padding:24,position:"relative",overflow:"hidden"}}>
+          <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, ${statusMeta.accent}, ${statusMeta.accent}55, transparent)`}}/>
+          <div style={{display:"inline-flex",padding:"6px 12px",borderRadius:999,border:`1px solid ${statusMeta.chipBorder}`,background:statusMeta.chipBg,fontSize:10,color:statusMeta.accent,textTransform:"uppercase",letterSpacing:1.6,fontWeight:700,marginBottom:14}}>
+            {statusMeta.label}
           </div>
-          {countdown ? (
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8,marginBottom:16}}>
-              <div style={{background:"#111",border:"1px solid #222",borderRadius:8,padding:14}}>
-                <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1,marginBottom:6,fontWeight:600}}>Days</div>
-                <div style={{fontSize:24,fontWeight:700,color:"#fff",...mono}}>{countdown.d}</div>
-              </div>
-              <div style={{background:"#111",border:"1px solid #222",borderRadius:8,padding:14}}>
-                <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1,marginBottom:6,fontWeight:600}}>Hours</div>
-                <div style={{fontSize:24,fontWeight:700,color:"#fff",...mono}}>{countdown.h}</div>
-              </div>
-              <div style={{background:"#111",border:"1px solid #222",borderRadius:8,padding:14}}>
-                <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1,marginBottom:6,fontWeight:600}}>Mins</div>
-                <div style={{fontSize:24,fontWeight:700,color:"#fff",...mono}}>{countdown.m}</div>
-              </div>
-              <div style={{background:"#111",border:"1px solid #222",borderRadius:8,padding:14}}>
-                <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1,marginBottom:6,fontWeight:600}}>Secs</div>
-                <div style={{fontSize:24,fontWeight:700,color:"#fff",...mono}}>{countdown.s}</div>
-              </div>
-            </div>
-          ) : null}
-          <div style={{fontSize:12,color:"#666"}}>
-            {liveData.nextRace.startTime
-              ? new Date(liveData.nextRace.startTime).toLocaleString("en-US", { weekday:"short", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" })
-              : "Start time unavailable"}
+          <div style={{fontSize:30,fontWeight:800,marginBottom:8,color:"#fff",lineHeight:1.05}}>{heading}</div>
+          <div style={{fontSize:14,color:"#aaa",marginBottom:8}}>{subtitle || "Latest timing summary"}</div>
+          <div style={{fontSize:12,color:"#666",marginBottom:16,maxWidth:680,lineHeight:1.6}}>{liveData.message}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:18}}>
+            <a href={F1_TV_URL} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,background:"#E10600",color:"#fff",textDecoration:"none",fontSize:13,fontWeight:700}}>
+              Watch on F1 TV
+            </a>
+            <a href={F1_BROADCAST_INFO_URL} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,border:`1px solid ${statusMeta.accent}33`,background:"#0f0f0f",color:"#fff",textDecoration:"none",fontSize:13,fontWeight:700}}>
+              Find Local Broadcaster
+            </a>
+            <a href={F1_TV_INFO_URL} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,border:"1px solid #222",background:"#111",color:"#bbb",textDecoration:"none",fontSize:13,fontWeight:700}}>
+              F1 TV Plans
+            </a>
           </div>
-        </div>
-      )}
-
-      <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20,marginBottom:20}}>
-        <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:14}}>Session Order</div>
-        {liveData.leaderboard?.length ? (
-          <div style={{display:"grid",gap:10}}>
-            {liveData.leaderboard.slice(0, 6).map((driver) => (
-              <div key={`${driver.driverNumber}-${driver.code}`} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",borderRadius:10,background:"#111",border:"1px solid #1e1e1e"}}>
-                <div style={{display:"flex",alignItems:"center",gap:12}}>
-                  <div style={{width:22,fontSize:16,fontWeight:700,color:"#FFD700",...mono}}>{driver.position ?? "—"}</div>
-                  <div style={{width:4,height:26,borderRadius:999,background:driver.teamColor}}/>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>{driver.name}</div>
-                    <div style={{fontSize:11,color:"#666"}}>{driver.team} • {driver.code}</div>
-                  </div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#27F4D2",...mono}}>
-                    {driver.lastLap != null ? `${driver.lastLap.toFixed(3)}s` : "No lap yet"}
-                  </div>
-                  <div style={{fontSize:11,color:"#555"}}>{driver.lapCount} laps</div>
-                </div>
+          <div style={{fontSize:11,color:"#666",marginBottom:18}}>
+            Official links only. Availability varies by territory; in the U.S., official live access may route through Apple TV according to F1 TV guidance.
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+            {heroStats.map(([label, value, accent]) => (
+              <div key={label} style={{background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:"12px 12px"}}>
+                <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.2,marginBottom:6}}>{label}</div>
+                <div style={{fontSize:18,fontWeight:800,color:accent,...mono,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{value}</div>
               </div>
             ))}
           </div>
-        ) : <Empty icon="⏱️" msg="No session timing entries available yet."/>}
+        </div>
+
+        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:14,padding:20}}>
+          <SecLabel>{liveData.status === "upcoming" ? "Countdown" : "Race Center"}</SecLabel>
+          <div style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>{liveData.status === "upcoming" ? "Next race starts in" : sessionLabel}</div>
+          <div style={{fontSize:12,color:"#777",marginBottom:16,lineHeight:1.5}}>
+            {[locationLabel, formatEventDateTime(liveData.nextRace?.startTime || liveData.session?.startTime)].filter(Boolean).join(" • ")}
+          </div>
+          {countdown ? (
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8,marginBottom:16}}>
+              {[
+                ["Days", countdown.d],
+                ["Hours", countdown.h],
+                ["Mins", countdown.m],
+                ["Secs", countdown.s],
+              ].map(([label, value]) => (
+                <div key={label} style={{background:"#111",border:"1px solid #222",borderRadius:10,padding:"14px 10px",textAlign:"center"}}>
+                  <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.1,marginBottom:6,fontWeight:600}}>{label}</div>
+                  <div style={{fontSize:22,fontWeight:800,color:"#fff",...mono}}>{pad2(value)}</div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{display:"grid",gap:10,marginBottom:16}}>
+              {[
+                ["Status", statusMeta.label],
+                ["Session", sessionLabel],
+                ["Leading Driver", leader?.name || "No timing leader"],
+                ["Latest Lap", leader?.lastLap != null ? `${leader.lastLap.toFixed(3)}s` : "No lap yet"],
+              ].map(([label, value]) => (
+                <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:10,background:"#111",border:"1px solid #1d1d1d"}}>
+                  <span style={{fontSize:11,color:"#666",textTransform:"uppercase",letterSpacing:1.1}}>{label}</span>
+                  <span style={{fontSize:12,color:"#fff",fontWeight:700,textAlign:"right"}}>{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{fontSize:11,color:"#666",lineHeight:1.6}}>{statusMeta.summary}</div>
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
+        <StatCard label="Mode" value={statusMeta.label} sub={liveData.status === "live" ? "Live timing feed active" : liveData.status === "recent" ? "Latest completed timing" : "Official pre-race center"} accent={statusMeta.accent}/>
+        <StatCard label="Next Race" value={gpName(liveData.nextRace?.raceName || "—")} sub={liveData.nextRace?.round ? `Round ${liveData.nextRace.round}` : "No scheduled round"} accent="#27F4D2"/>
+        <StatCard label="Leaderboard Entries" value={liveData.leaderboard?.length || 0} sub="Drivers in live snapshot" accent="#64C4FF"/>
+        <StatCard label="Lap Series Points" value={liveData.lapSeries?.length || 0} sub="Chart samples available" accent="#FFD700"/>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"minmax(0,0.95fr) minmax(0,1.05fr)",gap:18,alignItems:"start",marginBottom:20}}>
+        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20}}>
+          <SecLabel>Watch & Coverage</SecLabel>
+          <div style={{display:"grid",gap:12,marginBottom:16}}>
+            <ActionLinkCard
+              href={F1_TV_URL}
+              eyebrow="Official Streaming"
+              title="Open F1 TV"
+              body="Go straight to the official F1 TV experience for live sessions, replays, onboard cameras, team radio, and timing where available."
+              accent="#E10600"
+            />
+            <ActionLinkCard
+              href={F1_BROADCAST_INFO_URL}
+              eyebrow="Where To Watch"
+              title="Find Your Broadcaster"
+              body="Use Formula 1’s official broadcast information page to find the rights holder and local live coverage in your territory."
+              accent="#27F4D2"
+            />
+            <ActionLinkCard
+              href={F1_TV_INFO_URL}
+              eyebrow="Plans & Devices"
+              title="Review F1 TV Plans"
+              body="Check official plan availability, supported devices, and region-specific notes like the U.S. Apple TV route."
+              accent="#FFD700"
+            />
+          </div>
+
+          {!!liveData.nextRace && (
+            <div style={{background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:14}}>
+              <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.3,marginBottom:8,fontWeight:700}}>Next Race Details</div>
+              {[
+                ["Round", liveData.nextRace.round ? `R${liveData.nextRace.round}` : "—"],
+                ["Grand Prix", gpName(liveData.nextRace.raceName || "—")],
+                ["Circuit", liveData.nextRace.circuitName || "—"],
+                ["Location", [liveData.nextRace.locality, liveData.nextRace.country].filter(Boolean).join(" · ") || "—"],
+                ["Start", formatEventDateTime(liveData.nextRace.startTime)],
+              ].map(([label, value]) => (
+                <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid #161616"}}>
+                  <span style={{fontSize:11,color:"#666"}}>{label}</span>
+                  <span style={{fontSize:12,color:"#fff",fontWeight:600,textAlign:"right"}}>{value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20}}>
+          <SecLabel>{liveData.leaderboard?.length ? "Live Leaderboard" : "Timing Snapshot"}</SecLabel>
+          {liveData.leaderboard?.length ? (
+            <div style={{display:"grid",gap:10}}>
+              {liveData.leaderboard.slice(0, 6).map((driver) => {
+                const { firstName, lastName } = splitDriverName(driver.name);
+                return (
+                  <div key={`${driver.driverNumber}-${driver.code}`} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",borderRadius:10,background:"#111",border:"1px solid #1e1e1e",gap:12}}>
+                    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
+                      <PosBadge pos={driver.position ?? "—"}/>
+                      <DriverPhoto
+                        firstName={firstName}
+                        lastName={lastName}
+                        headshotUrl={driver.headshotUrl}
+                        teamColor={driver.teamColor}
+                        headshotVariant="2col"
+                        style={{width:44,height:52,display:"block",objectFit:"contain",objectPosition:"center bottom",background:"transparent",border:"none",flexShrink:0}}
+                      />
+                      <div style={{minWidth:0}}>
+                        <div style={{fontSize:13,fontWeight:700,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{driver.name}</div>
+                        <div style={{fontSize:11,color:"#666"}}>{driver.team} • {driver.code}</div>
+                      </div>
+                    </div>
+                    <div style={{textAlign:"right",flexShrink:0}}>
+                      <div style={{fontSize:12,fontWeight:700,color:driver.teamColor,...mono}}>
+                        {driver.lastLap != null ? `${driver.lastLap.toFixed(3)}s` : "No lap yet"}
+                      </div>
+                      <div style={{fontSize:11,color:"#555"}}>{driver.lapCount} laps</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : <Empty icon="⏱️" msg="No session timing entries available yet."/>}
+        </div>
       </div>
 
       <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20}}>
-        <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:14}}>Lap Time Progression</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:14,flexWrap:"wrap"}}>
+          <div>
+            <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:4}}>Lap Time Progression</div>
+            <div style={{fontSize:11,color:"#666"}}>Top timing trend from the current or latest official timing snapshot</div>
+          </div>
+          {leader ? (
+            <div style={{fontSize:11,color:"#666"}}>
+              Leader: <span style={{color:leader.teamColor,fontWeight:700}}>{leader.name}</span>
+            </div>
+          ) : null}
+        </div>
         {liveData.lapSeries?.length && liveData.lapSeriesDrivers?.length ? (
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={liveData.lapSeries}>
@@ -3452,19 +3674,81 @@ function TelemetryPage() {
   if(loading) return <Spinner/>;
   if(error) return <Empty icon="⚠️" msg={error}/>;
 
+  const sessionContext = payload?.session || null;
+  const usingEstimatedTelemetry = payload?.source === "lap-data";
+  const sourceLabel =
+    payload?.source === "car-data"
+      ? "Official car data"
+      : payload?.source === "lap-data"
+        ? "Lap-derived estimate"
+        : "Unavailable";
+  const selectedDriverLabel = payload?.selectedDriver?.name || selectedDriver;
+  const telemetryContextRows = [
+    ["Session", sessionContext?.sessionName || "—"],
+    ["Circuit", sessionContext?.circuit || "—"],
+    ["Country", sessionContext?.country || "—"],
+    ["Session Start", formatEventDateTime(sessionContext?.startTime)],
+    ["Data Source", sourceLabel],
+  ];
+
   return (
     <div>
-      {payload?.session && (
-        <div style={{marginBottom:12,fontSize:12,color:"#666"}}>
-          {[payload.session.meetingName, payload.session.sessionName].filter(Boolean).join(" • ")}
+      <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18,marginBottom:18}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:14,flexWrap:"wrap"}}>
+          <div>
+            <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.4,fontWeight:700,marginBottom:8}}>Telemetry Session</div>
+            <div style={{fontSize:22,fontWeight:800,color:"#fff",lineHeight:1.1,marginBottom:6}}>
+              {sessionContext?.meetingName || sessionContext?.circuit || "Telemetry Feed"}
+            </div>
+            <div style={{fontSize:12,color:"#777"}}>
+              {[sessionContext?.sessionName, sessionContext?.circuit, sessionContext?.country].filter(Boolean).join(" • ")}
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <div style={{
+              display:"inline-flex",
+              padding:"6px 10px",
+              borderRadius:999,
+              border:`1px solid ${usingEstimatedTelemetry ? "#FFD70033" : "#27F4D233"}`,
+              background:usingEstimatedTelemetry ? "#FFD70014" : "#27F4D214",
+              color:usingEstimatedTelemetry ? "#FFD700" : "#27F4D2",
+              fontSize:10,
+              fontWeight:700,
+              textTransform:"uppercase",
+              letterSpacing:1.1,
+            }}>
+              {sourceLabel}
+            </div>
+            <div style={{
+              display:"inline-flex",
+              padding:"6px 10px",
+              borderRadius:999,
+              border:"1px solid #1f1f1f",
+              background:"#111",
+              color:"#aaa",
+              fontSize:10,
+              fontWeight:700,
+              textTransform:"uppercase",
+              letterSpacing:1.1,
+            }}>
+              Driver · {payload?.selectedDriver?.code || selectedDriver}
+            </div>
+          </div>
         </div>
-      )}
-      {payload?.message && (
-        <div style={{marginBottom:8,fontSize:12,color:"#888"}}>{payload.message}</div>
-      )}
-      {payload?.derivedMetricsNotice && (
-        <div style={{marginBottom:20,fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.2}}>
-          {payload.derivedMetricsNotice}
+
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10,marginTop:16}}>
+          {telemetryContextRows.map(([label, value]) => (
+            <div key={label} style={{background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:"10px 12px"}}>
+              <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:5}}>{label}</div>
+              <div style={{fontSize:13,color:"#fff",fontWeight:700,wordBreak:"break-word"}}>{value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {usingEstimatedTelemetry && payload?.derivedMetricsNotice && (
+        <div style={{marginBottom:20,padding:"10px 12px",borderRadius:10,background:"#FFD70010",border:"1px solid #FFD70022",fontSize:11,color:"#C9B46B",lineHeight:1.5}}>
+          <strong style={{color:"#FFD700"}}>Estimated telemetry:</strong> {payload.derivedMetricsNotice.toLowerCase()}
         </div>
       )}
       <div style={{marginBottom:20}}>
