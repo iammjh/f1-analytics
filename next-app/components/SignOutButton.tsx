@@ -11,10 +11,10 @@ export default function SignOutButton() {
   return (
     <button
       onClick={handleSignOut}
-      className="flex items-center gap-2 px-4 py-2 bg-f1-red hover:bg-red-700 text-white font-semibold rounded transition"
+      className="flex items-center gap-2 px-2 sm:px-4 py-2 bg-f1-red hover:bg-red-700 text-white font-semibold rounded transition"
     >
       <LogOut size={16} />
-      <span>Sign Out</span>
+      <span className="hidden sm:inline">Sign Out</span>
     </button>
   );
 }

@@ -105,19 +105,19 @@ export default function LivePage() {
   );
 
   if (loading) {
-    return <div className="min-h-screen bg-f1-black p-8 text-white">Loading live race data...</div>;
+    return <div className="min-h-screen bg-f1-black p-4 sm:p-6 lg:p-8 text-white">Loading live race data...</div>;
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-f1-black p-8 text-white">
+      <div className="min-h-screen bg-f1-black p-4 sm:p-6 lg:p-8 text-white">
         <div className="rounded-lg border border-f1-red bg-f1-dark p-6 text-red-300">{error}</div>
       </div>
     );
   }
 
   if (!liveData) {
-    return <div className="min-h-screen bg-f1-black p-8 text-white">No live race data available.</div>;
+    return <div className="min-h-screen bg-f1-black p-4 sm:p-6 lg:p-8 text-white">No live race data available.</div>;
   }
 
   const heading =
@@ -128,12 +128,12 @@ export default function LivePage() {
       : [liveData.session?.sessionName, liveData.session?.circuit].filter(Boolean).join(' • ');
 
   return (
-    <div className="min-h-screen bg-f1-black p-8 text-white">
-      <div className="mb-8 rounded-xl border border-f1-grid bg-f1-dark p-6">
+    <div className="min-h-screen bg-f1-black p-4 sm:p-6 lg:p-8 text-white">
+      <div className="mb-6 sm:mb-8 rounded-xl border border-f1-grid bg-f1-dark p-4 sm:p-6">
         <div className="mb-3 inline-flex rounded-full border border-f1-red/40 bg-f1-red/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-f1-red">
           {liveData.status}
         </div>
-        <h1 className="mb-2 text-4xl font-bold">{heading}</h1>
+        <h1 className="mb-2 text-2xl sm:text-3xl lg:text-4xl font-bold">{heading}</h1>
         <p className="mb-2 text-gray-300">{subheading || 'Latest timing summary'}</p>
         <p className="text-sm text-gray-400">{liveData.message}</p>
         {liveData.session && (
@@ -145,11 +145,11 @@ export default function LivePage() {
       </div>
 
       {liveData.nextRace && (
-        <div className="mb-8 rounded-xl border border-f1-grid bg-f1-dark p-6">
+        <div className="mb-6 sm:mb-8 rounded-xl border border-f1-grid bg-f1-dark p-4 sm:p-6">
           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
             Next Scheduled Race
           </div>
-          <div className="mb-3 text-2xl font-bold text-f1-red">{liveData.nextRace.raceName}</div>
+          <div className="mb-3 text-xl sm:text-2xl font-bold text-f1-red">{liveData.nextRace.raceName}</div>
           <p className="mb-4 text-gray-400">
             {[liveData.nextRace.circuitName, liveData.nextRace.country].filter(Boolean).join(' • ')}
           </p>
@@ -170,14 +170,14 @@ export default function LivePage() {
         </div>
       )}
 
-      <div className="mb-8 rounded-xl border border-f1-grid bg-f1-dark p-6">
+      <div className="mb-6 sm:mb-8 rounded-xl border border-f1-grid bg-f1-dark p-4 sm:p-6">
         <h2 className="mb-4 text-xl font-bold">Session Order</h2>
         {liveData.leaderboard.length ? (
           <div className="space-y-3">
             {liveData.leaderboard.map((driver) => (
               <div
                 key={`${driver.driverNumber}-${driver.code}`}
-                className="flex items-center justify-between rounded-lg border border-f1-grid bg-f1-grid p-4"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-f1-grid bg-f1-grid p-4"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-8 font-mono text-lg font-bold text-f1-gold">
@@ -194,7 +194,7 @@ export default function LivePage() {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="font-mono text-sm font-semibold text-f1-accent">
                     {formatLapTime(driver.lastLap)}
                   </p>
@@ -210,7 +210,7 @@ export default function LivePage() {
         )}
       </div>
 
-      <div className="rounded-xl border border-f1-grid bg-f1-dark p-6">
+      <div className="rounded-xl border border-f1-grid bg-f1-dark p-4 sm:p-6">
         <h2 className="mb-4 text-xl font-bold">Lap Time Progression</h2>
         {liveData.lapSeries.length && liveData.lapSeriesDrivers.length ? (
           <ResponsiveContainer width="100%" height={320}>

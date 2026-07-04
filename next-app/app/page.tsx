@@ -158,10 +158,10 @@ export default function Home() {
 
       {/* ── Fixed Nav ──────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-f1-black/85 backdrop-blur-md border-b border-f1-grid">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <img src="/F1-Logo.png" alt="F1" style={{width:56,objectFit:"contain"}}/>
-            <span className="text-white font-black text-xl tracking-tight">F1 Analytics</span>
+            <img src="/F1-Logo.png" alt="F1" className="w-10 sm:w-14" style={{objectFit:"contain"}}/>
+            <span className="text-white font-black text-base sm:text-xl tracking-tight">F1 Analytics</span>
             <span className="hidden sm:block text-xs text-f1-red font-bold bg-f1-red/10 px-2 py-0.5 rounded-full border border-f1-red/30">
               {activeSeason}
             </span>
@@ -169,7 +169,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {status === 'authenticated' ? (
               <div className="relative group">
-                <button className="px-4 py-2 bg-f1-red hover:bg-red-700 text-white font-semibold rounded-lg transition text-sm inline-flex items-center gap-2 max-w-[240px] border border-red-500/40">
+                <button className="px-3 sm:px-4 py-2 bg-f1-red hover:bg-red-700 text-white font-semibold rounded-lg transition text-xs sm:text-sm inline-flex items-center gap-2 max-w-[170px] sm:max-w-[240px] border border-red-500/40">
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-white text-[12px] font-extrabold text-f1-red">
                     {userInitial}
                   </span>
@@ -195,13 +195,13 @@ export default function Home() {
               <>
                 <Link
                   href="/auth/signin"
-                  className="px-5 py-2 text-white/70 hover:text-white text-sm font-medium transition"
+                  className="px-3 sm:px-5 py-2 text-white/70 hover:text-white text-xs sm:text-sm font-medium transition"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/signin"
-                  className="px-5 py-2 bg-f1-red hover:bg-red-700 text-white font-bold rounded-lg transition text-sm"
+                  className="px-3 sm:px-5 py-2 bg-f1-red hover:bg-red-700 text-white font-bold rounded-lg transition text-xs sm:text-sm whitespace-nowrap"
                 >
                   Get Started →
                 </Link>
@@ -214,7 +214,7 @@ export default function Home() {
       {/* ── Hero ───────────────────────────────────────────────── */}
       {/* BUG FIX: removed backgroundAttachment:'fixed' (breaks iOS/Safari)
           Using JS parallax instead. Also removed -mx-4/-mx-8 that caused horizontal overflow. */}
-      <div ref={heroRef} className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16">
+      <div ref={heroRef} className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden pt-14 sm:pt-16">
 
         {/* Background image — JS parallax, no iOS issues */}
         <div className="hero-bg-img absolute inset-0 will-change-transform" style={{ top: '-15%', bottom: '-15%' }}>
@@ -236,31 +236,31 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-f1-red to-transparent opacity-60" />
 
         {/* Hero content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center py-24">
-          <div className="inline-flex items-center gap-2 bg-f1-red/15 border border-f1-red/30 rounded-full px-4 py-1.5 mb-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center py-16 sm:py-24">
+          <div className="inline-flex items-center gap-2 bg-f1-red/15 border border-f1-red/30 rounded-full px-3 sm:px-4 py-1.5 mb-6 sm:mb-8">
             <span className="w-2 h-2 rounded-full bg-f1-red animate-pulse" />
-            <span className="text-f1-red text-sm font-bold tracking-wider uppercase">Live {activeSeason} Season</span>
+            <span className="text-f1-red text-xs sm:text-sm font-bold tracking-wider uppercase">Live {activeSeason} Season</span>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-none tracking-tighter">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-5 sm:mb-6 leading-none tracking-tighter">
             F1 Data<br />
             <span className="text-f1-red">Reimagined</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-xl md:text-2xl text-white/70 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed">
             Real-time telemetry, race strategy analysis, and deep championship insights — all in one place.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-10 sm:mb-16">
             <Link
               href="/auth/signin"
-              className="px-10 py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-lg shadow-lg shadow-f1-red/25"
+              className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-base sm:text-lg shadow-lg shadow-f1-red/25"
             >
               Enter Dashboard →
             </Link>
             <a
               href="#features"
-              className="px-10 py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition border border-white/20 text-lg backdrop-blur-sm"
+              className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition border border-white/20 text-base sm:text-lg backdrop-blur-sm"
             >
               Explore Features
             </a>
@@ -274,7 +274,7 @@ export default function Home() {
               ['🔴', 'Live Telemetry'],
               ['📊', 'Historical Data'],
             ].map(([icon, label]) => (
-              <div key={label} className="flex items-center gap-2 bg-black/40 backdrop-blur border border-white/10 rounded-full px-4 py-2 text-sm text-white/80">
+              <div key={label} className="flex items-center gap-2 bg-black/40 backdrop-blur border border-white/10 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm text-white/80">
                 <span>{icon}</span><span>{label}</span>
               </div>
             ))}
@@ -282,17 +282,17 @@ export default function Home() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-50">
+        <div className="hidden sm:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-1 opacity-50">
           <span className="text-white/60 text-xs uppercase tracking-widest">Scroll</span>
           <div className="w-px h-8 bg-gradient-to-b from-white/60 to-transparent" />
         </div>
       </div>
 
       {/* ── Main content ───────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8">
 
         {/* Stats bar */}
-        <div className="grid grid-cols-3 gap-4 -mt-8 mb-20 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 -mt-6 sm:-mt-8 mb-14 sm:mb-20 relative z-10">
           {STATS.map(s => (
             <div key={s.label} className="bg-f1-dark border border-f1-grid rounded-xl p-4 md:p-6 text-center backdrop-blur">
               <p className="text-3xl md:text-5xl font-black mb-1" style={{ color: s.accent }}>{s.value}</p>
@@ -302,8 +302,8 @@ export default function Home() {
         </div>
 
         {/* Driver Standings Preview */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-6">
+        <section className="mb-16 sm:mb-20">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
             <div>
               <h2 className="text-2xl font-black text-white">{activeSeason} Driver Standings</h2>
               <p className="text-white/40 text-sm mt-1">Top 5 · Championship points</p>
@@ -318,11 +318,11 @@ export default function Home() {
               <table className="w-full text-sm">
                 <thead className="border-b-2 border-f1-red">
                   <tr>
-                    <th className="text-left p-4 text-f1-red font-bold text-xs uppercase tracking-wider w-12">Pos</th>
-                    <th className="text-left p-4 text-f1-red font-bold text-xs uppercase tracking-wider">Driver</th>
-                    <th className="text-left p-4 text-f1-red font-bold text-xs uppercase tracking-wider hidden sm:table-cell">Team</th>
-                    <th className="text-center p-4 text-f1-red font-bold text-xs uppercase tracking-wider hidden md:table-cell w-16">Wins</th>
-                    <th className="text-right p-4 text-f1-red font-bold text-xs uppercase tracking-wider w-20">Pts</th>
+                    <th className="text-left p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider w-12">Pos</th>
+                    <th className="text-left p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider">Driver</th>
+                    <th className="text-left p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider hidden sm:table-cell">Team</th>
+                    <th className="text-center p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider hidden md:table-cell w-16">Wins</th>
+                    <th className="text-right p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider w-20">Pts</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -341,13 +341,13 @@ export default function Home() {
                         const medal = ['1','2','3'].includes(d.position);
                         return (
                           <tr key={d.Driver.driverId} className="border-b border-f1-grid hover:bg-white/[0.02] transition">
-                            <td className="p-4">
+                            <td className="p-3 sm:p-4">
                               <span className={`w-7 h-7 inline-flex items-center justify-center rounded-full text-xs font-black ${medal ? '' : 'text-white/40'}`}
                                 style={medal ? { background: d.position==='1'?'#FFD700':d.position==='2'?'#C0C0C0':'#CD7F32', color:'#000' } : {}}>
                                 {d.position}
                               </span>
                             </td>
-                            <td className="p-4">
+                            <td className="p-3 sm:p-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-1 h-8 rounded-full" style={{ background: tc }} />
                                 <div>
@@ -356,11 +356,11 @@ export default function Home() {
                                 </div>
                               </div>
                             </td>
-                            <td className="p-4 hidden sm:table-cell" style={{ color: tc }}>
+                            <td className="p-3 sm:p-4 hidden sm:table-cell" style={{ color: tc }}>
                               <span className="font-medium text-sm">{d.Constructors?.[0]?.name ?? '—'}</span>
                             </td>
-                            <td className="p-4 text-center font-mono text-white/60 hidden md:table-cell">{d.wins}</td>
-                            <td className="p-4 text-right font-black text-f1-red font-mono">{d.points}</td>
+                            <td className="p-3 sm:p-4 text-center font-mono text-white/60 hidden md:table-cell">{d.wins}</td>
+                            <td className="p-3 sm:p-4 text-right font-black text-f1-red font-mono">{d.points}</td>
                           </tr>
                         );
                       })
@@ -372,8 +372,8 @@ export default function Home() {
         </section>
 
         {/* Upcoming Races */}
-        <section className="mb-20">
-          <div className="flex items-center justify-between mb-6">
+        <section className="mb-16 sm:mb-20">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
             <div>
               <h2 className="text-2xl font-black text-white">
                 {showingRecentRaces ? 'Recent Races' : 'Upcoming Races'}
@@ -387,7 +387,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {dataLoading
               ? Array(3).fill(0).map((_, i) => <SkeletonRaceCard key={i} />)
               : featuredRaces.map((race) => {
@@ -426,9 +426,9 @@ export default function Home() {
         </section>
 
         {/* Features */}
-        <section id="features" className="mb-20 scroll-mt-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-black text-white mb-3">Everything You Need</h2>
+        <section id="features" className="mb-16 sm:mb-20 scroll-mt-20">
+          <div className="text-center mb-10 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-3">Everything You Need</h2>
             <p className="text-white/40 max-w-xl mx-auto">A complete analytics suite built for F1 fans and data enthusiasts</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -445,21 +445,21 @@ export default function Home() {
         </section>
 
         {/* CTA Banner */}
-        <section className="mb-20">
-          <div className="relative overflow-hidden bg-gradient-to-br from-f1-red/20 via-f1-red/10 to-transparent border border-f1-red/40 rounded-2xl p-10 md:p-16 text-center">
+        <section className="mb-16 sm:mb-20">
+          <div className="relative overflow-hidden bg-gradient-to-br from-f1-red/20 via-f1-red/10 to-transparent border border-f1-red/40 rounded-2xl p-6 sm:p-10 md:p-16 text-center">
             {/* Decorative glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px bg-gradient-to-r from-transparent via-f1-red to-transparent" />
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-f1-red/5 rounded-full blur-3xl pointer-events-none" />
 
             <div className="relative z-10">
               <img src="/F1-Logo.png" alt="F1" style={{width:80,margin:"0 auto 12px",objectFit:"contain"}}/>
-              <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Ready to Dive In?</h2>
-              <p className="text-white/60 mb-8 text-lg max-w-md mx-auto">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4">Ready to Dive In?</h2>
+              <p className="text-white/60 mb-8 text-base sm:text-lg max-w-md mx-auto">
                 Access advanced analytics, live telemetry, and real-time race data.
               </p>
               <Link
                 href="/auth/signin"
-                className="inline-block px-10 py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-lg shadow-xl shadow-f1-red/30"
+                className="inline-block w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-base sm:text-lg shadow-xl shadow-f1-red/30"
               >
                 Get Started — It&apos;s Free →
               </Link>
@@ -470,7 +470,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-f1-grid py-10 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="flex items-center gap-3">
             <img src="/F1-Logo.png" alt="F1" style={{width:48,objectFit:"contain"}}/>
             <span className="text-white/60 text-sm font-bold">F1 Analytics Hub</span>
@@ -478,7 +478,7 @@ export default function Home() {
           <p className="text-white/30 text-sm">
             © {new Date().getFullYear()} · Data via Jolpica / Ergast API · OpenF1
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 sm:gap-6">
             <Link href="/auth/signin" className="text-white/40 hover:text-white text-sm transition">Sign In</Link>
             <a href="https://ergast.com/mrd/" target="_blank" rel="noreferrer" className="text-white/40 hover:text-white text-sm transition">API Docs</a>
           </div>

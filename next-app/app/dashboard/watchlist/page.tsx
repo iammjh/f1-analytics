@@ -210,9 +210,9 @@ export default function WatchlistPage() {
   }
 
   return (
-    <div className="min-h-screen bg-f1-black p-6 md:p-8">
+    <div className="min-h-screen bg-f1-black p-4 sm:p-6 md:p-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">
               Server-backed Favorites
@@ -225,7 +225,7 @@ export default function WatchlistPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-zinc-500">
               Season
             </span>
@@ -249,7 +249,7 @@ export default function WatchlistPage() {
           </div>
         )}
 
-        <div className="mb-8 grid gap-4 md:grid-cols-4">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-xl border border-zinc-800 bg-zinc-950/80 p-5">
             <div className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">Tracked Total</div>
             <div className="mt-3 text-3xl font-black text-white">{trackedCount}</div>

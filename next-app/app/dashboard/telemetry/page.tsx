@@ -73,20 +73,20 @@ export default function TelemetryPage() {
   }, [selectedDriver]);
 
   if (loading) {
-    return <div className="p-8 bg-f1-black min-h-screen text-white">Loading telemetry...</div>;
+    return <div className="p-4 sm:p-6 lg:p-8 bg-f1-black min-h-screen text-white">Loading telemetry...</div>;
   }
 
   if (error) {
     return (
-      <div className="p-8 bg-f1-black min-h-screen text-white">
+      <div className="p-4 sm:p-6 lg:p-8 bg-f1-black min-h-screen text-white">
         <div className="rounded-lg border border-f1-red bg-f1-dark p-6 text-red-300">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 bg-f1-black min-h-screen">
-      <h1 className="text-4xl font-bold text-white mb-8">📊 Telemetry Dashboard</h1>
+    <div className="p-4 sm:p-6 lg:p-8 bg-f1-black min-h-screen">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 sm:mb-8">📊 Telemetry Dashboard</h1>
       <p className="mb-6 text-sm text-gray-400">{formatSessionLabel(payload)}</p>
       {payload?.message && <p className="mb-3 text-sm text-gray-400">{payload.message}</p>}
       {payload?.derivedMetricsNotice && (
@@ -101,7 +101,7 @@ export default function TelemetryPage() {
         <select 
           value={selectedDriver}
           onChange={(e) => setSelectedDriver(e.target.value)}
-          className="bg-f1-dark border border-f1-red rounded px-4 py-2 text-white font-semibold hover:bg-f1-grid transition"
+          className="w-full sm:w-auto bg-f1-dark border border-f1-red rounded px-4 py-2 text-white font-semibold hover:bg-f1-grid transition"
         >
           {drivers.map(d => (
             <option key={d.code} value={d.code}>{d.name} ({d.code})</option>
@@ -111,7 +111,7 @@ export default function TelemetryPage() {
 
       {/* Current Metrics Cards */}
       {currentMetrics && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4 mb-8">
           <MetricCard label="Speed" value={currentMetrics.speed.toFixed(0)} unit="km/h" color="text-f1-red" />
           <MetricCard label="Throttle" value={currentMetrics.throttle.toFixed(0)} unit="%" color="text-blue-400" />
           <MetricCard label="Brake" value={currentMetrics.braking.toFixed(0)} unit="%" color="text-red-500" />
@@ -124,9 +124,9 @@ export default function TelemetryPage() {
       )}
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
         {/* Speed Chart */}
-        <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+        <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Speed Profile</h3>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={telemetryData}>
@@ -143,7 +143,7 @@ export default function TelemetryPage() {
         </div>
 
         {/* Throttle & Brake */}
-        <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+        <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Throttle & Brake Input</h3>
           <ResponsiveContainer width="100%" height={280}>
             <ComposedChart data={telemetryData}>
@@ -158,7 +158,7 @@ export default function TelemetryPage() {
         </div>
 
         {/* Fuel Consumption */}
-        <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+        <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Fuel Consumption</h3>
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={telemetryData}>
@@ -172,7 +172,7 @@ export default function TelemetryPage() {
         </div>
 
         {/* Tire Temperature */}
-        <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+        <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Tire Temperature</h3>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={telemetryData}>
@@ -188,7 +188,7 @@ export default function TelemetryPage() {
         </div>
 
         {/* Gear Usage */}
-        <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+        <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Gear Selection</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={telemetryData}>
@@ -202,7 +202,7 @@ export default function TelemetryPage() {
         </div>
 
         {/* RPM Curve */}
-        <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+        <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Engine RPM</h3>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={telemetryData}>
@@ -222,7 +222,7 @@ export default function TelemetryPage() {
       </div>
 
       {/* DRS Status */}
-      <div className="bg-f1-dark border border-f1-grid rounded-lg p-6">
+      <div className="bg-f1-dark border border-f1-grid rounded-lg p-4 sm:p-6">
         <h3 className="text-lg font-semibold text-white mb-4">DRS Status</h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={telemetryData}>

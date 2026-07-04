@@ -98,9 +98,11 @@ function buildStints(stops, totalLaps) {
 
 // ── Hooks ─────────────────────────────────────────────────────────
 function useWindowWidth() {
-  const [w,setW] = useState(typeof window!=="undefined"?window.innerWidth:1200);
+  // Keep initial render deterministic across server and client to avoid hydration mismatch.
+  const [w,setW] = useState(1200);
   useEffect(() => {
     const fn = () => setW(window.innerWidth);
+    fn();
     window.addEventListener("resize",fn);
     return () => window.removeEventListener("resize",fn);
   },[]);
@@ -3138,14 +3140,14 @@ function LivePage() {
 
   return (
     <div>
-      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.35fr) minmax(300px,0.85fr)",gap:18,marginBottom:20,alignItems:"stretch"}}>
-        <div style={{background:"linear-gradient(135deg, #101010 0%, #0a0a0a 58%, #070707 100%)",border:`1px solid ${statusMeta.accent}22`,borderRadius:14,padding:24,position:"relative",overflow:"hidden"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:18,marginBottom:20,alignItems:"stretch"}}>
+        <div style={{background:"linear-gradient(135deg, #101010 0%, #0a0a0a 58%, #070707 100%)",border:`1px solid ${statusMeta.accent}22`,borderRadius:14,padding:20,position:"relative",overflow:"hidden"}}>
           <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, ${statusMeta.accent}, ${statusMeta.accent}55, transparent)`}}/>
           <div style={{display:"inline-flex",padding:"6px 12px",borderRadius:999,border:`1px solid ${statusMeta.chipBorder}`,background:statusMeta.chipBg,fontSize:10,color:statusMeta.accent,textTransform:"uppercase",letterSpacing:1.6,fontWeight:700,marginBottom:14}}>
             {statusMeta.label}
           </div>
-          <div style={{fontSize:30,fontWeight:800,marginBottom:8,color:"#fff",lineHeight:1.05}}>{heading}</div>
-          <div style={{fontSize:14,color:"#aaa",marginBottom:8}}>{subtitle || "Latest timing summary"}</div>
+          <div style={{fontSize:"clamp(22px, 5vw, 30px)",fontWeight:800,marginBottom:8,color:"#fff",lineHeight:1.05}}>{heading}</div>
+          <div style={{fontSize:13,color:"#aaa",marginBottom:8}}>{subtitle || "Latest timing summary"}</div>
           <div style={{fontSize:12,color:"#666",marginBottom:16,maxWidth:680,lineHeight:1.6}}>{liveData.message}</div>
           <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:18}}>
             <a href={F1_TV_URL} target="_blank" rel="noreferrer" style={{display:"inline-flex",alignItems:"center",gap:8,padding:"10px 14px",borderRadius:10,background:"#E10600",color:"#fff",textDecoration:"none",fontSize:13,fontWeight:700}}>
@@ -3161,7 +3163,7 @@ function LivePage() {
           <div style={{fontSize:11,color:"#666",marginBottom:18}}>
             Official links only. Availability varies by territory; in the U.S., official live access may route through Apple TV according to F1 TV guidance.
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10}}>
             {heroStats.map(([label, value, accent]) => (
               <div key={label} style={{background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:"12px 12px"}}>
                 <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.2,marginBottom:6}}>{label}</div>
@@ -3171,14 +3173,14 @@ function LivePage() {
           </div>
         </div>
 
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:14,padding:20}}>
+        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:14,padding:18}}>
           <SecLabel>{liveData.status === "upcoming" ? "Countdown" : "Race Center"}</SecLabel>
           <div style={{fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>{liveData.status === "upcoming" ? "Next race starts in" : sessionLabel}</div>
           <div style={{fontSize:12,color:"#777",marginBottom:16,lineHeight:1.5}}>
             {[locationLabel, formatEventDateTime(liveData.nextRace?.startTime || liveData.session?.startTime)].filter(Boolean).join(" • ")}
           </div>
           {countdown ? (
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8,marginBottom:16}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(96px,1fr))",gap:8,marginBottom:16}}>
               {[
                 ["Days", countdown.d],
                 ["Hours", countdown.h],
@@ -3217,7 +3219,7 @@ function LivePage() {
         <StatCard label="Lap Series Points" value={liveData.lapSeries?.length || 0} sub="Chart samples available" accent="#FFD700"/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"minmax(0,0.95fr) minmax(0,1.05fr)",gap:18,alignItems:"start",marginBottom:20}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:18,alignItems:"start",marginBottom:20}}>
         <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20}}>
           <SecLabel>Watch & Coverage</SecLabel>
           <div style={{display:"grid",gap:12,marginBottom:16}}>
@@ -3400,7 +3402,7 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
 
   return (
     <div>
-      <div style={{marginBottom:20,padding:"14px 16px",background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:10,display:"flex",alignItems:"center",gap:12}}>
+      <div style={{marginBottom:20,padding:"14px 16px",background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:10,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
         <div style={{width:36,height:36,background:"#FFD70015",border:"1px solid #FFD70030",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>⭐</div>
         <div>
           <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>{trackedCount} tracked item{trackedCount===1?"":"s"}</div>
@@ -3753,7 +3755,7 @@ function TelemetryPage() {
       )}
       <div style={{marginBottom:20}}>
         <div style={{fontSize:12,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:10,fontWeight:600}}>Select Driver</div>
-        <select value={selectedDriver} onChange={e=>setSelectedDriver(e.target.value)} style={{background:"#111",border:"1px solid #1e1e1e",color:"#fff",padding:"8px 12px",borderRadius:6,fontSize:13,cursor:"pointer",...mono}}>
+        <select value={selectedDriver} onChange={e=>setSelectedDriver(e.target.value)} style={{background:"#111",border:"1px solid #1e1e1e",color:"#fff",padding:"8px 12px",borderRadius:6,fontSize:13,cursor:"pointer",...mono,width:"min(100%, 360px)"}}>
           {drivers.map(d=><option key={d.code} value={d.code}>{d.name} ({d.code})</option>)}
         </select>
       </div>
@@ -3772,7 +3774,7 @@ function TelemetryPage() {
       )}
 
       {/* Charts Grid */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(400px,1fr))",gap:20,marginBottom:24}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,marginBottom:24}}>
         {/* Speed Chart */}
         <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
           <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Speed Profile</h3>
@@ -3895,6 +3897,7 @@ export default function F1AnalyticsHub() {
   } = useDashboardWatchlist();
   const width    = useWindowWidth();
   const isMobile = width < 768;
+  const isTablet = width >= 768 && width < 1100;
   const contentRef = useRef(null);
 
   // Track scroll position of the CONTENT div (not window) for topbar shadow
@@ -4232,7 +4235,7 @@ export default function F1AnalyticsHub() {
         {/* ── Desktop sidebar ────────────────────────────────────── */}
         {!isMobile && (
           <div style={{
-            width: sidebarOpen ? 230 : 52,
+            width: sidebarOpen ? (isTablet ? 206 : 230) : 52,
             flexShrink:0,
             height:"100vh",           /* ← CRITICAL: sidebar is always exactly viewport height */
             background:"#0a0a0a",
@@ -4263,8 +4266,8 @@ export default function F1AnalyticsHub() {
               this topbar cannot scroll. No position:fixed, no left offset math. */}
           <div style={{
             flexShrink:0,             /* ← never shrinks — always visible */
-            height:72,
-            padding:`0 ${isMobile ? 14 : 24}px`,
+            height: isTablet ? 66 : 72,
+            padding:`0 ${isMobile ? 14 : isTablet ? 16 : 24}px`,
             display:"flex",
             alignItems:"center",
             justifyContent:"space-between",
@@ -4312,14 +4315,14 @@ export default function F1AnalyticsHub() {
 
                 <div style={{ minWidth:0, overflow:"hidden" }}>
                   <h2 style={{
-                    margin:0, fontSize:isMobile ? 18 : 22, fontWeight:900,
+                    margin:0, fontSize:isMobile ? 18 : isTablet ? 20 : 22, fontWeight:900,
                     letterSpacing:-0.5, color:"#fff",
                     whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
                     lineHeight:1.1,
                   }}>
                     {topbarHeader.title}
                   </h2>
-                  {!isMobile && (
+                  {!isMobile && !isTablet && (
                     <p style={{
                       margin:"3px 0 0", fontSize:12, color:"#444",
                       whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
@@ -4329,7 +4332,7 @@ export default function F1AnalyticsHub() {
                   )}
                 </div>
 
-                {!isMobile && (
+                {!isMobile && !isTablet && (
                   <div style={{
                     position:"absolute",
                     left:56,
@@ -4345,7 +4348,7 @@ export default function F1AnalyticsHub() {
 
             {/* Right: season selector + signout */}
             <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-              {!isMobile && (
+              {!isMobile && !isTablet && (
                 <span style={{ color:"#333", fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>Season</span>
               )}
               <select
@@ -4361,7 +4364,7 @@ export default function F1AnalyticsHub() {
                 {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
 
-              <div style={{ width:1, height:22, background:"#1c1c1c", flexShrink:0 }}/>
+              {!isTablet && <div style={{ width:1, height:22, background:"#1c1c1c", flexShrink:0 }}/>}
 
               <SignOutButton/>
             </div>
@@ -4377,7 +4380,7 @@ export default function F1AnalyticsHub() {
               flex:1,                  /* fills remaining vertical space */
               overflowY:"auto",        /* ← ONLY THIS SCROLLS — topbar above and footer below stay put */
               overflowX:"hidden",
-              padding:`${isMobile ? 16 : 22}px ${isMobile ? 14 : 24}px`,
+              padding:`${isMobile ? 16 : isTablet ? 18 : 22}px ${isMobile ? 14 : isTablet ? 16 : 24}px`,
               /* Subtle page-change animation */
               animation:"slideIn 0.18s ease-out",
             }}
