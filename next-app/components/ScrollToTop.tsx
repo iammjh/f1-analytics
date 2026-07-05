@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 
-const SPOKE_ANGLES = [0, 72, 144, 216, 288];
+/** Medium-compound yellow — matches Pirelli P Zero reference */
+const COMPOUND = '#FFD700';
+const SPOKE_COUNT = 10;
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
-  const [lit, setLit] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 420);
@@ -19,127 +20,82 @@ export default function ScrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const cx = 40;
+  const cy = 40;
+  const outerR = 36;
+  const rimR = 24;
+  const hubR = 8.5;
+  const sidewallR = 30.5;
+
   return (
     <button
       type="button"
       aria-label="Scroll to top"
       onClick={scrollToTop}
-      onMouseEnter={() => setLit(true)}
-      onMouseLeave={() => setLit(false)}
-      onFocus={() => setLit(true)}
-      onBlur={() => setLit(false)}
       className={[
         'fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 group',
         'transition-all duration-500 ease-out',
         visible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-6 pointer-events-none',
       ].join(' ')}
     >
-      {/* Brake-light glow */}
-      <span
-        aria-hidden
-        className={[
-          'absolute left-1/2 top-[58%] h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-300 sm:h-[78px] sm:w-[78px]',
-          lit ? 'opacity-100 scale-110' : 'opacity-60 scale-100',
-        ].join(' ')}
-        style={{
-          background: 'radial-gradient(circle, rgba(255,0,0,0.5) 0%, rgba(225,6,0,0.2) 50%, transparent 72%)',
-          boxShadow: lit
-            ? '0 0 20px #ff0000, 0 0 40px rgba(225,6,0,0.55)'
-            : '0 0 12px rgba(255,0,0,0.25)',
-        }}
-      />
-
-      {/* Mini rear rain light / brake strip */}
-      <span
-        aria-hidden
-        className="absolute -top-1 left-1/2 z-10 flex -translate-x-1/2 gap-[3px] rounded-md border border-white/10 bg-black/90 px-1.5 py-1 shadow-lg"
-      >
-        {[0, 1, 2, 3, 4].map((i) => (
-          <span
-            key={i}
-            className={[
-              'h-[5px] w-[5px] rounded-full transition-all duration-300',
-              lit || visible ? 'bg-red-600 shadow-[0_0_6px_#ff0000]' : 'bg-[#2a0505]',
-            ].join(' ')}
-            style={{
-              animation: lit ? `f1-brake-pulse 1.2s ease-in-out ${i * 0.08}s infinite alternate` : undefined,
-            }}
-          />
-        ))}
-      </span>
-
-      {/* F1 wheel — tyre + Pirelli sidewall + machined rim */}
       <svg
         viewBox="0 0 80 80"
         aria-hidden
         className={[
-          'relative h-[68px] w-[68px] transition-transform duration-300 sm:h-[74px] sm:w-[74px]',
-          'group-hover:scale-105 group-active:scale-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.65)]',
+          'h-[68px] w-[68px] transition-all duration-300 sm:h-[74px] sm:w-[74px]',
+          'drop-shadow-[0_8px_20px_rgba(0,0,0,0.55)]',
+          'group-hover:scale-105 group-hover:drop-shadow-[0_10px_28px_rgba(0,0,0,0.65)]',
+          'group-active:scale-95',
         ].join(' ')}
       >
         <defs>
-          <radialGradient id="f1TyreRubber" cx="35%" cy="30%" r="70%">
-            <stop offset="0%" stopColor="#1c1c1c" />
-            <stop offset="55%" stopColor="#0a0a0a" />
+          <radialGradient id="f1TyreRubber" cx="38%" cy="32%" r="68%">
+            <stop offset="0%" stopColor="#181818" />
             <stop offset="100%" stopColor="#050505" />
           </radialGradient>
 
-          <linearGradient id="f1RimMetal" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#eceff3" />
-            <stop offset="35%" stopColor="#b8bec8" />
-            <stop offset="55%" stopColor="#8f98a6" />
-            <stop offset="100%" stopColor="#5f6773" />
+          <linearGradient id="f1RimSilver" x1="15%" y1="10%" x2="85%" y2="90%">
+            <stop offset="0%" stopColor="#f4f6f8" />
+            <stop offset="45%" stopColor="#c5ccd6" />
+            <stop offset="100%" stopColor="#8b939f" />
           </linearGradient>
 
-          <linearGradient id="f1RimInner" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#dfe3ea" />
-            <stop offset="100%" stopColor="#707986" />
+          <linearGradient id="f1SpokeSilver" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#aeb6c2" />
+            <stop offset="50%" stopColor="#eef1f5" />
+            <stop offset="100%" stopColor="#9aa3af" />
           </linearGradient>
 
-          <path
-            id="pirelliArcTop"
-            d="M 16 40 A 24 24 0 0 1 64 40"
-            fill="none"
-          />
-          <path
-            id="pirelliArcBottom"
-            d="M 64 42 A 24 24 0 0 1 16 42"
-            fill="none"
-          />
-
-          <clipPath id="f1RimClip">
-            <circle cx="40" cy="40" r="21.5" />
-          </clipPath>
+          <path id="pirelliArcTop" d="M 18 40 A 22.5 22.5 0 0 1 62 40" fill="none" />
+          <path id="pirelliArcBottom" d="M 62 40 A 22.5 22.5 0 0 1 18 40" fill="none" />
         </defs>
 
         {/* Outer tyre */}
-        <circle cx="40" cy="40" r="38" fill="url(#f1TyreRubber)" />
-        <circle cx="40" cy="40" r="38" fill="none" stroke="#111" strokeWidth="0.6" />
+        <circle cx={cx} cy={cy} r={outerR} fill="url(#f1TyreRubber)" />
+        <circle cx={cx} cy={cy} r={outerR} fill="none" stroke="#0a0a0a" strokeWidth="0.5" />
 
-        {/* Tread blocks */}
-        {Array.from({ length: 24 }).map((_, i) => (
-          <line
-            key={i}
-            x1={40 + 33 * Math.cos((i * 15 * Math.PI) / 180)}
-            y1={40 + 33 * Math.sin((i * 15 * Math.PI) / 180)}
-            x2={40 + 37 * Math.cos((i * 15 * Math.PI) / 180)}
-            y2={40 + 37 * Math.sin((i * 15 * Math.PI) / 180)}
-            stroke="#222"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-          />
-        ))}
+        {/* Slim sidewall — black rubber inside tread */}
+        <circle cx={cx} cy={cy} r={rimR + 1.5} fill="#080808" />
 
-        {/* Sidewall band */}
-        <circle cx="40" cy="40" r="29.5" fill="none" stroke="#151515" strokeWidth="7.5" />
-        <circle cx="40" cy="40" r="29.5" fill="none" stroke="#262626" strokeWidth="0.5" />
+        {/* Compound colour ring (medium = yellow) */}
+        <circle
+          cx={cx}
+          cy={cy}
+          r={sidewallR}
+          fill="none"
+          stroke={COMPOUND}
+          strokeWidth="4.8"
+          strokeLinecap="round"
+          strokeDasharray="86 18"
+          transform={`rotate(-90 ${cx} ${cy})`}
+        />
 
-        {/* Pirelli lettering on sidewall */}
+        {/* Sidewall branding */}
         <text
-          fill="#FFE033"
-          fontSize="5.2"
+          fill={COMPOUND}
+          fontSize="5.4"
           fontWeight="800"
-          letterSpacing="0.9"
+          letterSpacing="0.85"
           fontFamily="Arial, Helvetica, sans-serif"
         >
           <textPath href="#pirelliArcTop" startOffset="50%" textAnchor="middle">
@@ -147,74 +103,69 @@ export default function ScrollToTop() {
           </textPath>
         </text>
         <text
-          fill="#FFE033"
-          fontSize="4.2"
+          fill={COMPOUND}
+          fontSize="4.6"
           fontWeight="800"
-          letterSpacing="0.7"
+          letterSpacing="0.65"
           fontFamily="Arial, Helvetica, sans-serif"
-          opacity="0.85"
         >
           <textPath href="#pirelliArcBottom" startOffset="50%" textAnchor="middle">
             P ZERO
           </textPath>
         </text>
 
-        {/* Compound stripe */}
-        <path
-          d="M 40 12 A 28 28 0 0 1 40 68"
-          fill="none"
-          stroke="#FFD700"
-          strokeWidth="1.4"
-          strokeDasharray="2 54"
-          strokeLinecap="round"
-          opacity="0.9"
-        />
+        {/* Rim barrel */}
+        <circle cx={cx} cy={cy} r={rimR} fill="url(#f1RimSilver)" stroke="#6d7580" strokeWidth="0.45" />
 
-        {/* Machined rim barrel */}
-        <circle cx="40" cy="40" r="22" fill="url(#f1RimMetal)" stroke="#4a5260" strokeWidth="0.6" />
-
-        {/* Spoke cutouts — F1-style 5-spoke machined face */}
-        <g clipPath="url(#f1RimClip)">
-          {SPOKE_ANGLES.map((deg) => (
-            <g key={deg} transform={`rotate(${deg} 40 40)`}>
-              <path
-                d="M 40 40 L 34 22 Q 40 18 46 22 Z"
-                fill="#090909"
-                opacity="0.92"
-              />
-              <path
-                d="M 40 40 L 33 24 L 40 20 L 47 24 Z"
-                fill="none"
-                stroke="rgba(255,255,255,0.18)"
-                strokeWidth="0.4"
-              />
-            </g>
-          ))}
-        </g>
-
-        {/* Rim lip + bolt detail ring */}
-        <circle cx="40" cy="40" r="22" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="0.5" />
-        <circle cx="40" cy="40" r="18.5" fill="none" stroke="#3a4048" strokeWidth="0.4" />
-
-        {SPOKE_ANGLES.map((deg) => {
-          const rad = (deg * Math.PI) / 180;
-          const bx = 40 + 19.5 * Math.cos(rad);
-          const by = 40 + 19.5 * Math.sin(rad);
+        {/* 10 thin spokes — reference-style machined face */}
+        {Array.from({ length: SPOKE_COUNT }).map((_, i) => {
+          const angle = (i * 360) / SPOKE_COUNT - 90;
+          const rad = (angle * Math.PI) / 180;
+          const inner = hubR + 0.8;
+          const outer = rimR - 1.2;
+          const x1 = cx + inner * Math.cos(rad);
+          const y1 = cy + inner * Math.sin(rad);
+          const x2 = cx + outer * Math.cos(rad);
+          const y2 = cy + outer * Math.sin(rad);
           return (
-            <circle key={`bolt-${deg}`} cx={bx} cy={by} r="0.9" fill="#555b65" stroke="#888" strokeWidth="0.2" />
+            <line
+              key={i}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              stroke="url(#f1SpokeSilver)"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+            />
           );
         })}
 
-        {/* Center lock / hub */}
-        <circle cx="40" cy="40" r="11.5" fill="url(#f1RimInner)" stroke="#555" strokeWidth="0.5" />
-        <circle cx="40" cy="40" r="8.5" fill="#101214" stroke="#666" strokeWidth="0.4" />
-        <circle cx="40" cy="40" r="3.2" fill="#c8ccd2" stroke="#888" strokeWidth="0.3" />
+        {/* Rim lip */}
+        <circle cx={cx} cy={cy} r={rimR} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="0.4" />
+        <circle cx={cx} cy={cy} r={rimR - 1.5} fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="0.35" />
 
-        {/* Scroll-up chevron */}
+        {/* Centre hub / wheel nut */}
+        <circle cx={cx} cy={cy} r={hubR} fill="#141618" stroke="#555b63" strokeWidth="0.45" />
+        <circle cx={cx} cy={cy} r={hubR - 2} fill="#0a0b0c" stroke="#444" strokeWidth="0.3" />
+
+        {/* Scroll-up chevron in hub */}
         <path
-          d="M 40 33 L 34 41 L 36.5 41 L 36.5 47 L 43.5 47 L 43.5 41 L 46 41 Z"
+          d="M 40 32.5 L 35.5 39.5 L 37.5 39.5 L 37.5 44.5 L 42.5 44.5 L 42.5 39.5 L 44.5 39.5 Z"
           fill="#fff"
-          opacity="0.95"
+          opacity="0.92"
+        />
+
+        {/* Valve stem — 9 o'clock detail */}
+        <rect
+          x="14.5"
+          y="38.6"
+          width="3.2"
+          height="1.4"
+          rx="0.35"
+          fill="#111"
+          stroke="#333"
+          strokeWidth="0.25"
         />
       </svg>
     </button>

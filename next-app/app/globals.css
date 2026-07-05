@@ -75,11 +75,6 @@
   50%       { opacity: 0.4; }
 }
 
-@keyframes f1-brake-pulse {
-  0%   { opacity: 0.65; box-shadow: 0 0 4px #ff0000; }
-  100% { opacity: 1; box-shadow: 0 0 10px #ff0000, 0 0 16px rgba(255, 0, 0, 0.6); }
-}
-
 /* Scrollbar — minimal dark theme */
 ::-webkit-scrollbar       { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #080808; }
