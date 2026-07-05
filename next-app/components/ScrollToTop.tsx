@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
@@ -24,17 +23,19 @@ export default function ScrollToTop() {
         visible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-6 pointer-events-none',
       ].join(' ')}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/f1-wheel-scroll.svg"
         alt=""
-        width={78}
-        height={78}
+        width={88}
+        height={88}
         aria-hidden
+        draggable={false}
         className={[
-          'h-[72px] w-[72px] sm:h-[78px] sm:w-[78px]',
+          'h-[80px] w-[80px] sm:h-[88px] sm:w-[88px]',
           'transition-transform duration-200',
-          'drop-shadow-[0_6px_18px_rgba(0,0,0,0.5)]',
-          'group-hover:scale-[1.06] group-active:scale-95',
+          'drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]',
+          'group-hover:scale-[1.05] group-active:scale-95',
         ].join(' ')}
       />
     </button>

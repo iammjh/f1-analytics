@@ -1,56 +1,75 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
   <defs>
-    <linearGradient id="rim" x1="20" y1="14" x2="80" y2="86" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#f5f7fa"/>
-      <stop offset=".5" stop-color="#cdd3dc"/>
-      <stop offset="1" stop-color="#8a929e"/>
+    <linearGradient id="rimFace" x1="22" y1="18" x2="78" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f8fafc"/>
+      <stop offset=".45" stop-color="#d5dbe4"/>
+      <stop offset="1" stop-color="#8b939f"/>
     </linearGradient>
-    <linearGradient id="spoke" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="spokeFace" x1="0" y1="0" x2="0" y2="1">
       <stop stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#b0b8c4"/>
+      <stop offset="1" stop-color="#b7bec8"/>
     </linearGradient>
-    <radialGradient id="hub" cx="38%" cy="32%" r="70%">
-      <stop stop-color="#32363d"/>
-      <stop offset="1" stop-color="#0c0d0f"/>
+    <radialGradient id="hubFace" cx="40%" cy="34%" r="68%">
+      <stop stop-color="#3a4048"/>
+      <stop offset="1" stop-color="#101215"/>
     </radialGradient>
-    <path id="arcTop" d="M 24 50 A 26 26 0 0 1 76 50"/>
-    <path id="arcBottom" d="M 76 50 A 26 26 0 0 1 24 50"/>
   </defs>
 
-  <circle cx="50" cy="50" r="47" fill="#0c0c0c"/>
+  <!-- 1 · Machined rim barrel (large centre — ~66% of wheel) -->
+  <circle cx="50" cy="50" r="32" fill="#3a4048"/>
+  <circle cx="50" cy="50" r="32" fill="url(#rimFace)"/>
 
-  <circle cx="50" cy="50" r="33" fill="#444a52"/>
-  <circle cx="50" cy="50" r="33" fill="url(#rim)"/>
-
-  <g fill="url(#spoke)">
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(36 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(72 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(108 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(144 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(180 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(216 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(252 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(288 50 50)"/>
-    <path d="M 48.6 37.5 L 47.2 16.8 L 52.8 16.8 L 51.4 37.5 Z" transform="rotate(324 50 50)"/>
+  <!-- 2 · Ten thin spokes on dark base -->
+  <g fill="url(#spokeFace)">
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(36 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(72 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(108 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(144 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(180 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(216 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(252 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(288 50 50)"/>
+    <path d="M 48.8 38.5 46.8 19.5 53.2 19.5 51.2 38.5Z" transform="rotate(324 50 50)"/>
   </g>
 
-  <circle cx="50" cy="50" r="33" stroke="#ffffff" stroke-opacity=".4" stroke-width=".5"/>
-  <circle cx="50" cy="50" r="30.5" stroke="#000000" stroke-opacity=".15" stroke-width=".4"/>
+  <circle cx="50" cy="50" r="32" stroke="#ffffff" stroke-opacity=".35" stroke-width=".55"/>
+  <circle cx="50" cy="50" r="29.5" stroke="#000000" stroke-opacity=".12" stroke-width=".45"/>
 
-  <circle cx="50" cy="50" r="43.5" stroke="#101010" stroke-width="11"/>
+  <!-- 3 · Centre lock nut -->
+  <circle cx="50" cy="50" r="11.5" fill="url(#hubFace)" stroke="#616872" stroke-width=".45"/>
+  <circle cx="50" cy="50" r="9" fill="#0a0b0d" stroke="#343a42" stroke-width=".35"/>
+  <path fill="#ffffff" d="M50 37.5 44.5 47.5h2.8v6.2h5.4v-6.2h2.8z"/>
 
-  <path d="M 75.58 14.79 A 43.5 43.5 0 1 1 75.58 85.21" stroke="#F2C300" stroke-width="4" stroke-linecap="round"/>
-  <path d="M 24.42 85.21 A 43.5 43.5 0 1 1 24.42 14.79" stroke="#F2C300" stroke-width="4" stroke-linecap="round"/>
+  <!-- 4 · Black rubber tyre wraps the rim (sidewall + tread) -->
+  <circle cx="50" cy="50" r="40.5" stroke="#0b0b0b" stroke-width="17" stroke-linecap="round"/>
 
-  <text fill="#F2C300" font-family="Arial,Helvetica,sans-serif" font-size="6" font-weight="800" letter-spacing=".95">
-    <textPath href="#arcTop" startOffset="50%" text-anchor="middle">PIRELLI</textPath>
-  </text>
-  <text fill="#F2C300" font-family="Arial,Helvetica,sans-serif" font-size="5" font-weight="800" letter-spacing=".7">
-    <textPath href="#arcBottom" startOffset="50%" text-anchor="middle">P ZERO</textPath>
-  </text>
+  <!-- 5 · Medium-compound stripe — thin full ring on sidewall (not a broken arc) -->
+  <circle cx="50" cy="50" r="41.8" stroke="#F2C300" stroke-width="3.2"/>
 
-  <circle cx="50" cy="50" r="11" fill="url(#hub)" stroke="#5a6068" stroke-width=".4"/>
-  <circle cx="50" cy="50" r="8.5" fill="#090909" stroke="#333333" stroke-width=".3"/>
-  <path fill="#ffffff" d="M 50 36.5 43.5 47.5h3.3v6.5h6.4v-6.5H56.5Z"/>
+  <!-- 6 · Sidewall branding (flat text reads better at small size) -->
+  <text
+    x="50"
+    y="17.5"
+    text-anchor="middle"
+    fill="#F2C300"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="5.6"
+    font-weight="800"
+    letter-spacing=".85"
+  >PIRELLI</text>
+  <text
+    x="50"
+    y="86"
+    text-anchor="middle"
+    fill="#F2C300"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="4.8"
+    font-weight="800"
+    letter-spacing=".55"
+    transform="rotate(180 50 86)"
+  >P ZERO</text>
+
+  <!-- 7 · Outer tread edge -->
+  <circle cx="50" cy="50" r="48.5" stroke="#050505" stroke-width=".8"/>
 </svg>
