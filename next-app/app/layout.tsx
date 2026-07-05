@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from './providers';
+import { getGoogleSiteVerification } from '@/lib/google-site-verification';
+
+const googleSiteVerification = getGoogleSiteVerification();
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://f1-analytic.vercel.app'),
@@ -35,9 +38,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
-  },
+  verification: googleSiteVerification
+    ? { google: googleSiteVerification }
+    : undefined,
   alternates: {
     canonical: 'https://f1-analytic.vercel.app',
   },
