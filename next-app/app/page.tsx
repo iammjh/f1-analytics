@@ -25,8 +25,6 @@ import {
   Users,
   History
 } from 'lucide-react';
-import ScrollToTop from '@/components/ScrollToTop';
-
 const CURRENT_SEASON = new Date().getFullYear();
 const SEASON_CANDIDATES = [CURRENT_SEASON, CURRENT_SEASON - 1, CURRENT_SEASON - 2].map(String);
 
@@ -513,8 +511,6 @@ export default function Home() {
           </section>
         )}
       </div>
-
-      <ScrollToTop />
 
       {/* Footer */}
       <footer className="border-t border-f1-grid py-10 px-4">
