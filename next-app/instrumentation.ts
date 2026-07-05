@@ -1,8 +1,10 @@
 export async function register() {
-  if (process.env.BACKGROUND_JOBS_ENABLED !== 'true') {
-    return;
-  }
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    if (process.env.BACKGROUND_JOBS_ENABLED !== 'true') {
+      return;
+    }
 
-  const { scheduleJobs } = await import('./lib/jobs');
-  scheduleJobs();
+    const { scheduleJobs } = await import('./lib/jobs');
+    scheduleJobs();
+  }
 }

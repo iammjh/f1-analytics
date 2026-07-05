@@ -36,7 +36,7 @@ const nextConfig = {
     instrumentationHook: true,
     // This Next.js version still expects the Prisma package allowlist under
     // `experimental.serverComponentsExternalPackages`.
-    serverComponentsExternalPackages: ['prisma', '@prisma/client'],
+    serverComponentsExternalPackages: ['prisma', '@prisma/client', 'bull'],
   },
 };
 
