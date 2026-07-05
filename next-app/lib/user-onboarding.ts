@@ -1,7 +1,8 @@
-import { prisma } from '@/lib/prisma';
+import { getPrisma } from '@/lib/prisma';
 
 /** Default watchlist + preferences for new accounts (parity with legacy Express register). */
 export async function ensureUserOnboarding(userId: string): Promise<void> {
+  const prisma = getPrisma();
   const [preferences, watchlistCount] = await Promise.all([
     prisma.userPreferences.findUnique({ where: { userId } }),
     prisma.watchlist.count({ where: { userId } }),

@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-config';
-import { prisma } from '@/lib/prisma';
+import { getAuthOptions } from '@/lib/auth-config';
+import { getPrisma } from '@/lib/prisma';
 import {
   validateWatchlistDescription,
   validateWatchlistName,
 } from '@/lib/watchlist-validation';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // ─── GET /api/watchlist ────────────────────────────────────────────────────────
 export async function GET(_req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const prisma = getPrisma();
     const watchlists = await prisma.watchlist.findMany({
       where:   { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
@@ -32,7 +36,7 @@ export async function GET(_req: NextRequest) {
 
 // ─── POST /api/watchlist ───────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -59,6 +63,7 @@ export async function POST(req: NextRequest) {
       return [];
     };
 
+    const prisma = getPrisma();
     const watchlist = await prisma.watchlist.create({
       data: {
         userId:      session.user.id,

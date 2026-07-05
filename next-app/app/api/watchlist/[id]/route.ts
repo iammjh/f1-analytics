@@ -1,22 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth-config';
-import { prisma } from '@/lib/prisma';
+import { getAuthOptions } from '@/lib/auth-config';
+import { getPrisma } from '@/lib/prisma';
 import {
   validateWatchlistDescription,
   validateWatchlistName,
 } from '@/lib/watchlist-validation';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 type Params = { params: { id: string } };
 
 // ─── PUT /api/watchlist/[id] ───────────────────────────────────────────────────
 export async function PUT(req: NextRequest, { params }: Params) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const prisma = getPrisma();
     // Ownership check — prevent users editing other users' watchlists
     const existing = await prisma.watchlist.findUnique({
       where: { id: params.id },
@@ -83,12 +87,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
 // ─── DELETE /api/watchlist/[id] ───────────────────────────────────────────────
 export async function DELETE(req: NextRequest, { params }: Params) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    const prisma = getPrisma();
     // Ownership check
     const existing = await prisma.watchlist.findUnique({
       where:  { id: params.id },
