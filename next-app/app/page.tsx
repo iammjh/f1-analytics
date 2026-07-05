@@ -25,6 +25,7 @@ import {
   Users,
   History
 } from 'lucide-react';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const CURRENT_SEASON = new Date().getFullYear();
 const SEASON_CANDIDATES = [CURRENT_SEASON, CURRENT_SEASON - 1, CURRENT_SEASON - 2].map(String);
@@ -55,9 +56,9 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { label: 'Teams',   value: '10',   accent: '#E10600' },
-  { label: 'Drivers', value: '20',   accent: '#FFD700' },
-  { label: 'Rounds',  value: '24',   accent: '#27F4D2' },
+  { label: 'Teams', value: '11', accent: '#E10600' },
+  { label: 'Cars',  value: '22', accent: '#FFD700' },
+  { label: 'Rounds', value: '24', accent: '#27F4D2' },
 ];
 
 // ─── Skeleton components ───────────────────────────────────────────
@@ -285,8 +286,8 @@ export default function Home() {
           {/* Live stat pills */}
           <div className="flex flex-wrap justify-center gap-3">
             {[
-              { icon: Wrench, label: '10 Teams', color: '#FF8000' },
-              { icon: Users, label: '20 Drivers', color: '#27F4D2' },
+              { icon: Wrench, label: '11 Teams', color: '#FF8000' },
+              { icon: Users, label: '22 Cars', color: '#27F4D2' },
               { icon: Activity, label: 'Live Telemetry', color: '#E10600' },
               { icon: History, label: 'Historical Data', color: '#a855f7' },
             ].map((pill) => {
@@ -512,6 +513,8 @@ export default function Home() {
           </section>
         )}
       </div>
+
+      <ScrollToTop />
 
       {/* Footer */}
       <footer className="border-t border-f1-grid py-10 px-4">
