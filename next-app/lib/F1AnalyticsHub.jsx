@@ -58,6 +58,9 @@ const NAV_GROUPS = [
 const ALL_NAV = NAV_GROUPS.flatMap(g => g.items);
 const DEFAULT_DASHBOARD_PAGE = "standings";
 const DASHBOARD_TAB_PARAM = "tab";
+const SEASON_SELECTOR_PAGES = new Set([
+  "standings", "drivers", "constructors", "races", "points", "records", "strategy", "h2h",
+]);
 
 // ── API Cache (5-min TTL) ─────────────────────────────────────────
 const _cache = new Map();
@@ -1711,7 +1714,7 @@ function buildHeadToHeadDuels(leftMetric, rightMetric) {
   return { leftWins, rightWins, ties, commonRounds: leftWins + rightWins + ties, recent };
 }
 
-function PointsChartPage({season}) {
+function PointsChartPage({season, isMobile=false}) {
   const [standings,setStandings]=useState([]);
   const [races,setRaces]=useState([]);
   const [loading,setLoading]=useState(true);
@@ -1754,11 +1757,16 @@ function PointsChartPage({season}) {
         <StatCard label="Featured Drivers" value={progression.series.length} sub="Main chart lines" accent="#a855f7"/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.6fr) minmax(320px,0.95fr)",gap:18,alignItems:"start"}}>
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+      <div style={{
+        display:"grid",
+        gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.6fr) minmax(0,1fr)",
+        gap:18,
+        alignItems:"start",
+      }}>
+        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18,minWidth:0}}>
           <SecLabel>Round-by-round championship evolution</SecLabel>
           {progression.data.length ? (
-            <div style={{height:410}}>
+            <div style={{height: isMobile ? 280 : 410}}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={progression.data} margin={{ top:20, right:24, left:0, bottom:10 }}>
                   <CartesianGrid stroke="#1a1a1a"/>
@@ -1793,7 +1801,7 @@ function PointsChartPage({season}) {
           )}
         </div>
 
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18,minWidth:0}}>
           <SecLabel>Current order</SecLabel>
           <div style={{display:"grid",gap:10}}>
             {featuredMetrics.map((metric) => {
@@ -1836,7 +1844,7 @@ function PointsChartPage({season}) {
   );
 }
 
-function SeasonRecordsPage({season}) {
+function SeasonRecordsPage({season, isMobile=false}) {
   const [drivers,setDrivers]=useState([]);
   const [constructors,setConstructors]=useState([]);
   const [races,setRaces]=useState([]);
@@ -1880,8 +1888,13 @@ function SeasonRecordsPage({season}) {
         <StatCard label="Total DNFs" value={totalDnfs} sub="Across tracked drivers" accent="#FFD700"/>
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"minmax(0,1.2fr) minmax(0,1fr)",gap:18,alignItems:"start"}}>
-        <div style={{display:"grid",gap:18}}>
+      <div style={{
+        display:"grid",
+        gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.2fr) minmax(0,1fr)",
+        gap:18,
+        alignItems:"start",
+      }}>
+        <div style={{display:"grid",gap:18,minWidth:0}}>
           <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
             <SecLabel>Driver leaders</SecLabel>
             <div style={{overflowX:"auto"}}>
@@ -1949,7 +1962,7 @@ function SeasonRecordsPage({season}) {
           </div>
         </div>
 
-        <div style={{display:"grid",gap:18}}>
+        <div style={{display:"grid",gap:18,minWidth:0}}>
           <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
             <SecLabel>Constructor leaderboard</SecLabel>
             <div style={{display:"grid",gap:10}}>
@@ -3609,15 +3622,26 @@ function LiveWeekendHub({
 }) {
   const hasNextRace = Boolean(liveData.nextRace);
 
+  const cardShell = {
+    background: "#0f0f0f",
+    border: "1px solid #1e1e1e",
+    borderRadius: 14,
+    overflow: "hidden",
+    padding: 20,
+    position: "relative",
+    minWidth: 0,
+  };
+
   return (
-    <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:14,overflow:"hidden",marginBottom:20}}>
+    <div style={{marginBottom:20}}>
       <div style={{
         display:"grid",
-        gridTemplateColumns: showSessionPanel && hasNextRace ? "repeat(auto-fit, minmax(300px, 1fr))" : "1fr",
-        gap:0,
+        gridTemplateColumns: showSessionPanel && hasNextRace ? "repeat(2, minmax(0, 1fr))" : "1fr",
+        gap:18,
+        alignItems:"stretch",
       }}>
         {showSessionPanel ? (
-          <div style={{padding:20,borderRight: hasNextRace ? "1px solid #1d1d1d" : "none",position:"relative"}}>
+          <div style={cardShell}>
             <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, ${statusMeta.accent}, ${statusMeta.accent}55, transparent)`}}/>
             <SessionContextContent
               liveData={liveData}
@@ -3632,10 +3656,13 @@ function LiveWeekendHub({
         ) : null}
 
         {hasNextRace ? (
-          <div style={{padding:20,position:"relative",background: showSessionPanel ? "linear-gradient(135deg, #121212 0%, #0d0d0d 100%)" : "transparent",display:"flex",flexDirection:"column",minHeight:"100%"}}>
-            {!showSessionPanel ? (
-              <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg, #27F4D2, #27F4D255, transparent)"}}/>
-            ) : null}
+          <div style={{
+            ...cardShell,
+            display:"flex",
+            flexDirection:"column",
+            minHeight:"100%",
+          }}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg, #27F4D2, #27F4D255, transparent)"}}/>
             {!showSessionPanel ? (
               <div style={{marginBottom:14}}>
                 <div style={{display:"inline-flex",padding:"6px 12px",borderRadius:999,border:`1px solid ${statusMeta.chipBorder}`,background:statusMeta.chipBg,fontSize:10,color:statusMeta.accent,textTransform:"uppercase",letterSpacing:1.6,fontWeight:700,marginBottom:10}}>
@@ -3657,7 +3684,13 @@ function LiveWeekendHub({
         ) : null}
       </div>
 
-      <div style={{padding:"16px 20px",borderTop:"1px solid #1d1d1d",background:"#0c0c0c"}}>
+      <div style={{
+        marginTop:18,
+        padding:"16px 20px",
+        background:"#0f0f0f",
+        border:"1px solid #1e1e1e",
+        borderRadius:14,
+      }}>
         <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.3,fontWeight:700,marginBottom:10}}>Watch & Coverage</div>
         <WatchCoverageStrip compact/>
         <div style={{fontSize:11,color:"#555",lineHeight:1.5,marginTop:10}}>
@@ -4465,6 +4498,7 @@ export default function F1AnalyticsHub() {
   const width    = useWindowWidth();
   const isMobile = width < 768;
   const isTablet = width >= 768 && width < 1100;
+  const showSeasonSelector = SEASON_SELECTOR_PAGES.has(page);
   const contentRef = useRef(null);
 
   // Track scroll position of the CONTENT div (not window) for topbar shadow
@@ -4853,15 +4887,16 @@ export default function F1AnalyticsHub() {
               Because the parent has overflow:hidden and is exactly 100vh tall,
               this topbar cannot scroll. No position:fixed, no left offset math. */}
           <div style={{
-            flexShrink:0,             /* ← never shrinks — always visible */
-            height: isTablet ? 66 : 72,
-            padding:`0 ${isMobile ? 14 : isTablet ? 16 : 24}px`,
+            flexShrink:0,
+            height: isMobile && showSeasonSelector ? "auto" : (isTablet ? 66 : 72),
+            minHeight: isMobile ? 58 : undefined,
+            padding:`${isMobile && showSeasonSelector ? 10 : 0} ${isMobile ? 14 : isTablet ? 16 : 24}px ${isMobile && showSeasonSelector ? 12 : 0}`,
             display:"flex",
+            flexDirection: isMobile && showSeasonSelector ? "column" : "row",
             alignItems:"center",
             justifyContent:"space-between",
-            gap:12,
+            gap: isMobile && showSeasonSelector ? 10 : 12,
             background:"#080808",
-            /* Scroll shadow — appears only when content has been scrolled down */
             borderBottom: scrolled
               ? "1px solid #1e1e1e"
               : "1px solid #141414",
@@ -4869,93 +4904,141 @@ export default function F1AnalyticsHub() {
               ? "0 2px 16px rgba(0,0,0,0.5)"
               : "none",
             transition:"box-shadow 0.2s ease, border-color 0.2s ease",
-            zIndex:10,                /* above content, below mobile overlay */
+            zIndex:10,
           }}>
 
-            {/* Left: hamburger (mobile) + page-header style title block */}
-            <div style={{ display:"flex", alignItems:"center", gap:10, overflow:"hidden", flex:1 }}>
-              {isMobile && (
-                <button
-                  onClick={() => setMobileNavOpen(true)}
-                  style={{
-                    background:"transparent", border:"1px solid #1e1e1e",
-                    color:"#888", width:34, height:34, borderRadius:7,
-                    cursor:"pointer", fontSize:16, flexShrink:0,
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    transition:"all 0.15s",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "#E10600"; e.currentTarget.style.color = "#fff"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#888"; }}
-                >☰</button>
-              )}
+            {/* Primary row: nav toggle, title, sign out (+ season on desktop) */}
+            <div style={{
+              display:"flex",
+              alignItems:"center",
+              justifyContent:"space-between",
+              gap:10,
+              width:"100%",
+              minHeight: isMobile ? 44 : undefined,
+            }}>
+              <div style={{ display:"flex", alignItems:"center", gap: isMobile ? 8 : 10, flex:1, minWidth:0 }}>
+                {isMobile && (
+                  <button
+                    onClick={() => setMobileNavOpen(true)}
+                    style={{
+                      background:"transparent", border:"1px solid #1e1e1e",
+                      color:"#888", width:34, height:34, borderRadius:7,
+                      cursor:"pointer", fontSize:16, flexShrink:0,
+                      display:"flex", alignItems:"center", justifyContent:"center",
+                      transition:"all 0.15s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#E10600"; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#888"; }}
+                  >☰</button>
+                )}
 
-              {/* Icon + title + subtitle (same design language as PageHeader) */}
-              <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0, overflow:"hidden", position:"relative", paddingBottom:4 }}>
                 <div style={{
-                  width:44, height:44, borderRadius:12,
-                  background:`linear-gradient(135deg, ${topbarHeader.accent}22, ${topbarHeader.accent}08)`,
-                  border:`1px solid ${topbarHeader.accent}33`,
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  fontSize:22, flexShrink:0,
+                  display:"flex",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? 8 : 12,
+                  minWidth:0,
+                  flex:1,
+                  overflow: isMobile ? "visible" : "hidden",
+                  position:"relative",
+                  paddingBottom: isMobile ? 0 : 4,
                 }}>
-                  {topbarHeader.icon}
-                </div>
-
-                <div style={{ minWidth:0, overflow:"hidden" }}>
-                  <h2 style={{
-                    margin:0, fontSize:isMobile ? 18 : isTablet ? 20 : 22, fontWeight:900,
-                    letterSpacing:-0.5, color:"#fff",
-                    whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
-                    lineHeight:1.1,
+                  <div style={{
+                    width: isMobile ? 32 : 44,
+                    height: isMobile ? 32 : 44,
+                    borderRadius: isMobile ? 9 : 12,
+                    background:`linear-gradient(135deg, ${topbarHeader.accent}22, ${topbarHeader.accent}08)`,
+                    border:`1px solid ${topbarHeader.accent}33`,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize: isMobile ? 16 : 22,
+                    flexShrink:0,
+                    marginTop: isMobile ? 1 : 0,
                   }}>
-                    {topbarHeader.title}
-                  </h2>
-                  {!isMobile && !isTablet && (
-                    <p style={{
-                      margin:"3px 0 0", fontSize:12, color:"#444",
-                      whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+                    {topbarHeader.icon}
+                  </div>
+
+                  <div style={{ minWidth:0, flex:1, overflow: isMobile ? "visible" : "hidden" }}>
+                    <h2 style={{
+                      margin:0,
+                      fontSize: isMobile ? 15 : isTablet ? 20 : 22,
+                      fontWeight:900,
+                      letterSpacing:-0.5,
+                      color:"#fff",
+                      lineHeight: isMobile ? 1.25 : 1.1,
+                      ...(isMobile
+                        ? { whiteSpace:"normal", overflow:"visible", textOverflow:"unset" }
+                        : { whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }),
                     }}>
-                      {topbarHeader.subtitle}
-                    </p>
+                      {topbarHeader.title}
+                    </h2>
+                    {!isMobile && !isTablet && (
+                      <p style={{
+                        margin:"3px 0 0", fontSize:12, color:"#444",
+                        whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+                      }}>
+                        {topbarHeader.subtitle}
+                      </p>
+                    )}
+                  </div>
+
+                  {!isMobile && !isTablet && (
+                    <div style={{
+                      position:"absolute",
+                      left:56,
+                      bottom:0,
+                      width:60,
+                      height:2,
+                      background:`linear-gradient(90deg, ${topbarHeader.accent}, transparent)`,
+                      borderRadius:1,
+                    }}/>
                   )}
                 </div>
+              </div>
 
-                {!isMobile && !isTablet && (
-                  <div style={{
-                    position:"absolute",
-                    left:56,
-                    bottom:0,
-                    width:60,
-                    height:2,
-                    background:`linear-gradient(90deg, ${topbarHeader.accent}, transparent)`,
-                    borderRadius:1,
-                  }}/>
+              <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+                {showSeasonSelector && !isMobile && (
+                  <>
+                    {!isTablet && (
+                      <span style={{ color:"#333", fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>Season</span>
+                    )}
+                    <select
+                      value={season}
+                      onChange={e => setSeason(e.target.value)}
+                      style={{
+                        background:"#111", border:"1px solid #222",
+                        color:"#fff", padding:"6px 10px", borderRadius:7,
+                        fontSize:13, cursor:"pointer", fontFamily:"monospace",
+                        outline:"none",
+                      }}
+                    >
+                      {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </>
                 )}
+
+                {!isTablet && !isMobile && <div style={{ width:1, height:22, background:"#1c1c1c", flexShrink:0 }}/>}
+
+                <SignOutButton/>
               </div>
             </div>
 
-            {/* Right: season selector + signout */}
-            <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-              {!isMobile && !isTablet && (
-                <span style={{ color:"#333", fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>Season</span>
-              )}
-              <select
-                value={season}
-                onChange={e => setSeason(e.target.value)}
-                style={{
-                  background:"#111", border:"1px solid #222",
-                  color:"#fff", padding:"6px 10px", borderRadius:7,
-                  fontSize:13, cursor:"pointer", fontFamily:"monospace",
-                  outline:"none",
-                }}
-              >
-                {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-
-              {!isTablet && <div style={{ width:1, height:22, background:"#1c1c1c", flexShrink:0 }}/>}
-
-              <SignOutButton/>
-            </div>
+            {isMobile && showSeasonSelector && (
+              <div style={{ width:"100%", display:"flex", alignItems:"center", gap:8 }}>
+                <span style={{ color:"#444", fontSize:10, textTransform:"uppercase", letterSpacing:1, flexShrink:0 }}>Season</span>
+                <select
+                  value={season}
+                  onChange={e => setSeason(e.target.value)}
+                  style={{
+                    flex:1,
+                    background:"#111", border:"1px solid #222",
+                    color:"#fff", padding:"8px 10px", borderRadius:7,
+                    fontSize:13, cursor:"pointer", fontFamily:"monospace",
+                    outline:"none",
+                  }}
+                >
+                  {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* ── Scrollable content area ─────────────────────────────
@@ -4980,8 +5063,8 @@ export default function F1AnalyticsHub() {
                 {page === "drivers"      && <DriversPage      season={season} watchlist={watchlist} onToggle={toggleWatch} watchlistDisabled={!watchlistLoaded || watchlistSyncing} isMobile={isMobile}/>}
                 {page === "constructors" && <ConstructorsPage season={season} watchlist={watchlist} onToggle={toggleWatch} watchlistDisabled={!watchlistLoaded || watchlistSyncing} isMobile={isMobile}/>}
                 {page === "races"        && <RaceResultsPage  season={season} isMobile={isMobile}/>}
-                {page === "points"       && <PointsChartPage  season={season}/>}
-                {page === "records"      && <SeasonRecordsPage season={season}/>}
+                {page === "points"       && <PointsChartPage  season={season} isMobile={isMobile}/>}
+                {page === "records"      && <SeasonRecordsPage season={season} isMobile={isMobile}/>}
                 {page === "strategy"     && <StrategyPage     season={season}/>}
                 {page === "h2h"          && <HeadToHeadPage   season={season} isMobile={isMobile}/>}
                 {page === "circuits"     && <CircuitsPage     season={season} isMobile={isMobile}/>}

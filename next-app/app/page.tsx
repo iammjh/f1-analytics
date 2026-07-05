@@ -527,7 +527,7 @@ export default function Home() {
             {!session && (
               <Link href="/auth/signin" className="text-white/40 hover:text-white text-sm transition">Sign In</Link>
             )}
-            <a href="https://ergast.com/mrd/" target="_blank" rel="noreferrer" className="text-white/40 hover:text-white text-sm transition">API Docs</a>
+            <a href="https://iammjh.github.io" target="_blank" rel="noreferrer" className="text-white/45 hover:text-f1-red text-sm transition font-medium">Developed by iammjh</a>
           </div>
         </div>
       </footer>
