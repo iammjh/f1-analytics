@@ -2,10 +2,13 @@ const { spawn } = require("child_process");
 
 const [mode, ...args] = process.argv.slice(2);
 
+// Vercel's Next.js integration only recognizes the default ".next" output folder.
+const onVercel = Boolean(process.env.VERCEL);
+
 const distDirs = {
   dev: ".next-dev",
-  build: ".next-build",
-  start: ".next-build",
+  build: onVercel ? ".next" : ".next-build",
+  start: onVercel ? ".next" : ".next-build",
 };
 
 if (!mode) {
