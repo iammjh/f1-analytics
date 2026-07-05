@@ -20,11 +20,16 @@ pnpm-debug.log*
 .tmp/
 tmp/
 
-# Environment and secrets
+# Environment and secrets — NEVER commit real credentials
 .env
 .env.*
+.env.local
+.env.*.local
 !.env.example
 !.env.sample
+
+# Docker env overrides (keep these out too)
+docker-compose.override.yml
 
 # Private keys/certificates/credentials
 *.pem
@@ -65,6 +70,5 @@ Desktop.ini
 # Next.js / TypeScript
 *.tsbuildinfo
 
-# Docker env overrides
-.docker/*.env
-*.local
+# Docker env overrides (covered above)
+.sixth

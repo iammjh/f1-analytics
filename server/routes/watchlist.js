@@ -1,9 +1,14 @@
-import express from "express";
+﻿import express from "express";
 import Watchlist from "../models/Watchlist.js";
 import authenticateToken from "../middleware/auth.js";
 
 const router = express.Router();
 const VALID_ITEM_TYPES = new Set(["driver", "team", "race"]);
+const WATCHLIST_ITEM_LIMIT = 50; // max items per bucket
+
+// H1 FIX: safe error helper — never expose internals in production
+const isDev = () => process.env.NODE_ENV === "development";
+const safeErr = (err, fallback) => (isDev() ? err.message : fallback);
 
 const isObject = (value) =>
   value !== null && typeof value === "object" && !Array.isArray(value);
@@ -15,22 +20,21 @@ const normalizeItemValue = (type, value) => {
   if (value === undefined || value === null || value === "") {
     return null;
   }
-
   if (type === "race") {
     const raceId = Number(value);
     return Number.isNaN(raceId) ? null : raceId;
   }
-
   return String(value);
 };
 
-// Get user's watchlists
+// Get user watchlists
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const watchlists = await Watchlist.find({ userId: req.user.userId });
     res.json(watchlists);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("[watchlist GET]", err);
+    res.status(500).json({ error: safeErr(err, "Failed to fetch watchlists") });
   }
 });
 
@@ -55,7 +59,8 @@ router.post("/", authenticateToken, async (req, res) => {
     await watchlist.save();
     res.status(201).json(watchlist);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("[watchlist POST]", err);
+    res.status(500).json({ error: safeErr(err, "Failed to create watchlist") });
   }
 });
 
@@ -86,14 +91,15 @@ router.put("/:id", authenticateToken, async (req, res) => {
     if (err.name === "CastError") {
       return res.status(404).json({ error: "Watchlist not found" });
     }
-    res.status(500).json({ error: err.message });
+    console.error("[watchlist PUT]", err);
+    res.status(500).json({ error: safeErr(err, "Failed to update watchlist") });
   }
 });
 
 // Add item to watchlist
 router.post("/:id/add", authenticateToken, async (req, res) => {
   try {
-    const { type, id } = req.body; // type: 'driver', 'team', 'race'
+    const { type, id } = req.body;
 
     if (!VALID_ITEM_TYPES.has(type)) {
       return res.status(400).json({ error: "Invalid item type" });
@@ -109,12 +115,22 @@ router.post("/:id/add", authenticateToken, async (req, res) => {
       return res.status(404).json({ error: "Watchlist not found" });
     }
 
-    if (type === "driver" && !watchlist.drivers.includes(itemValue)) {
-      watchlist.drivers.push(itemValue);
-    } else if (type === "team" && !watchlist.teams.includes(itemValue)) {
-      watchlist.teams.push(itemValue);
-    } else if (type === "race" && !watchlist.races.includes(itemValue)) {
-      watchlist.races.push(itemValue);
+    // H4 FIX: enforce size limit per bucket
+    if (type === "driver") {
+      if (watchlist.drivers.length >= WATCHLIST_ITEM_LIMIT) {
+        return res.status(400).json({ error: `Driver limit reached (max ${WATCHLIST_ITEM_LIMIT})` });
+      }
+      if (!watchlist.drivers.includes(itemValue)) watchlist.drivers.push(itemValue);
+    } else if (type === "team") {
+      if (watchlist.teams.length >= WATCHLIST_ITEM_LIMIT) {
+        return res.status(400).json({ error: `Team limit reached (max ${WATCHLIST_ITEM_LIMIT})` });
+      }
+      if (!watchlist.teams.includes(itemValue)) watchlist.teams.push(itemValue);
+    } else if (type === "race") {
+      if (watchlist.races.length >= WATCHLIST_ITEM_LIMIT) {
+        return res.status(400).json({ error: `Race limit reached (max ${WATCHLIST_ITEM_LIMIT})` });
+      }
+      if (!watchlist.races.includes(itemValue)) watchlist.races.push(itemValue);
     }
 
     await watchlist.save();
@@ -123,7 +139,8 @@ router.post("/:id/add", authenticateToken, async (req, res) => {
     if (err.name === "CastError") {
       return res.status(404).json({ error: "Watchlist not found" });
     }
-    res.status(500).json({ error: err.message });
+    console.error("[watchlist add]", err);
+    res.status(500).json({ error: safeErr(err, "Failed to add item") });
   }
 });
 
@@ -160,7 +177,8 @@ router.post("/:id/remove", authenticateToken, async (req, res) => {
     if (err.name === "CastError") {
       return res.status(404).json({ error: "Watchlist not found" });
     }
-    res.status(500).json({ error: err.message });
+    console.error("[watchlist remove]", err);
+    res.status(500).json({ error: safeErr(err, "Failed to remove item") });
   }
 });
 
@@ -181,7 +199,8 @@ router.delete("/:id", authenticateToken, async (req, res) => {
     if (err.name === "CastError") {
       return res.status(404).json({ error: "Watchlist not found" });
     }
-    res.status(500).json({ error: err.message });
+    console.error("[watchlist DELETE]", err);
+    res.status(500).json({ error: safeErr(err, "Failed to delete watchlist") });
   }
 });
 

@@ -18,13 +18,18 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
+      // F1 official media
+      { protocol: 'https', hostname: 'media.formula1.com' },
+      { protocol: 'https', hostname: 'www.formula1.com' },
+      // GitHub OAuth avatars
+      { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+      // Google OAuth avatars
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: 'lh4.googleusercontent.com' },
+      // OpenF1 / Jolpica driver images
+      { protocol: 'https', hostname: 'api.openf1.org' },
     ],
-    // Allow local public/ images (hero-f1-car.jpg etc.)
-    // No extra config needed — Next.js serves public/ automatically.
+    // Local public/ images (hero-f1-car.jpg etc.) are served automatically.
   },
 
   experimental: {

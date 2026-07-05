@@ -122,11 +122,19 @@ export async function fetchSeasonStandingsBundle(
 }
 
 export function getCompletedRaces(races, now = new Date()) {
-  return races.filter((race) => new Date(race.date) <= now);
+  return races.filter((race) => {
+    if (!race.date) return false;
+    const timeStr = race.time ? (race.time.endsWith("Z") ? race.time : race.time + "Z") : "00:00:00Z";
+    return new Date(`${race.date}T${timeStr}`) <= now;
+  });
 }
 
 export function getUpcomingRaces(races, now = new Date()) {
-  return races.filter((race) => new Date(race.date) > now);
+  return races.filter((race) => {
+    if (!race.date) return false;
+    const timeStr = race.time ? (race.time.endsWith("Z") ? race.time : race.time + "Z") : "23:59:59Z";
+    return new Date(`${race.date}T${timeStr}`) > now;
+  });
 }
 
 export function findNextUpcomingRace(races, now = new Date()) {

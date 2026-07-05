@@ -11,6 +11,20 @@ import {
   getCompletedRaces,
   getUpcomingRaces,
 } from '@/lib/jolpica-client';
+import { 
+  Activity, 
+  Trophy, 
+  Target, 
+  Swords, 
+  TrendingUp, 
+  Star, 
+  MapPin, 
+  Calendar, 
+  Clock,
+  Wrench,
+  Users,
+  History
+} from 'lucide-react';
 
 const CURRENT_SEASON = new Date().getFullYear();
 const SEASON_CANDIDATES = [CURRENT_SEASON, CURRENT_SEASON - 1, CURRENT_SEASON - 2].map(String);
@@ -32,12 +46,12 @@ interface Race {
 }
 
 const FEATURES = [
-  { icon: '📊', title: 'Live Telemetry',     desc: 'Real-time sensor data streamed from every car on track' },
-  { icon: '🏆', title: 'Driver Rankings',    desc: 'Full championship standings with gap-to-leader tracking' },
-  { icon: '🎯', title: 'Race Strategy',      desc: 'Pit stop windows, tire strategies, and compound choices' },
-  { icon: '⚔️',  title: 'Head-to-Head',      desc: 'Compare any two drivers across every metric this season' },
-  { icon: '📈', title: 'Points Progression', desc: 'Interactive championship evolution chart, race by race' },
-  { icon: '⭐', title: 'Watchlist',          desc: 'Pin your favorite drivers and constructors for fast access' },
+  { icon: Activity, title: 'Live Telemetry',     desc: 'Real-time sensor data streamed from every car on track' },
+  { icon: Trophy, title: 'Driver Rankings',    desc: 'Full championship standings with gap-to-leader tracking' },
+  { icon: Target, title: 'Race Strategy',      desc: 'Pit stop windows, tire strategies, and compound choices' },
+  { icon: Swords,  title: 'Head-to-Head',      desc: 'Compare any two drivers across every metric this season' },
+  { icon: TrendingUp, title: 'Points Progression', desc: 'Interactive championship evolution chart, race by race' },
+  { icon: Star, title: 'Watchlist',          desc: 'Pin your favorite drivers and constructors for fast access' },
 ];
 
 const STATS = [
@@ -269,15 +283,19 @@ export default function Home() {
           {/* Live stat pills */}
           <div className="flex flex-wrap justify-center gap-3">
             {[
-              ['🏎️', '10 Teams'],
-              ['👤', '20 Drivers'],
-              ['🔴', 'Live Telemetry'],
-              ['📊', 'Historical Data'],
-            ].map(([icon, label]) => (
-              <div key={label} className="flex items-center gap-2 bg-black/40 backdrop-blur border border-white/10 rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm text-white/80">
-                <span>{icon}</span><span>{label}</span>
-              </div>
-            ))}
+              { icon: Wrench, label: '10 Teams', color: '#FF8000' },
+              { icon: Users, label: '20 Drivers', color: '#27F4D2' },
+              { icon: Activity, label: 'Live Telemetry', color: '#E10600' },
+              { icon: History, label: 'Historical Data', color: '#a855f7' },
+            ].map((pill) => {
+              const Icon = pill.icon;
+              return (
+                <div key={pill.label} className="flex items-center gap-2 bg-black/40 backdrop-blur border border-white/10 rounded-full px-3.5 sm:px-4.5 py-2 text-xs sm:text-sm text-white/80 transition-all duration-200 hover:border-white/20 hover:bg-black/60">
+                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: pill.color }} />
+                  <span className="font-medium">{pill.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -406,15 +424,20 @@ export default function Home() {
                       <h3 className="text-lg font-black text-white mb-2 group-hover:text-f1-red transition leading-tight">
                         {race.raceName}
                       </h3>
-                      <p className="text-white/50 text-sm mb-1">📍 {race.Circuit?.Location?.locality}, {race.Circuit?.Location?.country}</p>
-                      <p className="text-white/40 text-xs mb-4 truncate">{race.Circuit?.circuitName}</p>
-                      <div className="pt-3 border-t border-f1-grid">
-                        <p className="text-f1-red font-bold text-sm">
-                          📅 {raceDate.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' })}
+                      <p className="text-white/50 text-sm mb-1 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-f1-red flex-shrink-0" />
+                        <span>{race.Circuit?.Location?.locality}, {race.Circuit?.Location?.country}</span>
+                      </p>
+                      <p className="text-white/40 text-xs mb-4 truncate pl-5">{race.Circuit?.circuitName}</p>
+                      <div className="pt-3 border-t border-f1-grid space-y-1.5">
+                        <p className="text-f1-red font-bold text-sm flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>{raceDate.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' })}</span>
                         </p>
                         {race.time && (
-                          <p className="text-white/30 text-xs mt-1 font-mono">
-                            🕐 {race.time.replace('Z', ' UTC')}
+                          <p className="text-white/30 text-xs font-mono flex items-center gap-1.5 pl-5">
+                            <Clock className="w-3 h-3 flex-shrink-0" />
+                            <span>{race.time.replace('Z', ' UTC')}</span>
                           </p>
                         )}
                       </div>
@@ -432,40 +455,45 @@ export default function Home() {
             <p className="text-white/40 max-w-xl mx-auto">A complete analytics suite built for F1 fans and data enthusiasts</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="group bg-f1-dark border border-f1-grid hover:border-f1-red rounded-xl p-6 transition-all hover:-translate-y-0.5 cursor-default">
-                <div className="w-12 h-12 bg-f1-grid group-hover:bg-f1-red/15 rounded-xl flex items-center justify-center text-2xl mb-4 transition">
-                  {f.icon}
+            {FEATURES.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div key={f.title} className="group bg-f1-dark border border-f1-grid hover:border-f1-red rounded-xl p-6 transition-all hover:-translate-y-0.5 cursor-default">
+                  <div className="w-12 h-12 bg-f1-grid group-hover:bg-f1-red/15 rounded-xl flex items-center justify-center mb-4 transition text-f1-red">
+                    <Icon className="w-6 h-6 stroke-[1.75]" />
+                  </div>
+                  <h3 className="text-lg font-black text-white mb-2 group-hover:text-f1-red transition">{f.title}</h3>
+                  <p className="text-white/45 text-sm leading-relaxed">{f.desc}</p>
                 </div>
-                <h3 className="text-lg font-black text-white mb-2 group-hover:text-f1-red transition">{f.title}</h3>
-                <p className="text-white/45 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
         {/* CTA Banner */}
-        <section className="mb-16 sm:mb-20">
-          <div className="relative overflow-hidden bg-gradient-to-br from-f1-red/20 via-f1-red/10 to-transparent border border-f1-red/40 rounded-2xl p-6 sm:p-10 md:p-16 text-center">
-            {/* Decorative glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px bg-gradient-to-r from-transparent via-f1-red to-transparent" />
-            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-f1-red/5 rounded-full blur-3xl pointer-events-none" />
+        {!session && (
+          <section className="mb-16 sm:mb-20">
+            <div className="relative overflow-hidden bg-gradient-to-br from-f1-red/20 via-f1-red/10 to-transparent border border-f1-red/40 rounded-2xl p-6 sm:p-10 md:p-16 text-center">
+              {/* Decorative glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-px bg-gradient-to-r from-transparent via-f1-red to-transparent" />
+              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-f1-red/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative z-10">
-              <img src="/F1-Logo.png" alt="F1" style={{width:80,margin:"0 auto 12px",objectFit:"contain"}}/>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4">Ready to Dive In?</h2>
-              <p className="text-white/60 mb-8 text-base sm:text-lg max-w-md mx-auto">
-                Access advanced analytics, live telemetry, and real-time race data.
-              </p>
-              <Link
-                href="/auth/signin"
-                className="inline-block w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-base sm:text-lg shadow-xl shadow-f1-red/30"
-              >
-                Get Started — It&apos;s Free →
-              </Link>
+              <div className="relative z-10">
+                <img src="/F1-Logo.png" alt="F1" style={{width:80,margin:"0 auto 12px",objectFit:"contain"}}/>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4">Ready to Dive In?</h2>
+                <p className="text-white/60 mb-8 text-base sm:text-lg max-w-md mx-auto">
+                  Access advanced analytics, live telemetry, and real-time race data.
+                </p>
+                <Link
+                  href="/auth/signin"
+                  className="inline-block w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-base sm:text-lg shadow-xl shadow-f1-red/30"
+                >
+                  Get Started — It&apos;s Free →
+                </Link>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </div>
 
       {/* Footer */}
@@ -479,7 +507,9 @@ export default function Home() {
             © {new Date().getFullYear()} · Data via Jolpica / Ergast API · OpenF1
           </p>
           <div className="flex items-center gap-4 sm:gap-6">
-            <Link href="/auth/signin" className="text-white/40 hover:text-white text-sm transition">Sign In</Link>
+            {!session && (
+              <Link href="/auth/signin" className="text-white/40 hover:text-white text-sm transition">Sign In</Link>
+            )}
             <a href="https://ergast.com/mrd/" target="_blank" rel="noreferrer" className="text-white/40 hover:text-white text-sm transition">API Docs</a>
           </div>
         </div>

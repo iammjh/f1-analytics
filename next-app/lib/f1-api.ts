@@ -30,6 +30,31 @@ export const openF1 = axios.create({
   timeout: 10000,
 });
 
+// Response interceptor to handle OpenF1 API 429 Rate Limit (max 3 req/sec)
+openF1.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config = error.config;
+    if (!config || error.response?.status !== 429) {
+      return Promise.reject(error);
+    }
+
+    config.__retryCount = config.__retryCount || 0;
+    if (config.__retryCount >= 3) {
+      return Promise.reject(error);
+    }
+
+    config.__retryCount += 1;
+
+    // Wait with exponential backoff + randomized jitter (350ms to 550ms for first retry)
+    const delay = 350 * config.__retryCount + Math.floor(Math.random() * 200);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+
+    // Retry the request using the same configuration
+    return openF1(config);
+  }
+);
+
 export const ergast = axios.create({
   baseURL: ERGAST_API,
   timeout: 10000,
