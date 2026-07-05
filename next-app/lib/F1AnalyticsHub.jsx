@@ -3619,6 +3619,7 @@ function LiveWeekendHub({
   leader,
   countdown,
   showSessionPanel,
+  isMobile = false,
 }) {
   const hasNextRace = Boolean(liveData.nextRace);
 
@@ -3636,7 +3637,7 @@ function LiveWeekendHub({
     <div style={{marginBottom:20}}>
       <div style={{
         display:"grid",
-        gridTemplateColumns: showSessionPanel && hasNextRace ? "repeat(2, minmax(0, 1fr))" : "1fr",
+        gridTemplateColumns: showSessionPanel && hasNextRace && !isMobile ? "repeat(2, minmax(0, 1fr))" : "1fr",
         gap:18,
         alignItems:"stretch",
       }}>
@@ -3701,7 +3702,7 @@ function LiveWeekendHub({
   );
 }
 
-function LivePage() {
+function LivePage({ isMobile = false }) {
   const [liveData,setLiveData]=useState(null); 
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(null);
@@ -3795,6 +3796,7 @@ function LivePage() {
         leader={leader}
         countdown={countdown}
         showSessionPanel={showSessionPanel}
+        isMobile={isMobile}
       />
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:18,alignItems:"start",marginBottom:20}}>
@@ -4888,14 +4890,13 @@ export default function F1AnalyticsHub() {
               this topbar cannot scroll. No position:fixed, no left offset math. */}
           <div style={{
             flexShrink:0,
-            height: isMobile && showSeasonSelector ? "auto" : (isTablet ? 66 : 72),
+            height: isMobile ? "auto" : (isTablet ? 66 : 72),
             minHeight: isMobile ? 58 : undefined,
-            padding:`${isMobile && showSeasonSelector ? 10 : 0} ${isMobile ? 14 : isTablet ? 16 : 24}px ${isMobile && showSeasonSelector ? 12 : 0}`,
+            padding:`${isMobile ? 10 : 0}px ${isMobile ? 14 : isTablet ? 16 : 24}px ${isMobile ? 10 : 0}`,
             display:"flex",
-            flexDirection: isMobile && showSeasonSelector ? "column" : "row",
             alignItems:"center",
             justifyContent:"space-between",
-            gap: isMobile && showSeasonSelector ? 10 : 12,
+            gap:12,
             background:"#080808",
             borderBottom: scrolled
               ? "1px solid #1e1e1e"
@@ -4907,7 +4908,7 @@ export default function F1AnalyticsHub() {
             zIndex:10,
           }}>
 
-            {/* Primary row: nav toggle, title, sign out (+ season on desktop) */}
+            {/* Nav toggle, title (+ season on mobile), sign out */}
             <div style={{
               display:"flex",
               alignItems:"center",
@@ -4970,6 +4971,30 @@ export default function F1AnalyticsHub() {
                     }}>
                       {topbarHeader.title}
                     </h2>
+                    {isMobile && showSeasonSelector && (
+                      <select
+                        value={season}
+                        onChange={e => setSeason(e.target.value)}
+                        aria-label="Season"
+                        style={{
+                          marginTop:6,
+                          background:"#111",
+                          border:`1px solid ${topbarHeader.accent}44`,
+                          color:topbarHeader.accent,
+                          padding:"4px 8px",
+                          borderRadius:6,
+                          fontSize:11,
+                          fontWeight:700,
+                          cursor:"pointer",
+                          fontFamily:"monospace",
+                          outline:"none",
+                          width:"auto",
+                          maxWidth:"100%",
+                        }}
+                      >
+                        {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    )}
                     {!isMobile && !isTablet && (
                       <p style={{
                         margin:"3px 0 0", fontSize:12, color:"#444",
@@ -5020,25 +5045,6 @@ export default function F1AnalyticsHub() {
                 <SignOutButton/>
               </div>
             </div>
-
-            {isMobile && showSeasonSelector && (
-              <div style={{ width:"100%", display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ color:"#444", fontSize:10, textTransform:"uppercase", letterSpacing:1, flexShrink:0 }}>Season</span>
-                <select
-                  value={season}
-                  onChange={e => setSeason(e.target.value)}
-                  style={{
-                    flex:1,
-                    background:"#111", border:"1px solid #222",
-                    color:"#fff", padding:"8px 10px", borderRadius:7,
-                    fontSize:13, cursor:"pointer", fontFamily:"monospace",
-                    outline:"none",
-                  }}
-                >
-                  {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            )}
           </div>
 
           {/* ── Scrollable content area ─────────────────────────────
@@ -5069,7 +5075,7 @@ export default function F1AnalyticsHub() {
                 {page === "h2h"          && <HeadToHeadPage   season={season} isMobile={isMobile}/>}
                 {page === "circuits"     && <CircuitsPage     season={season} isMobile={isMobile}/>}
                 {page === "telemetry"    && <TelemetryPage season={season} isMobile={isMobile}/>}
-                {page === "live"         && <LivePage/>}
+                {page === "live"         && <LivePage isMobile={isMobile}/>}
                 {page === "watchlist"    && <WatchlistPage    season={season} watchlist={watchlist} onToggle={toggleWatch} trackedCount={trackedCount} watchlistReady={watchlistLoaded} watchlistDisabled={!watchlistLoaded || watchlistSyncing}/>}
               </>
             ) : (
