@@ -1,17 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRedis, cacheKey } from '@/lib/redis';
 import { f1Api } from '@/lib/f1-api';
+import { parseRoundParam, parseSeasonParam } from '@/lib/query-params';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const season = searchParams.get('season') || new Date().getFullYear().toString();
-    const round = searchParams.get('round');
+    const seasonResult = parseSeasonParam(searchParams.get('season'));
+    if (!seasonResult.ok) {
+      return NextResponse.json({ error: seasonResult.error }, { status: 400 });
+    }
+    const season = seasonResult.value;
+
+    const roundResult = parseRoundParam(searchParams.get('round'));
+    if (roundResult && !roundResult.ok) {
+      return NextResponse.json({ error: roundResult.error }, { status: 400 });
+    }
+    const round = roundResult?.ok ? String(roundResult.value) : null;
 
     const redis = await getRedis();
-    const cacheKeyStr = round ? cacheKey.results(Number(season), Number(round)) : cacheKey.races(Number(season));
+    const cacheKeyStr = round
+      ? cacheKey.results(season, Number(round))
+      : cacheKey.races(season);
     
     // Check cache
     const cached = await redis.get(cacheKeyStr);

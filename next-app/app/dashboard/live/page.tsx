@@ -11,8 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { LiveRacePayload } from '@/lib/live-telemetry';
-
-const POLL_MS = 60_000;
+import { getLivePollIntervalMs } from '@/lib/live-poll-interval';
 
 function formatLapTime(value: number | null) {
   return value === null ? 'No lap yet' : `${value.toFixed(3)}s`;
@@ -61,11 +60,25 @@ export default function LivePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(Date.now());
+  const [isDocumentHidden, setIsDocumentHidden] = useState(false);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      setIsDocumentHidden(document.visibilityState === 'hidden');
+    };
+
+    onVisibilityChange();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    async function loadLiveData() {
+    const poll = async () => {
+      if (cancelled) return;
+
       try {
         const response = await fetch('/api/live/race', { cache: 'no-store' });
         if (!response.ok) {
@@ -73,26 +86,27 @@ export default function LivePage() {
         }
 
         const data = (await response.json()) as LiveRacePayload;
-        if (!cancelled) {
-          setLiveData(data);
-          setError(null);
-          setLoading(false);
-        }
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : 'Failed to load live race data.');
-          setLoading(false);
-        }
-      }
-    }
+        if (cancelled) return;
 
-    loadLiveData();
-    const poller = window.setInterval(loadLiveData, POLL_MS);
+        setLiveData(data);
+        setError(null);
+        setLoading(false);
+        timer = setTimeout(poll, getLivePollIntervalMs(data.status, isDocumentHidden));
+      } catch (loadError) {
+        if (cancelled) return;
+        setError(loadError instanceof Error ? loadError.message : 'Failed to load live race data.');
+        setLoading(false);
+        timer = setTimeout(poll, getLivePollIntervalMs('upcoming', isDocumentHidden));
+      }
+    };
+
+    poll();
+
     return () => {
       cancelled = true;
-      window.clearInterval(poller);
+      if (timer) clearTimeout(timer);
     };
-  }, []);
+  }, [isDocumentHidden]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNowMs(Date.now()), 1000);

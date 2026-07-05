@@ -6,9 +6,7 @@ version: '3.8'
 # IMPORTANT: Before running, create a .env file in this directory with:
 #   MONGO_ROOT_USER=<your-chosen-username>
 #   MONGO_ROOT_PASSWORD=<strong-random-password>
-#   JWT_SECRET=<run: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
-#   EMAIL_USER=<your-email@gmail.com>
-#   EMAIL_PASSWORD=<your-gmail-app-password>
+#   REDIS_PASSWORD=<strong-random-password>
 #
 # Never hardcode credentials in this file.
 # ─────────────────────────────────────────────────────────────────────────────
@@ -40,7 +38,7 @@ services:
       - f1-network
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
 
-  # Backend API
+  # Background support service (polling → Redis)
   backend:
     build: ./server
     restart: unless-stopped
@@ -48,9 +46,6 @@ services:
       - "5000:5000"
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongodb:27017/f1-analytics?authSource=admin
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRY=7d
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -60,7 +55,6 @@ services:
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
     depends_on:
-      - mongodb
       - redis
     networks:
       - f1-network

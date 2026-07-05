@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
+import {
+  validateWatchlistDescription,
+  validateWatchlistName,
+} from '@/lib/watchlist-validation';
 
 // ─── GET /api/watchlist ────────────────────────────────────────────────────────
 export async function GET(_req: NextRequest) {
@@ -36,6 +40,15 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    const nameResult = validateWatchlistName(body.name ?? 'My Watchlist');
+    if (!nameResult.ok) {
+      return NextResponse.json({ error: nameResult.error }, { status: 400 });
+    }
+    const descriptionResult = validateWatchlistDescription(body.description);
+    if (!descriptionResult.ok) {
+      return NextResponse.json({ error: descriptionResult.error }, { status: 400 });
+    }
+
     // Validate that array fields are actually arrays (guard against legacy
     // JSON-string payloads from clients that haven't been updated yet)
     const toArray = (v: unknown): string[] => {
@@ -49,8 +62,8 @@ export async function POST(req: NextRequest) {
     const watchlist = await prisma.watchlist.create({
       data: {
         userId:      session.user.id,
-        name:        typeof body.name === 'string' ? body.name : 'My Watchlist',
-        description: typeof body.description === 'string' ? body.description : undefined,
+        name:        nameResult.value,
+        description: descriptionResult.value,
         drivers:     toArray(body.drivers),
         teams:       toArray(body.teams),
         races:       toArray(body.races),

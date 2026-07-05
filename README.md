@@ -10,9 +10,8 @@ The project is organized as a modern web app (`next-app`) plus a backend service
 
 ## Current Architecture Direction
 
-- `next-app` is the preferred application path for ongoing auth and watchlist development.
-- `server` is currently retained for legacy JWT flows, live-data polling, and support services.
-- If you are adding or changing user-facing auth/watchlist features, prefer the Next.js routes and data model first.
+- `next-app` is the application for auth, watchlists, dashboards, and API routes.
+- `server` runs background support services only (Redis polling, email notifications).
 
 ### What this project focuses on
 - Clear race and standings insights

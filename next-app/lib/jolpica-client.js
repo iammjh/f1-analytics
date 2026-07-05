@@ -52,8 +52,14 @@ export async function fetchSeasonResults(season, { limit = 100, fetcher = defaul
   const racesByRound = new Map();
   let offset = 0;
   let total = Number.POSITIVE_INFINITY;
+  const maxPages = Math.ceil(limit / pageSize) + 2;
+  let pagesFetched = 0;
 
   while (offset < total) {
+    if (pagesFetched >= maxPages) {
+      break;
+    }
+
     const data = await fetcher(
       `${JOLPICA_BASE_URL}/${season}/results/?format=json&limit=${pageSize}&offset=${offset}`
     );
@@ -76,6 +82,7 @@ export async function fetchSeasonResults(season, { limit = 100, fetcher = defaul
     }
 
     offset += pageSize;
+    pagesFetched += 1;
   }
 
   return [...racesByRound.values()].sort(

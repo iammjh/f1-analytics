@@ -90,6 +90,7 @@ export default function Home() {
   const [upcomingRaces, setUpcomingRaces] = useState<Race[]>([]);
   const [pastRaces, setPastRaces] = useState<Race[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
   const [activeSeason, setActiveSeason] = useState(SEASON_CANDIDATES[0]);
   const heroRef = useRef<HTMLDivElement>(null);
   const userLabel = session?.user?.name || session?.user?.email?.split('@')[0] || 'Account';
@@ -106,6 +107,7 @@ export default function Home() {
     if (!mounted) return;
 
     async function fetchData() {
+      setDataError(null);
       try {
         for (const season of SEASON_CANDIDATES) {
           const [driverList, raceList] = await Promise.all([
@@ -128,7 +130,7 @@ export default function Home() {
           return;
         }
       } catch {
-        // Silent fail — empty states handle the rest
+        setDataError('Could not load standings or race data. Check your connection and try again.');
       } finally {
         setDataLoading(false);
       }
@@ -331,6 +333,13 @@ export default function Home() {
             </Link>
           </div>
 
+          {dataError && (
+            <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-800 bg-red-950/50 p-3 text-sm text-red-300">
+              <span className="text-red-400">⚠</span>
+              <span>{dataError}</span>
+            </div>
+          )}
+
           <div className="bg-f1-dark border border-f1-grid rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -346,6 +355,14 @@ export default function Home() {
                 <tbody>
                   {dataLoading
                     ? Array(5).fill(0).map((_, i) => <SkeletonRow key={i} />)
+                    : dataError
+                    ? (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-red-300/80 text-sm">
+                          Standings unavailable — see message above.
+                        </td>
+                      </tr>
+                    )
                     : standings.length === 0
                     ? (
                       <tr>

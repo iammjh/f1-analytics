@@ -73,20 +73,41 @@ export const fetchAndCacheRaceResults = async (season = new Date().getFullYear()
   }
 };
 
-// Polling service - runs every X minutes
-export const startPollingService = (intervalMinutes = 5) => {
-  const season = new Date().getFullYear();
+// Polling service - runs every X minutes when enabled via env
+export function resolvePollingConfig() {
+  const enabled = process.env.POLLING_ENABLED !== "false";
+  const parsedInterval = Number.parseInt(process.env.POLL_INTERVAL_MINUTES ?? "5", 10);
+  const intervalMinutes = Number.isFinite(parsedInterval)
+    ? Math.min(Math.max(parsedInterval, 1), 1440)
+    : 5;
 
-  setInterval(async () => {
+  return { enabled, intervalMinutes };
+}
+
+export const startPollingService = (intervalMinutes = resolvePollingConfig().intervalMinutes) => {
+  const config = resolvePollingConfig();
+  if (!config.enabled) {
+    console.log("○ Polling service disabled (POLLING_ENABLED=false)");
+    return null;
+  }
+
+  const season = new Date().getFullYear();
+  const intervalMs = intervalMinutes * 60 * 1000;
+
+  const poll = async () => {
     console.log(`🔄 Polling race data [${new Date().toLocaleTimeString()}]`);
     const data = await fetchAndCacheRaceData(season);
-    
-    if (data && data.liveRace) {
+
+    if (data?.liveRace) {
       console.log(`📍 Live race detected: ${data.liveRace.name}`);
     }
-  }, intervalMinutes * 60 * 1000);
+  };
+
+  poll();
+  const timer = setInterval(poll, intervalMs);
 
   console.log(`✓ Polling service started (interval: ${intervalMinutes} min)`);
+  return timer;
 };
 
 // Get cached race data
@@ -114,6 +135,7 @@ export const getLiveRaceData = async (season) => {
 export default {
   fetchAndCacheRaceData,
   fetchAndCacheRaceResults,
+  resolvePollingConfig,
   startPollingService,
   getCachedRaceData,
   getLiveRaceData

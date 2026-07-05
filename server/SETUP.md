@@ -1,30 +1,20 @@
 # F1 Analytics Hub - Phase 3 Setup Guide
 
-> Note: `next-app` is now the preferred path for user-facing auth and watchlist work. This Express backend is mainly kept for legacy JWT flows, live-data polling, and related support services.
+> Note: `next-app` owns all user auth, watchlists, and API routes. This Express service is background polling + Redis cache only.
 
 ## Project Structure
 ```
 f1-analytics/
-├── server/                    # Backend (Node.js/Express)
+├── server/                    # Background support service
 │   ├── config/
-│   │   ├── database.js       # MongoDB connection
 │   │   └── redis.js          # Redis connection
-│   ├── models/
-│   │   ├── User.js          # User model with auth
-│   │   └── Watchlist.js     # Watchlist model
-│   ├── middleware/
-│   │   └── auth.js          # JWT authentication
-│   ├── routes/
-│   │   ├── auth.js          # Auth endpoints
-│   │   ├── watchlist.js     # Watchlist CRUD
-│   │   └── live.js          # Live race data
 │   ├── services/
 │   │   ├── emailService.js  # Email notifications
-│   │   └── pollingService.js # Redis polling
+│   │   └── pollingService.js # Race data polling → Redis
 │   ├── .env                 # Environment variables
 │   ├── package.json
-│   └── server.js            # Main server file
-└── next-app/                # Preferred frontend / full-stack app
+│   └── server.js            # Health check + polling worker
+└── next-app/                # Next.js app (auth, watchlists, dashboards)
 ```
 
 ## Prerequisites
@@ -45,28 +35,31 @@ npm install
 ```
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/f1-analytics
-JWT_SECRET=your_super_secret_jwt_key_change_this
-JWT_EXPIRY=7d
+POLLING_ENABLED=true
+POLL_INTERVAL_MINUTES=5
 REDIS_HOST=localhost
 REDIS_PORT=6379
+REDIS_PASSWORD=
+JOLPICA_API=https://api.jolpi.ca/ergast/f1
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASSWORD=your_app_password
 EMAIL_SERVICE=gmail
 FRONTEND_URL=http://localhost:3000
+ALLOWED_ORIGINS=http://localhost:3000
 ```
 
-### 3. Start MongoDB (if local)
-```bash
-# Windows
-# Extract MongoDB and add to system PATH, then:
-mongod
+**Polling notes:**
+- Set `POLLING_ENABLED=false` to run the support service without Jolpica background fetches.
+- `POLL_INTERVAL_MINUTES` accepts 1–1440 (default 5).
 
-# Or use MongoDB Atlas (cloud)
-# Update MONGODB_URI in .env with your Atlas connection string
-```
+**Redis password notes:**
+- **Local dev, no Docker:** empty `REDIS_PASSWORD` is fine if Redis only listens on `127.0.0.1`.
+- **Local dev with `docker-compose`:** Redis runs with `--requirepass` — set the same password in `server/.env` and root `.env` (`REDIS_PASSWORD=...`).
+- **Production:** `REDIS_PASSWORD` is **required** — the support service refuses to start without it when `NODE_ENV=production`.
 
-### 4. Start Redis (if local)
+Auth and MongoDB are configured in `next-app/.env.local` (NextAuth + Prisma).
+
+### 3. Start Redis (if local)
 ```bash
 # Windows
 # Download Redis from https://github.com/microsoftarchive/redis/releases
@@ -76,7 +69,7 @@ redis-server
 # Update Redis config in server/config/redis.js
 ```
 
-### 5. Start Backend Server
+### 4. Start support service
 ```bash
 npm start
 # Or for development with auto-reload:
@@ -85,10 +78,9 @@ npm run dev
 
 Expected output:
 ```
-✓ MongoDB connected
 ✓ Redis connected
 ╔════════════════════════════════════╗
-║  F1 ANALYTICS HUB - BACKEND       ║
+║  F1 ANALYTICS HUB - SUPPORT SVC   ║
 ║  Status: Running                   ║
 ║  Port: 5000                        ║
 ║  Environment: development          ║
@@ -112,39 +104,25 @@ http://localhost:3000
 ```
 
 ### 3. Development Direction
-- Prefer `next-app/app/api/auth` and `next-app/app/api/watchlist` for new auth/watchlist work.
-- Use this Express backend when you need the legacy JWT endpoints or live-data support routes in `server/routes/live.js`.
+- **Auth and watchlists:** use Next.js only — `next-app/app/auth/signin` and `next-app/app/api/*`.
+- **This Express service:** background race-data polling, Redis cache, and email notifications only.
 
 ## API Endpoints
 
-### Authentication (legacy JWT backend)
-- **POST** `/api/auth/register` - Create new account
-- **POST** `/api/auth/login` - Login with email/password
-- **GET** `/api/auth/profile` - Get user profile (requires auth)
-- **PUT** `/api/auth/preferences` - Update user preferences
+### Express backend (support services)
+- **GET** `/api/health` — server health check
 
-### Watchlist (legacy JWT backend)
-- **GET** `/api/watchlist` - Get all watchlists
-- **POST** `/api/watchlist` - Create new watchlist
-- **PUT** `/api/watchlist/:id` - Update watchlist
-- **POST** `/api/watchlist/:id/add` - Add item (driver/team/race)
-- **POST** `/api/watchlist/:id/remove` - Remove item
-- **DELETE** `/api/watchlist/:id` - Delete watchlist
-
-### Live Data
-- **GET** `/api/live/race` - Get current/upcoming race
-- **GET** `/api/live/races` - Get all races for season
-- **GET** `/api/live/race/:raceRound/results` - Get race results
-
-All endpoints (except auth/register & auth/login) require `Authorization: Bearer <token>` header.
-For the primary user-facing watchlist flow in the current app, use the authenticated Next.js routes instead.
+### User-facing APIs (Next.js — port 3000)
+- **NextAuth:** `/api/auth/*` — sign-in, sign-up (credentials + OAuth)
+- **Watchlist:** `/api/watchlist` — CRUD (session cookie auth)
+- **Live / telemetry:** `/api/live/race`, `/api/telemetry`, etc.
 
 ## Features Implemented
 
 ### Phase 3 - Live & Auth (Current)
-✅ User authentication (register/login with JWT)
-✅ Personal profile management
-✅ Watchlist creation and management (drivers, teams, races)
+✅ User authentication via NextAuth (Next.js) — credentials + OAuth
+✅ Personal profile and preferences (Prisma)
+✅ Watchlist creation and management (Next.js API routes)
 ✅ Email notifications for race alerts
 ✅ Redis-based race data polling (every 5 minutes)
 ✅ Live race dashboard showing upcoming/active races
@@ -165,11 +143,7 @@ For the primary user-facing watchlist flow in the current app, use the authentic
 
 ## Testing Credentials
 
-Use these to test login:
-- Email: test@example.com
-- Password: testpass123
-
-(Note: Create an account first via register)
+Create an account at `http://localhost:3000/auth/signin` (Create Account tab), or sign in with GitHub/Google if configured.
 
 ## Troubleshooting
 

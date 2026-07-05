@@ -101,8 +101,8 @@ model UserPreferences {
 model Watchlist {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @db.ObjectId                // FK → User._id
-  name        String
-  description String?
+  name        String   // max 100 chars — enforced in /api/watchlist validators
+  description String?  // max 500 chars — enforced in /api/watchlist validators
   // Native MongoDB arrays — no more JSON.stringify/parse needed
   drivers     String[] @default([])
   teams       String[] @default([])

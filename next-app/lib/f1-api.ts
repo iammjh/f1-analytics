@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const OPENF1_API = process.env.OPENF1_API || 'https://api.openf1.org/v1';
-const ERGAST_API = process.env.ERGAST_API || 'https://ergast.com/api/f1';
+const ERGAST_API = process.env.ERGAST_API || 'https://api.jolpi.ca/ergast/f1';
 
 type OpenF1Primitive = string | number | boolean | undefined | null;
 type OpenF1Params = Record<string, OpenF1Primitive>;

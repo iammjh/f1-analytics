@@ -1,7 +1,7 @@
 {
   "name": "f1-analytics-backend",
   "version": "1.0.0",
-  "description": "F1 Analytics Hub Backend - Live Data & Auth",
+  "description": "F1 Analytics Hub — background polling & Redis cache",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -10,13 +10,9 @@
   },
   "dependencies": {
     "axios": "^1.4.0",
-    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "express-rate-limit": "^8.5.2",
-    "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.0.0",
     "nodemailer": "^8.0.10",
     "redis": "^4.6.0"
   },

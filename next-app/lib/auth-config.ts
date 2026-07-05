@@ -3,8 +3,15 @@ import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
+import { ensureUserOnboarding } from '@/lib/user-onboarding';
 import bcrypt from 'bcryptjs';
 import type { NextAuthOptions } from 'next-auth';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function normalizeEmail(email: string): string {
+  return email.toLowerCase().trim();
+}
 
 // ─── Notes on MongoDB + NextAuth ──────────────────────────────────────────────
 //
@@ -50,21 +57,33 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password are required');
         }
 
+        const email = normalizeEmail(credentials.email);
+        if (!EMAIL_REGEX.test(email)) {
+          throw new Error('Invalid email format');
+        }
+        if (credentials.password.length > 128) {
+          throw new Error('Password must be 128 characters or fewer');
+        }
+
         // ── Sign-up flow ───────────────────────────────────────────────────
         if (credentials.isSignUp === 'true') {
-          const existing = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          });
+          if (credentials.password.length < 6) {
+            throw new Error('Password must be at least 6 characters');
+          }
+
+          const existing = await prisma.user.findUnique({ where: { email } });
           if (existing) throw new Error('Email already registered');
 
           const hash = await bcrypt.hash(credentials.password, 12);
           const user = await prisma.user.create({
             data: {
-              email:    credentials.email,
-              name:     credentials.email.split('@')[0],
+              email,
+              name: email.split('@')[0],
               password: hash,
             },
           });
+
+          await ensureUserOnboarding(user.id);
 
           return {
             id:    user.id,
@@ -75,9 +94,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // ── Sign-in flow ───────────────────────────────────────────────────
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
+        const user = await prisma.user.findUnique({ where: { email } });
 
         if (!user?.password) {
           // User exists but signed up via OAuth — no password set
@@ -99,6 +116,14 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+
+  // ── Events ─────────────────────────────────────────────────────────────────
+  events: {
+    // OAuth sign-ups are created by PrismaAdapter — seed defaults here.
+    async createUser({ user }) {
+      if (user.id) await ensureUserOnboarding(user.id);
+    },
+  },
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   callbacks: {

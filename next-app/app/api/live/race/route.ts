@@ -2,20 +2,18 @@ import { NextResponse } from 'next/server';
 import { f1Api } from '@/lib/f1-api';
 import { fetchSeasonRaces, findNextUpcomingRace } from '@/lib/jolpica-client';
 import { normalizeLiveRacePayload, selectPreferredSession } from '@/lib/live-telemetry';
+import { parseSeasonParam } from '@/lib/query-params';
 
 export const dynamic = 'force-dynamic';
-
-function parseSeason(rawSeason: string | null) {
-  const fallbackSeason = new Date().getFullYear();
-  if (!rawSeason) return fallbackSeason;
-  const parsedSeason = Number(rawSeason);
-  return Number.isFinite(parsedSeason) && parsedSeason > 0 ? parsedSeason : fallbackSeason;
-}
 
 export async function GET(request: Request) {
   try {
     const searchParams = new URL(request.url).searchParams;
-    const season = parseSeason(searchParams.get('season'));
+    const seasonResult = parseSeasonParam(searchParams.get('season'));
+    if (!seasonResult.ok) {
+      return NextResponse.json({ error: seasonResult.error }, { status: 400 });
+    }
+    const season = seasonResult.value;
 
     const [sessionsResult, racesResult] = await Promise.allSettled([
       f1Api.sessions({ year: season }),

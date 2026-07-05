@@ -6,6 +6,7 @@ import {
   selectPreferredSession,
   selectTelemetryDriver,
 } from '@/lib/live-telemetry';
+import { parseSeasonParam } from '@/lib/query-params';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,19 +16,16 @@ interface CacheEntry {
 }
 const telemetryCache = new Map<string, CacheEntry>();
 
-function parseSeason(rawSeason: string | null) {
-  const fallbackSeason = new Date().getFullYear();
-  if (!rawSeason) return fallbackSeason;
-  const parsedSeason = Number(rawSeason);
-  return Number.isFinite(parsedSeason) && parsedSeason > 0 ? parsedSeason : fallbackSeason;
-}
-
 export async function GET(request: Request) {
   try {
     const searchParams = new URL(request.url).searchParams;
+    const seasonResult = parseSeasonParam(searchParams.get('season'));
+    if (!seasonResult.ok) {
+      return NextResponse.json({ error: seasonResult.error }, { status: 400 });
+    }
+    const season = seasonResult.value;
     const requestedDriver = searchParams.get('driver');
     const requestedSessionKey = searchParams.get('sessionKey');
-    const season = parseSeason(searchParams.get('season'));
 
     let session: any = null;
     let rawDrivers: any[] = [];

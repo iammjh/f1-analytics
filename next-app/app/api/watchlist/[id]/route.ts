@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { prisma } from '@/lib/prisma';
+import {
+  validateWatchlistDescription,
+  validateWatchlistName,
+} from '@/lib/watchlist-validation';
 
 type Params = { params: { id: string } };
 
@@ -28,6 +32,24 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
     const body = await req.json();
 
+    let validatedName: string | undefined;
+    if (body.name !== undefined) {
+      const nameResult = validateWatchlistName(body.name);
+      if (!nameResult.ok) {
+        return NextResponse.json({ error: nameResult.error }, { status: 400 });
+      }
+      validatedName = nameResult.value;
+    }
+
+    let validatedDescription: string | undefined;
+    if (body.description !== undefined) {
+      const descriptionResult = validateWatchlistDescription(body.description);
+      if (!descriptionResult.ok) {
+        return NextResponse.json({ error: descriptionResult.error }, { status: 400 });
+      }
+      validatedDescription = descriptionResult.value;
+    }
+
     // Same defensive helper as the POST route
     const toArray = (v: unknown): string[] => {
       if (Array.isArray(v)) return v.map(String);
@@ -40,8 +62,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const updated = await prisma.watchlist.update({
       where: { id: params.id },
       data: {
-        ...(body.name        !== undefined && { name:        String(body.name) }),
-        ...(body.description !== undefined && { description: String(body.description) }),
+        ...(validatedName !== undefined && { name: validatedName }),
+        ...(body.description !== undefined && { description: validatedDescription }),
         ...(body.drivers     !== undefined && { drivers:     toArray(body.drivers) }),
         ...(body.teams       !== undefined && { teams:       toArray(body.teams) }),
         ...(body.races       !== undefined && { races:       toArray(body.races) }),

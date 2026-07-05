@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  instrumentationHook: true,
 
   async redirects() {
     return [

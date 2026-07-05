@@ -92,9 +92,14 @@ export default function SignInPage() {
           {/* Email form */}
           <form onSubmit={handleEmail} className="space-y-4 mb-6">
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Email address</label>
+              <label htmlFor="signin-email" className="block text-sm font-medium text-white/60 mb-1.5">
+                Email address
+              </label>
               <input
+                id="signin-email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
@@ -103,9 +108,14 @@ export default function SignInPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-1.5">Password</label>
+              <label htmlFor="signin-password" className="block text-sm font-medium text-white/60 mb-1.5">
+                Password
+              </label>
               <input
+                id="signin-password"
+                name="password"
                 type="password"
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
