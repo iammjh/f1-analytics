@@ -3174,6 +3174,47 @@ const CIRCUIT_DISPLAY_NAMES = {
   yas_marina: "Yas Marina Circuit",
 };
 
+const OFFICIAL_TRACK_NAMES = {
+  bahrain:       "Bahrain International Circuit",
+  jeddah:        "Jeddah Corniche Circuit",
+  melbourne:     "Albert Park Circuit",
+  albert_park:   "Albert Park Circuit",
+  suzuka:        "Suzuka International Racing Course",
+  shanghai:      "Shanghai International Circuit",
+  miami:         "Miami International Autodrome",
+  imola:         "Autodromo Enzo e Dino Ferrari",
+  monaco:        "Circuit de Monaco",
+  montreal:      "Circuit Gilles Villeneuve",
+  villeneuve:    "Circuit Gilles Villeneuve",
+  barcelona:     "Circuit de Barcelona-Catalunya",
+  catalunya:     "Circuit de Barcelona-Catalunya",
+  spielberg:     "Red Bull Ring",
+  red_bull_ring: "Red Bull Ring",
+  silverstone:   "Silverstone Circuit",
+  hungaroring:   "Hungaroring",
+  spa:           "Circuit de Spa-Francorchamps",
+  zandvoort:     "Circuit Zandvoort",
+  monza:         "Autodromo Nazionale Monza",
+  madring:       "Circuit de Madrid",
+  baku:          "Baku City Circuit",
+  singapore:     "Marina Bay Street Circuit",
+  marina_bay:    "Marina Bay Street Circuit",
+  austin:        "Circuit of the Americas",
+  americas:      "Circuit of the Americas",
+  mexico_city:   "Autódromo Hermanos Rodríguez",
+  rodriguez:     "Autódromo Hermanos Rodríguez",
+  interlagos:    "Autódromo José Carlos Pace",
+  las_vegas:     "Las Vegas Strip Circuit",
+  vegas:         "Las Vegas Strip Circuit",
+  lusail:        "Lusail International Circuit",
+  losail:        "Lusail International Circuit",
+  yas_marina:    "Yas Marina Circuit",
+};
+
+function getVisualizerCircuitName(c) {
+  return OFFICIAL_TRACK_NAMES[c?.trackType] || c?.circuit || "Unknown Circuit";
+}
+
 function getCircuitDisplayName(c) {
   return CIRCUIT_DISPLAY_NAMES[c?.circuitId] || c?.circuitName || "Unknown Circuit";
 }
@@ -3851,7 +3892,7 @@ function LapVisualizerPage({ season = "2026", isMobile = false }) {
             style={{ width: "100%", background: "#0c0c0c", border: "1px solid #1a1a1a", borderRadius: 6, padding: "8px 12px", color: "#fff", outline: "none", fontSize: 13 }}
           >
             {countries.map((c, i) => (
-              <option key={i} value={i}>{c.country} ({c.circuit.split(" ")[0]})</option>
+              <option key={i} value={i}>{getVisualizerCircuitName(c)} ({c.country})</option>
             ))}
           </select>
         </div>
@@ -3900,7 +3941,7 @@ function LapVisualizerPage({ season = "2026", isMobile = false }) {
         <div style={{ flex: 1, background: "#0b0b0b", border: "1px solid #1a1a1a", borderRadius: 12, padding: 18, display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <h2 style={{ fontSize: 18, fontWeight: 900, textTransform: "uppercase" }}>{selectedCountry.circuit}</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 900, textTransform: "uppercase" }}>{getVisualizerCircuitName(selectedCountry)}</h2>
               <p style={{ fontSize: 11, color: "#666" }}>{selectedCountry.country} • Interactive Snapping & Trail Visuals</p>
             </div>
             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
