@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { AuthProvider } from './providers';
 import { getGoogleSiteVerification } from '@/lib/google-site-verification';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const googleSiteVerification = getGoogleSiteVerification();
 
@@ -85,8 +86,10 @@ export default function RootLayout({
       <body className="bg-f1-black text-white">
         <AuthProvider>
           {children}
+          <ScrollToTop />
         </AuthProvider>
       </body>
     </html>
   );
 }
+
