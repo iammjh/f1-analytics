@@ -60,7 +60,7 @@ export default function SignInPage() {
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <img src="/F1-Logo.png" alt="F1" style={{width:90,margin:"0 auto 16px",objectFit:"contain"}}/>
-            <h1 className="text-2xl font-black text-white">F1 Analytics Hub</h1>
+            <h1 className="text-2xl font-black text-white font-f1-display">Pitwall Analytics Hub</h1>
             <p className="text-white/40 text-sm mt-1">
               {mode === 'signin' ? 'Welcome back' : 'Create your account'}
             </p>

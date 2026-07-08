@@ -157,7 +157,7 @@ export default function Home() {
       <div className="flex items-center justify-center min-h-screen bg-f1-black">
         <div className="text-center space-y-4">
           <img src="/F1-Logo.png" alt="F1" className="w-24 mx-auto" style={{objectFit:"contain"}}/>
-          <h1 className="text-3xl font-black text-white">F1 Analytics Hub</h1>
+          <h1 className="text-3xl font-black text-white font-f1-display">Pitwall Analytics Hub</h1>
           <div className="flex gap-1 justify-center">
             {[0,1,2].map(i => (
               <div key={i} className="w-2 h-2 bg-f1-red rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
@@ -176,8 +176,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             <img src="/F1-Logo.png" alt="F1" className="w-10 sm:w-14" style={{objectFit:"contain"}}/>
-            <span className="text-white font-black text-base sm:text-xl tracking-tight">F1 Analytics</span>
-            <span className="hidden sm:block text-xs text-f1-red font-bold bg-f1-red/10 px-2 py-0.5 rounded-full border border-f1-red/30">
+            <span className="text-white font-black text-base sm:text-xl tracking-tight font-f1-display">Pitwall Analytics</span>
+            <span className="hidden sm:block text-xs text-f1-red font-bold bg-f1-red/10 px-2 py-0.5 rounded-full border border-f1-red/30 font-f1-display">
               {activeSeason}
             </span>
           </div>
@@ -252,12 +252,12 @@ export default function Home() {
 
         {/* Hero content */}
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center py-16 sm:py-24">
-          <div className="inline-flex items-center gap-2 bg-f1-red/15 border border-f1-red/30 rounded-full px-3 sm:px-4 py-1.5 mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-2 bg-f1-red/15 border border-f1-red/30 rounded-full px-3 sm:px-4 py-1.5 mb-6 sm:mb-8 font-f1-display">
             <span className="w-2 h-2 rounded-full bg-f1-red animate-pulse" />
             <span className="text-f1-red text-xs sm:text-sm font-bold tracking-wider uppercase">Live {activeSeason} Season</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-5 sm:mb-6 leading-none tracking-tighter">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-5 sm:mb-6 leading-none tracking-tighter" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
             F1 Data<br />
             <span className="text-f1-red">Reimagined</span>
           </h1>
@@ -311,7 +311,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-8">
 
         {/* Stats bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 -mt-6 sm:-mt-8 mb-14 sm:mb-20 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 -mt-6 sm:-mt-8 mb-14 sm:mb-20 relative z-10 font-f1-display">
           {STATS.map(s => (
             <div key={s.label} className="bg-f1-dark border border-f1-grid rounded-xl p-4 md:p-6 text-center backdrop-blur">
               <p className="text-3xl md:text-5xl font-black mb-1" style={{ color: s.accent }}>{s.value}</p>
@@ -324,7 +324,7 @@ export default function Home() {
         <section className="mb-16 sm:mb-20">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
             <div>
-              <h2 className="text-2xl font-black text-white">{activeSeason} Driver Standings</h2>
+              <h2 className="text-2xl font-black text-white font-f1-display">{activeSeason} Driver Standings</h2>
               <p className="text-white/40 text-sm mt-1">Top 5 · Championship points</p>
             </div>
             <Link href="/auth/signin" className="text-f1-red text-sm font-bold hover:underline">
@@ -343,7 +343,7 @@ export default function Home() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b-2 border-f1-red">
-                  <tr>
+                  <tr className="font-f1-display">
                     <th className="text-left p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider w-12">Pos</th>
                     <th className="text-left p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider">Driver</th>
                     <th className="text-left p-3 sm:p-4 text-f1-red font-bold text-xs uppercase tracking-wider hidden sm:table-cell">Team</th>
@@ -376,7 +376,7 @@ export default function Home() {
                         return (
                           <tr key={d.Driver.driverId} className="border-b border-f1-grid hover:bg-white/[0.02] transition">
                             <td className="p-3 sm:p-4">
-                              <span className={`w-7 h-7 inline-flex items-center justify-center rounded-full text-xs font-black ${medal ? '' : 'text-white/40'}`}
+                              <span className={`w-7 h-7 inline-flex items-center justify-center rounded-full text-xs font-black font-f1-display ${medal ? '' : 'text-white/40'}`}
                                 style={medal ? { background: d.position==='1'?'#FFD700':d.position==='2'?'#C0C0C0':'#CD7F32', color:'#000' } : {}}>
                                 {d.position}
                               </span>
@@ -393,8 +393,8 @@ export default function Home() {
                             <td className="p-3 sm:p-4 hidden sm:table-cell" style={{ color: tc }}>
                               <span className="font-medium text-sm">{d.Constructors?.[0]?.name ?? '—'}</span>
                             </td>
-                            <td className="p-3 sm:p-4 text-center font-mono text-white/60 hidden md:table-cell">{d.wins}</td>
-                            <td className="p-3 sm:p-4 text-right font-black text-f1-red font-mono">{d.points}</td>
+                            <td className="p-3 sm:p-4 text-center font-mono text-white/60 hidden md:table-cell font-f1-display">{d.wins}</td>
+                            <td className="p-3 sm:p-4 text-right font-black text-f1-red font-mono font-f1-display">{d.points}</td>
                           </tr>
                         );
                       })
@@ -409,7 +409,7 @@ export default function Home() {
         <section className="mb-16 sm:mb-20">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
             <div>
-              <h2 className="text-2xl font-black text-white">
+              <h2 className="text-2xl font-black text-white font-f1-display">
                 {showingRecentRaces ? 'Recent Races' : 'Upcoming Races'}
               </h2>
               <p className="text-white/40 text-sm mt-1">
@@ -430,14 +430,14 @@ export default function Home() {
                   return (
                     <div key={race.round} className="bg-f1-dark border border-f1-grid hover:border-f1-red rounded-xl p-6 transition group">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-f1-red font-mono text-sm font-bold bg-f1-red/10 px-2 py-0.5 rounded">
+                        <span className="text-f1-red font-mono text-sm font-bold bg-f1-red/10 px-2 py-0.5 rounded font-f1-display">
                           R{race.round}
                         </span>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isUpcoming ? 'bg-f1-accent/15 text-f1-accent' : 'bg-white/10 text-white/40'}`}>
                           {isUpcoming ? 'Upcoming' : 'Completed'}
                         </span>
                       </div>
-                      <h3 className="text-lg font-black text-white mb-2 group-hover:text-f1-red transition leading-tight">
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-f1-red transition leading-tight">
                         {race.raceName}
                       </h3>
                       <p className="text-white/50 text-sm mb-1 flex items-center gap-1.5">
@@ -467,7 +467,7 @@ export default function Home() {
         {/* Features */}
         <section id="features" className="mb-16 sm:mb-20 scroll-mt-20">
           <div className="text-center mb-10 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-black text-white mb-3">Everything You Need</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-3 font-f1-display">Everything You Need</h2>
             <p className="text-white/40 max-w-xl mx-auto">A complete analytics suite built for F1 fans and data enthusiasts</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -478,7 +478,7 @@ export default function Home() {
                   <div className="w-12 h-12 bg-f1-grid group-hover:bg-f1-red/15 rounded-xl flex items-center justify-center mb-4 transition text-f1-red">
                     <Icon className="w-6 h-6 stroke-[1.75]" />
                   </div>
-                  <h3 className="text-lg font-black text-white mb-2 group-hover:text-f1-red transition">{f.title}</h3>
+                  <h3 className="text-lg font-bold text-white mb-2 group-hover:text-f1-red transition">{f.title}</h3>
                   <p className="text-white/45 text-sm leading-relaxed">{f.desc}</p>
                 </div>
               );
@@ -496,13 +496,13 @@ export default function Home() {
 
               <div className="relative z-10">
                 <img src="/F1-Logo.png" alt="F1" style={{width:80,margin:"0 auto 12px",objectFit:"contain"}}/>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4">Ready to Dive In?</h2>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">Ready to Dive In?</h2>
                 <p className="text-white/60 mb-8 text-base sm:text-lg max-w-md mx-auto">
                   Access advanced analytics, live telemetry, and real-time race data.
                 </p>
                 <Link
                   href="/auth/signin"
-                  className="inline-block w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-f1-red hover:bg-red-700 text-white font-black rounded-xl transition-all hover:scale-105 text-base sm:text-lg shadow-xl shadow-f1-red/30"
+                  className="inline-block w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-f1-red hover:bg-red-700 text-white font-bold rounded-xl transition-all hover:scale-105 text-base sm:text-lg shadow-xl shadow-f1-red/30"
                 >
                   Get Started — It&apos;s Free →
                 </Link>
@@ -517,7 +517,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="flex items-center gap-3">
             <img src="/F1-Logo.png" alt="F1" style={{width:48,objectFit:"contain"}}/>
-            <span className="text-white/60 text-sm font-bold">F1 Analytics Hub</span>
+            <span className="text-white/60 text-sm font-bold font-f1-display">Pitwall Analytics Hub</span>
           </div>
           <p className="text-white/30 text-sm">
             © {new Date().getFullYear()} · Data via Jolpica / Ergast API · OpenF1

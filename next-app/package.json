@@ -1,7 +1,7 @@
 {
   "name": "f1-analytics-next",
   "version": "4.0.0",
-  "description": "F1 Analytics Hub - Next.js 14 Full Stack",
+  "description": "Pitwall Analytics Hub - Next.js 14 Full Stack",
   "scripts": {
     "dev": "node scripts/next-with-dist.js dev",
     "build": "prisma generate && node scripts/next-with-dist.js build",

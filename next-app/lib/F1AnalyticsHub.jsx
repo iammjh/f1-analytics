@@ -25,36 +25,42 @@ import {
 import { formatGrandPrixName as gpName, getTeamColor as col } from "./f1-display";
 
 // ── Constants ─────────────────────────────────────────────────────
-const SEASONS = ["2026","2025","2024","2023","2022","2021","2020","2019","2018","2017","2016","2015"];
-const CHART_PAL   = ["#3671C6","#E8002D","#27F4D2","#FF8000","#229971","#FF87BC","#FFD700","#a855f7","#64C4FF","#f97316"];
-const STINT_PAL   = ["#E8002D","#FFD700","#d4d4d4","#27F4D2","#FF8000","#a855f7"];
-const NAT_FLAGS   = {
-  British:"🇬🇧", Dutch:"🇳🇱", Monegasque:"🇲🇨", Spanish:"🇪🇸", Mexican:"🇲🇽",
-  Australian:"🇦🇺", German:"🇩🇪", French:"🇫🇷", Finnish:"🇫🇮", Canadian:"🇨🇦",
-  Japanese:"🇯🇵", Danish:"🇩🇰", Thai:"🇹🇭", Chinese:"🇨🇳", American:"🇺🇸",
-  Italian:"🇮🇹", Austrian:"🇦🇹", Brazilian:"🇧🇷", Argentine:"🇦🇷", Swiss:"🇨🇭",
-  "New Zealander":"🇳🇿", Polish:"🇵🇱",
+const SEASONS = ["2026", "2025", "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", "2016", "2015"];
+const CHART_PAL = ["#3671C6", "#E8002D", "#27F4D2", "#FF8000", "#229971", "#FF87BC", "#FFD700", "#a855f7", "#64C4FF", "#f97316"];
+const STINT_PAL = ["#E8002D", "#FFD700", "#d4d4d4", "#27F4D2", "#FF8000", "#a855f7"];
+const NAT_FLAGS = {
+  British: "🇬🇧", Dutch: "🇳🇱", Monegasque: "🇲🇨", Spanish: "🇪🇸", Mexican: "🇲🇽",
+  Australian: "🇦🇺", German: "🇩🇪", French: "🇫🇷", Finnish: "🇫🇮", Canadian: "🇨🇦",
+  Japanese: "🇯🇵", Danish: "🇩🇰", Thai: "🇹🇭", Chinese: "🇨🇳", American: "🇺🇸",
+  Italian: "🇮🇹", Austrian: "🇦🇹", Brazilian: "🇧🇷", Argentine: "🇦🇷", Swiss: "🇨🇭",
+  "New Zealander": "🇳🇿", Polish: "🇵🇱",
 };
 const NAV_GROUPS = [
-  { label:"Core", items:[
-    { id:"standings",    label:"Standings",      icon:"🏆" },
-    { id:"drivers",      label:"Drivers",        icon:"👤" },
-    { id:"constructors", label:"Constructors",   icon:"🏎️" },
-    { id:"races",        label:"Race Results",   icon:"📋" },
-    { id:"points",       label:"Points Progression",   icon:"📈" },
-  ]},
-  { label:"Analytics", items:[
-    { id:"records",  label:"Season Records", icon:"🥇" },
-    { id:"strategy", label:"Strategy",       icon:"🎯" },
-    { id:"h2h",      label:"Head to Head",   icon:"⚔️"  },
-    { id:"circuits", label:"Circuits",       icon:"🗺️"  },
-    { id:"telemetry",  label:"Telemetry",      icon:"📊" },
-    { id:"visualizer", label:"Lap Visualizer", icon:"👁️" },
-  ]},
-  { label:"Live", items:[
-    { id:"live",      label:"Match",      icon:"🔴" },
-    { id:"watchlist", label:"Watchlist", icon:"⭐" },
-  ]},
+  {
+    label: "Core", items: [
+      { id: "standings", label: "Standings", icon: "🏆" },
+      { id: "drivers", label: "Drivers", icon: "👤" },
+      { id: "constructors", label: "Constructors", icon: "🏎️" },
+      { id: "races", label: "Race Results", icon: "📋" },
+      { id: "points", label: "Points Progression", icon: "📈" },
+    ]
+  },
+  {
+    label: "Analytics", items: [
+      { id: "records", label: "Season Records", icon: "🥇" },
+      { id: "strategy", label: "Strategy", icon: "🎯" },
+      { id: "h2h", label: "Head to Head", icon: "⚔️" },
+      { id: "circuits", label: "Circuits", icon: "🗺️" },
+      { id: "telemetry", label: "Telemetry", icon: "📊" },
+      { id: "visualizer", label: "Lap Visualizer", icon: "👁️" },
+    ]
+  },
+  {
+    label: "Live", items: [
+      { id: "live", label: "Match", icon: "🔴" },
+      { id: "watchlist", label: "Watchlist", icon: "⭐" },
+    ]
+  },
 ];
 const ALL_NAV = NAV_GROUPS.flatMap(g => g.items);
 const DEFAULT_DASHBOARD_PAGE = "standings";
@@ -75,41 +81,41 @@ async function apiFetch(url, ttl = 300000) {
 
 // ── Utils ─────────────────────────────────────────────────────────
 const flagOf = (nat) => NAT_FLAGS[nat] || "🌍";
-const mono  = { fontFamily:"monospace" };
-const pad2  = (n)  => String(n).padStart(2,"0");
+const mono = { fontFamily: "monospace" };
+const pad2 = (n) => String(n).padStart(2, "0");
 
 function timeToSecs(t) {
   if (!t) return null;
   const parts = t.split(":");
-  if (parts.length === 2) return parseFloat(parts[0])*60 + parseFloat(parts[1]);
+  if (parts.length === 2) return parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
   return parseFloat(t);
 }
 
 function formatCountdown(dateStr, timeStr) {
-  const target = new Date(`${dateStr}T${timeStr||"13:00:00"}Z`);
-  const diff   = target - Date.now();
+  const target = new Date(`${dateStr}T${timeStr || "13:00:00"}Z`);
+  const diff = target - Date.now();
   if (diff <= 0) return null;
-  return { d:Math.floor(diff/86400000), h:Math.floor((diff%86400000)/3600000), m:Math.floor((diff%3600000)/60000), s:Math.floor((diff%60000)/1000) };
+  return { d: Math.floor(diff / 86400000), h: Math.floor((diff % 86400000) / 3600000), m: Math.floor((diff % 3600000) / 60000), s: Math.floor((diff % 60000) / 1000) };
 }
 
 function buildStints(stops, totalLaps) {
-  const sorted = [...stops].sort((a,b) => Number(a.lap)-Number(b.lap));
+  const sorted = [...stops].sort((a, b) => Number(a.lap) - Number(b.lap));
   const out = []; let prev = 1;
-  sorted.forEach((stop,i) => { const lap=Number(stop.lap); out.push({start:prev,end:lap,i,dur:stop.duration}); prev=lap+1; });
-  out.push({start:prev, end:Number(totalLaps)||65, i:sorted.length});
+  sorted.forEach((stop, i) => { const lap = Number(stop.lap); out.push({ start: prev, end: lap, i, dur: stop.duration }); prev = lap + 1; });
+  out.push({ start: prev, end: Number(totalLaps) || 65, i: sorted.length });
   return out;
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────
 function useWindowWidth() {
   // Keep initial render deterministic across server and client to avoid hydration mismatch.
-  const [w,setW] = useState(1200);
+  const [w, setW] = useState(1200);
   useEffect(() => {
     const fn = () => setW(window.innerWidth);
     fn();
-    window.addEventListener("resize",fn);
-    return () => window.removeEventListener("resize",fn);
-  },[]);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
   return w;
 }
 
@@ -195,15 +201,15 @@ function useShareableH2H() {
   const getParams = () => {
     try {
       const p = new URLSearchParams(window.location.search);
-      return { d1: p.get("d1")||"", d2: p.get("d2")||"" };
-    } catch { return {d1:"",d2:""}; }
+      return { d1: p.get("d1") || "", d2: p.get("d2") || "" };
+    } catch { return { d1: "", d2: "" }; }
   };
-  const setParams = (d1,d2) => {
+  const setParams = (d1, d2) => {
     try {
       const url = new URL(window.location);
-      url.searchParams.set("d1",d1); url.searchParams.set("d2",d2);
-      window.history.replaceState({},"",url);
-    } catch {}
+      url.searchParams.set("d1", d1); url.searchParams.set("d2", d2);
+      window.history.replaceState({}, "", url);
+    } catch { }
   };
   return { getParams, setParams };
 }
@@ -228,19 +234,19 @@ function syncDashboardTabToUrl(tab) {
       url.searchParams.set(DASHBOARD_TAB_PARAM, tab);
     }
     window.history.replaceState({}, "", url);
-  } catch {}
+  } catch { }
 }
 
 // ── Shared UI Components ──────────────────────────────────────────
 // ── F1 Official Logo PNG ──────────────────────────────────────────
-function F1Logo({ width=56, height="auto" }) {
+function F1Logo({ width = 56, height = "auto" }) {
   return (
     <img
       src="/F1-Logo.png"
       alt="Formula 1"
       width={width}
       height={height}
-      style={{ display:"block", objectFit:"contain", flexShrink:0 }}
+      style={{ display: "block", objectFit: "contain", flexShrink: 0 }}
     />
   );
 }
@@ -558,7 +564,7 @@ function getFormula1HeadshotVariant(url, variant = "6col") {
 }
 
 // ── Driver image with official/Wikipedia fallback ─────────────────
-function DriverPhoto({ firstName="", lastName="", wikiUrl, headshotUrl=null, headshotVariant="6col", teamColor="#E10600", style={} }) {
+function DriverPhoto({ firstName = "", lastName = "", wikiUrl, headshotUrl = null, headshotVariant = "6col", teamColor = "#E10600", style = {} }) {
   const primaryTitle = extractWikiTitleFromUrl(wikiUrl);
   const compactFirstName = firstName.split(" ")[0] || firstName;
   const { img: wikiImgUrl } = useWikiImage({
@@ -583,7 +589,7 @@ function DriverPhoto({ firstName="", lastName="", wikiUrl, headshotUrl=null, hea
       <img
         src={imgUrl}
         alt={`${firstName} ${lastName}`.trim()}
-        style={{ objectFit:"cover", objectPosition:"center top", ...style }}
+        style={{ objectFit: "cover", objectPosition: "center top", ...style }}
         onError={() => setImgFailed(true)}
       />
     );
@@ -591,12 +597,12 @@ function DriverPhoto({ firstName="", lastName="", wikiUrl, headshotUrl=null, hea
 
   return (
     <div style={{
-      display:"flex", alignItems:"center", justifyContent:"center",
-      background:`linear-gradient(135deg, ${teamColor}22, ${teamColor}08)`,
-      border:`1px solid ${teamColor}33`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      background: `linear-gradient(135deg, ${teamColor}22, ${teamColor}08)`,
+      border: `1px solid ${teamColor}33`,
       ...style,
     }}>
-      <span style={{ fontSize: Math.min((style.height||120)/2.5, 48), fontWeight:800, color:teamColor, opacity:0.6, letterSpacing:-1 }}>
+      <span style={{ fontSize: Math.min((style.height || 120) / 2.5, 48), fontWeight: 800, color: teamColor, opacity: 0.6, letterSpacing: -1 }}>
         {initials}
       </span>
     </div>
@@ -613,7 +619,7 @@ function getConstructorBadgeText(teamName = "") {
   return tokens.slice(0, 2).map((token) => token[0]).join("").toUpperCase();
 }
 
-function ConstructorLogo({ constructorId, teamName="", meta=null, teamColor="#E10600", height=220, compact=false }) {
+function ConstructorLogo({ constructorId, teamName = "", meta = null, teamColor = "#E10600", height = 220, compact = false }) {
   const { img: imgUrl } = useWikiImage({
     title: meta?.visualTitle || null,
     titles: [
@@ -640,67 +646,67 @@ function ConstructorLogo({ constructorId, teamName="", meta=null, teamColor="#E1
 
   return (
     <div style={{
-      position:"relative",
-      width:"100%",
+      position: "relative",
+      width: "100%",
       height,
-      borderRadius:12,
-      overflow:"hidden",
-      border:`1px solid ${teamColor}33`,
-      background:`linear-gradient(135deg, ${teamColor}12, #060606 72%)`,
-      display:"flex",
-      alignItems:"center",
-      justifyContent:"center",
+      borderRadius: 12,
+      overflow: "hidden",
+      border: `1px solid ${teamColor}33`,
+      background: `linear-gradient(135deg, ${teamColor}12, #060606 72%)`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
     }}>
       {imgUrl && !imgFailed ? (
         <>
           <div style={{
-            position:"absolute",
+            position: "absolute",
             inset: compact ? 10 : 14,
             borderRadius: compact ? 12 : 16,
-            background:"linear-gradient(145deg, rgba(255,255,255,0.98), rgba(232,236,241,0.94) 58%, rgba(213,219,226,0.9) 100%)",
-            border:"1px solid rgba(255,255,255,0.45)",
-            boxShadow:"0 10px 26px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.55)",
-          }}/>
+            background: "linear-gradient(145deg, rgba(255,255,255,0.98), rgba(232,236,241,0.94) 58%, rgba(213,219,226,0.9) 100%)",
+            border: "1px solid rgba(255,255,255,0.45)",
+            boxShadow: "0 10px 26px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.55)",
+          }} />
           <img
             src={imgUrl}
             alt={`${teamName} logo`}
             style={{
-              position:"relative",
-              zIndex:1,
-              width:"100%",
-              height:"100%",
-              objectFit:"contain",
-              objectPosition:"center center",
+              position: "relative",
+              zIndex: 1,
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center center",
               padding: compact ? "16px 18px" : "24px 26px",
-              filter:"drop-shadow(0 0 6px rgba(255,255,255,0.18)) drop-shadow(0 10px 16px rgba(0,0,0,0.28))",
+              filter: "drop-shadow(0 0 6px rgba(255,255,255,0.18)) drop-shadow(0 10px 16px rgba(0,0,0,0.28))",
             }}
             onError={() => setImgFailed(true)}
           />
         </>
       ) : (
         <div style={{
-          width:"100%",
-          height:"100%",
-          display:"flex",
-          alignItems:"center",
-          justifyContent:"center",
-          background:`radial-gradient(circle at top left, ${teamColor}28, transparent 38%), linear-gradient(135deg, ${teamColor}12, #070707 74%)`,
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: `radial-gradient(circle at top left, ${teamColor}28, transparent 38%), linear-gradient(135deg, ${teamColor}12, #070707 74%)`,
         }}>
-          <div style={{ textAlign:"center", padding:"0 24px" }}>
-            <div style={{ fontSize: compact ? 34 : 52, fontWeight:900, color:teamColor, letterSpacing:-2, marginBottom:8 }}>{badge}</div>
-            <div style={{ fontSize: compact ? 12 : 14, fontWeight:700, color:"#f3f4f6" }}>{teamName}</div>
-            <div style={{ fontSize:11, color:"#8b8b8b", marginTop:6 }}>Logo not available</div>
+          <div style={{ textAlign: "center", padding: "0 24px" }}>
+            <div style={{ fontSize: compact ? 34 : 52, fontWeight: 900, color: teamColor, letterSpacing: -2, marginBottom: 8 }}>{badge}</div>
+            <div style={{ fontSize: compact ? 12 : 14, fontWeight: 700, color: "#f3f4f6" }}>{teamName}</div>
+            <div style={{ fontSize: 11, color: "#8b8b8b", marginTop: 6 }}>Logo not available</div>
           </div>
         </div>
       )}
 
       {!compact && (
         <div style={{
-          position:"absolute",
-          inset:0,
-          background:"linear-gradient(180deg, rgba(6,6,6,0.02) 0%, rgba(6,6,6,0.08) 100%)",
-          pointerEvents:"none",
-        }}/>
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(180deg, rgba(6,6,6,0.02) 0%, rgba(6,6,6,0.08) 100%)",
+          pointerEvents: "none",
+        }} />
       )}
     </div>
   );
@@ -708,37 +714,37 @@ function ConstructorLogo({ constructorId, teamName="", meta=null, teamColor="#E1
 
 // ── Circuit Wikipedia page titles ─────────────────────────────────
 const CIRCUIT_WIKI = {
-  bahrain:       "Bahrain_International_Circuit",
-  jeddah:        "Jeddah_Corniche_Circuit",
-  albert_park:   "Albert_Park_Circuit",
-  suzuka:        "Suzuka_International_Racing_Course",
-  shanghai:      "Shanghai_International_Circuit",
-  miami:         "Miami_International_Autodrome",
-  imola:         "Autodromo_Enzo_e_Dino_Ferrari",
-  monaco:        "Circuit_de_Monaco",
-  villeneuve:    "Circuit_Gilles_Villeneuve",
-  catalunya:     "Circuit_de_Barcelona-Catalunya",
-  silverstone:   "Silverstone_Circuit",
-  hungaroring:   "Hungaroring",
-  spa:           "Circuit_de_Spa-Francorchamps",
-  zandvoort:     "Circuit_Zandvoort",
-  monza:         "Autodromo_Nazionale_Monza",
-  baku:          "Baku_City_Circuit",
-  marina_bay:    "Marina_Bay_Street_Circuit",
-  americas:      "Circuit_of_the_Americas",
-  rodriguez:     "Autodromo_Hermanos_Rodriguez",
-  interlagos:    "Autodromo_Jose_Carlos_Pace",
-  las_vegas:     "Las_Vegas_Strip_Circuit",
-  vegas:         "Las_Vegas_Strip_Circuit",
-  madring:       "Madring",
-  yas_marina:    "Yas_Marina_Circuit",
-  losail:        "Losail_International_Circuit",
+  bahrain: "Bahrain_International_Circuit",
+  jeddah: "Jeddah_Corniche_Circuit",
+  albert_park: "Albert_Park_Circuit",
+  suzuka: "Suzuka_International_Racing_Course",
+  shanghai: "Shanghai_International_Circuit",
+  miami: "Miami_International_Autodrome",
+  imola: "Autodromo_Enzo_e_Dino_Ferrari",
+  monaco: "Circuit_de_Monaco",
+  villeneuve: "Circuit_Gilles_Villeneuve",
+  catalunya: "Circuit_de_Barcelona-Catalunya",
+  silverstone: "Silverstone_Circuit",
+  hungaroring: "Hungaroring",
+  spa: "Circuit_de_Spa-Francorchamps",
+  zandvoort: "Circuit_Zandvoort",
+  monza: "Autodromo_Nazionale_Monza",
+  baku: "Baku_City_Circuit",
+  marina_bay: "Marina_Bay_Street_Circuit",
+  americas: "Circuit_of_the_Americas",
+  rodriguez: "Autodromo_Hermanos_Rodriguez",
+  interlagos: "Autodromo_Jose_Carlos_Pace",
+  las_vegas: "Las_Vegas_Strip_Circuit",
+  vegas: "Las_Vegas_Strip_Circuit",
+  madring: "Madring",
+  yas_marina: "Yas_Marina_Circuit",
+  losail: "Losail_International_Circuit",
   red_bull_ring: "Red_Bull_Ring",
-  portimao:      "Algarve_International_Circuit",
-  mugello:       "Mugello_Circuit",
-  nurburgring:   "Nurburgring",
-  istanbul:      "Istanbul_Park",
-  sochi:         "Sochi_Autodrom",
+  portimao: "Algarve_International_Circuit",
+  mugello: "Mugello_Circuit",
+  nurburgring: "Nurburgring",
+  istanbul: "Istanbul_Park",
+  sochi: "Sochi_Autodrom",
 };
 
 const CIRCUIT_IMAGE_INDEX = {
@@ -801,14 +807,14 @@ const STATIC_CIRCUITS = [
 // ── Circuit image using local TRACK_PATHS data ──────────────────────
 function CircuitImage({ circuitId, height = 130 }) {
   const idMap = {
-    albert_park:   "melbourne",
-    villeneuve:    "montreal",
-    catalunya:     "barcelona",
-    marina_bay:    "singapore",
-    americas:      "austin",
-    rodriguez:     "mexico_city",
-    losail:        "lusail",
-    vegas:         "las_vegas",
+    albert_park: "melbourne",
+    villeneuve: "montreal",
+    catalunya: "barcelona",
+    marina_bay: "singapore",
+    americas: "austin",
+    rodriguez: "mexico_city",
+    losail: "lusail",
+    vegas: "las_vegas",
     red_bull_ring: "spielberg",
   };
   const pathKey = idMap[circuitId] || circuitId;
@@ -906,41 +912,41 @@ function buildSeasonCircuitList(races = []) {
 
 function Spinner() {
   return (
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 0",gap:16}}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 0", gap: 16 }}>
       {/* Starting Gantry */}
       <div style={{
-        background:"#080808",
-        border:"1px solid #222",
-        borderRadius:12,
-        padding:"14px 22px",
-        display:"flex",
-        gap:14,
-        boxShadow:"0 10px 30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)"
+        background: "#080808",
+        border: "1px solid #222",
+        borderRadius: 12,
+        padding: "14px 22px",
+        display: "flex",
+        gap: 14,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05)"
       }}>
         {[1, 2, 3, 4, 5].map(idx => (
           <div key={idx} style={{
-            display:"flex",
-            flexDirection:"column",
-            gap:4,
-            background:"#020202",
-            padding:"6px",
-            borderRadius:6,
-            border:"1px solid #151515"
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            background: "#020202",
+            padding: "6px",
+            borderRadius: 6,
+            border: "1px solid #151515"
           }}>
-            <div className={`f1-light-${idx}`} style={{width:14,height:14,borderRadius:"50%",background:"#1a0202"}}/>
-            <div className={`f1-light-${idx}`} style={{width:14,height:14,borderRadius:"50%",background:"#1a0202"}}/>
+            <div className={`f1-light-${idx}`} style={{ width: 14, height: 14, borderRadius: "50%", background: "#1a0202" }} />
+            <div className={`f1-light-${idx}`} style={{ width: 14, height: 14, borderRadius: "50%", background: "#1a0202" }} />
           </div>
         ))}
       </div>
 
       <span style={{
-        fontSize:10,
-        fontWeight:700,
-        color:"#888",
-        textTransform:"uppercase",
-        letterSpacing:2,
-        animation:"f1Pulse 1.5s infinite ease-in-out",
-        fontFamily:"monospace"
+        fontSize: 10,
+        fontWeight: 700,
+        color: "#888",
+        textTransform: "uppercase",
+        letterSpacing: 2,
+        animation: "f1Pulse 1.5s infinite ease-in-out",
+        fontFamily: "monospace"
       }}>
         Lights out and away we go...
       </span>
@@ -985,75 +991,75 @@ function Spinner() {
   );
 }
 
-function StatCard({label, value, sub, accent, onClick, delay=0}) {
+function StatCard({ label, value, sub, accent, onClick, delay = 0 }) {
   return (
     <div
       onClick={onClick}
       style={{
-        background:"linear-gradient(135deg, #0f0f0f 0%, #0a0a0a 100%)",
-        border:`1px solid ${accent ? accent+"33" : "#1e1e1e"}`,
-        borderRadius:10, padding:"14px 16px",
-        cursor:onClick?"pointer":"default",
-        position:"relative", overflow:"hidden",
-        animation:`cardIn 0.3s ease-out ${delay}ms both`,
-        transition:"transform 0.18s, box-shadow 0.18s",
+        background: "linear-gradient(135deg, #0f0f0f 0%, #0a0a0a 100%)",
+        border: `1px solid ${accent ? accent + "33" : "#1e1e1e"}`,
+        borderRadius: 10, padding: "14px 16px",
+        cursor: onClick ? "pointer" : "default",
+        position: "relative", overflow: "hidden",
+        animation: `cardIn 0.3s ease-out ${delay}ms both`,
+        transition: "transform 0.18s, box-shadow 0.18s",
       }}
-      onMouseEnter={e=>{ if(onClick){ e.currentTarget.style.transform="translateY(-2px)"; e.currentTarget.style.boxShadow=`0 6px 20px ${accent||"#E10600"}22`; }}}
-      onMouseLeave={e=>{ if(onClick){ e.currentTarget.style.transform="none"; e.currentTarget.style.boxShadow="none"; }}}
+      onMouseEnter={e => { if (onClick) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 6px 20px ${accent || "#E10600"}22`; } }}
+      onMouseLeave={e => { if (onClick) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; } }}
     >
       {/* Top accent line */}
-      {accent && <div style={{ position:"absolute", top:0, left:0, right:0, height:2, background:`linear-gradient(90deg, ${accent}, ${accent}44, transparent)`, borderRadius:"10px 10px 0 0" }}/>}
-      <div style={{fontSize:10, color:"#444", textTransform:"uppercase", letterSpacing:1.5, marginBottom:8, fontWeight:600}}>{label}</div>
-      <div style={{fontSize:22, fontWeight:800, color:accent||"#fff", fontFamily:"monospace", lineHeight:1}}>{value ?? "—"}</div>
-      {sub && <div style={{fontSize:11, color:"#555", marginTop:6}}>{sub}</div>}
+      {accent && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${accent}, ${accent}44, transparent)`, borderRadius: "10px 10px 0 0" }} />}
+      <div style={{ fontSize: 10, color: "#444", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8, fontWeight: 600, fontFamily: "'Orbitron', sans-serif" }}>{label}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, color: accent || "#fff", fontFamily: "'Orbitron', monospace", lineHeight: 1 }}>{value ?? "—"}</div>
+      {sub && <div style={{ fontSize: 11, color: "#555", marginTop: 6 }}>{sub}</div>}
     </div>
   );
 }
 
-function PosBadge({pos}) {
-  const m={"1":"#FFD700","2":"#C0C0C0","3":"#CD7F32"};
-  const bg=m[String(pos)]||"transparent", c=m[String(pos)]?"#000":"#666";
-  return <span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:26,height:26,borderRadius:"50%",fontSize:12,fontWeight:700,background:bg,color:c,border:m[String(pos)]?"none":"1px solid #2a2a2a",...mono}}>{pos}</span>;
+function PosBadge({ pos }) {
+  const m = { "1": "#FFD700", "2": "#C0C0C0", "3": "#CD7F32" };
+  const bg = m[String(pos)] || "transparent", c = m[String(pos)] ? "#000" : "#666";
+  return <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 26, height: 26, borderRadius: "50%", fontSize: 12, fontWeight: 700, background: bg, color: c, border: m[String(pos)] ? "none" : "1px solid #2a2a2a", ...mono, fontFamily: "'Orbitron', monospace" }}>{pos}</span>;
 }
 
-function PtsBar({points,max,color="#E10600"}) {
-  const pct = Math.round((points/Math.max(max,1))*100);
+function PtsBar({ points, max, color = "#E10600" }) {
+  const pct = Math.round((points / Math.max(max, 1)) * 100);
   return (
-    <div style={{display:"flex",alignItems:"center",gap:8}}>
-      <div style={{flex:1,height:4,background:"#1a1a1a",borderRadius:2,overflow:"hidden"}}>
-        <div style={{width:`${pct}%`,height:"100%",background:color,borderRadius:2,transition:"width 0.8s ease"}}/>
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ flex: 1, height: 4, background: "#1a1a1a", borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 2, transition: "width 0.8s ease" }} />
       </div>
-      <span style={{...mono,fontSize:13,color:"#fff",minWidth:36,textAlign:"right"}}>{points}</span>
+      <span style={{ ...mono, fontFamily: "'Orbitron', monospace", fontSize: 13, color: "#fff", minWidth: 36, textAlign: "right" }}>{points}</span>
     </div>
   );
 }
 
-function Dot({pos,status}) {
-  const s=String(pos);
-  if(s==="1") return <span style={{width:10,height:10,borderRadius:"50%",background:"#FFD700",display:"inline-block"}}/>;
-  if(s==="2") return <span style={{width:10,height:10,borderRadius:"50%",background:"#C0C0C0",display:"inline-block"}}/>;
-  if(s==="3") return <span style={{width:10,height:10,borderRadius:"50%",background:"#CD7F32",display:"inline-block"}}/>;
-  if(Number(pos)<=10) return <span style={{width:10,height:10,borderRadius:"50%",background:"#27F4D2",opacity:0.6,display:"inline-block"}}/>;
-  if(status==="Finished"||status?.startsWith("+")) return <span style={{width:10,height:10,borderRadius:"50%",background:"#333",display:"inline-block"}}/>;
-  return <span style={{width:10,height:10,borderRadius:2,background:"#E10600",opacity:0.5,display:"inline-block"}}/>;
+function Dot({ pos, status }) {
+  const s = String(pos);
+  if (s === "1") return <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#FFD700", display: "inline-block" }} />;
+  if (s === "2") return <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#C0C0C0", display: "inline-block" }} />;
+  if (s === "3") return <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#CD7F32", display: "inline-block" }} />;
+  if (Number(pos) <= 10) return <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#27F4D2", opacity: 0.6, display: "inline-block" }} />;
+  if (status === "Finished" || status?.startsWith("+")) return <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#333", display: "inline-block" }} />;
+  return <span style={{ width: 10, height: 10, borderRadius: 2, background: "#E10600", opacity: 0.5, display: "inline-block" }} />;
 }
 
-function Tabs({tabs,active,onSelect,wrap}) {
+function Tabs({ tabs, active, onSelect, wrap }) {
   return (
-    <div style={{display:"flex",gap:4,background:"#0f0f0f",padding:4,borderRadius:8,width:wrap?"100%":"fit-content",marginBottom:20,flexWrap:"wrap"}}>
-      {tabs.map(([id,label]) => (
-        <button key={id} onClick={()=>onSelect(id)} style={{flex:wrap?"1":"0",padding:"7px 14px",borderRadius:6,border:"none",cursor:"pointer",fontSize:13,fontWeight:500,background:active===id?"#E10600":"transparent",color:active===id?"#fff":"#666",transition:"all 0.15s",whiteSpace:"nowrap"}}>{label}</button>
+    <div style={{ display: "flex", gap: 4, background: "#0f0f0f", padding: 4, borderRadius: 8, width: wrap ? "100%" : "fit-content", marginBottom: 20, flexWrap: "wrap" }}>
+      {tabs.map(([id, label]) => (
+        <button key={id} onClick={() => onSelect(id)} style={{ flex: wrap ? "1" : "0", padding: "7px 14px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.2px", background: active === id ? "#E10600" : "transparent", color: active === id ? "#fff" : "#666", transition: "all 0.15s", whiteSpace: "nowrap" }}>{label}</button>
       ))}
     </div>
   );
 }
 
-function SecLabel({children}) {
-  return <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:2,marginBottom:12,fontWeight:600}}>{children}</div>;
+function SecLabel({ children }) {
+  return <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, fontWeight: 700, fontFamily: "'Orbitron', sans-serif" }}>{children}</div>;
 }
 
 
-function Empty({icon="📭",msg="No data available"}) {
+function Empty({ icon = "📭", msg = "No data available" }) {
   const size = 32;
   const color = "#3a3a3a"; // Sleek gray for empty state vectors
 
@@ -1129,17 +1135,17 @@ function Empty({icon="📭",msg="No data available"}) {
     ),
   };
 
-  const renderedIcon = m[String(icon)] || <span style={{fontSize:32}}>{icon}</span>;
+  const renderedIcon = m[String(icon)] || <span style={{ fontSize: 32 }}>{icon}</span>;
 
   return (
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 0",gap:12}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>{renderedIcon}</div>
-      <div style={{color:"#555",fontSize:13,textAlign:"center",padding:"0 16px",lineHeight:1.5}}>{msg}</div>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 0", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>{renderedIcon}</div>
+      <div style={{ color: "#555", fontSize: 13, textAlign: "center", padding: "0 16px", lineHeight: 1.5 }}>{msg}</div>
     </div>
   );
 }
 
-function StarBtn({id,watchlist,onToggle,itemType="driver",disabled=false}) {
+function StarBtn({ id, watchlist, onToggle, itemType = "driver", disabled = false }) {
   const bucket = WATCHLIST_BUCKETS[itemType] || "drivers";
   const on = watchlist?.[bucket]?.has(String(id));
 
@@ -1151,45 +1157,45 @@ function StarBtn({id,watchlist,onToggle,itemType="driver",disabled=false}) {
       }}
       disabled={disabled}
       style={{
-        background:"transparent",
-        border:`1px solid ${on?"#FFD700":"#222"}`,
-        borderRadius:6,
-        color:on?"#FFD700":"#444",
-        padding:"4px 8px",
-        cursor:disabled ? "not-allowed" : "pointer",
-        fontSize:13,
-        transition:"all 0.15s",
-        flexShrink:0,
-        opacity:disabled ? 0.55 : 1,
+        background: "transparent",
+        border: `1px solid ${on ? "#FFD700" : "#222"}`,
+        borderRadius: 6,
+        color: on ? "#FFD700" : "#444",
+        padding: "4px 8px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        fontSize: 13,
+        transition: "all 0.15s",
+        flexShrink: 0,
+        opacity: disabled ? 0.55 : 1,
       }}
     >
-      {on?"★":"☆"}
+      {on ? "★" : "☆"}
     </button>
   );
 }
 
-function TRow({children,onClick}) {
+function TRow({ children, onClick }) {
   return (
-    <tr onClick={onClick} style={{borderBottom:"1px solid #141414",cursor:onClick?"pointer":"default"}}
-      onMouseEnter={e=>e.currentTarget.style.background="#0d0d0d"}
-      onMouseLeave={e=>e.currentTarget.style.background="transparent"}>{children}</tr>
+    <tr onClick={onClick} style={{ borderBottom: "1px solid #141414", cursor: onClick ? "pointer" : "default" }}
+      onMouseEnter={e => e.currentTarget.style.background = "#0d0d0d"}
+      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>{children}</tr>
   );
 }
 
-function TH({children,right,center}) {
-  return <th style={{padding:"9px 12px",textAlign:right?"right":center?"center":"left",color:"#555",fontWeight:500,fontSize:11,letterSpacing:1,textTransform:"uppercase",whiteSpace:"nowrap"}}>{children}</th>;
+function TH({ children, right, center }) {
+  return <th style={{ padding: "9px 12px", textAlign: right ? "right" : center ? "center" : "left", color: "#555", fontWeight: 600, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap", fontFamily: "'Orbitron', sans-serif" }}>{children}</th>;
 }
 
-function SlidePanel({children,onClose,width=385,isMobile}) {
+function SlidePanel({ children, onClose, width = 385, isMobile }) {
   return (
     <div style={{
       position: isMobile ? "fixed" : "absolute",
-      top:0, right:0,
+      top: 0, right: 0,
       width: isMobile ? "100%" : width,
-      height:"100%",
-      background:"#0a0a0a",
-      borderLeft:"1px solid #1c1c1c",
-      overflowY:"auto",
+      height: "100%",
+      background: "#0a0a0a",
+      borderLeft: "1px solid #1c1c1c",
+      overflowY: "auto",
       zIndex: isMobile ? 1000 : 10,
       boxShadow: isMobile ? "-4px 0 20px rgba(0,0,0,0.8)" : "none",
     }}>
@@ -1198,25 +1204,25 @@ function SlidePanel({children,onClose,width=385,isMobile}) {
   );
 }
 
-function PanelHeader({title,accent,onClose}) {
+function PanelHeader({ title, accent, onClose }) {
   return (
-    <div style={{padding:"14px 18px",borderBottom:"1px solid #1c1c1c",display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,background:"#0a0a0a",zIndex:2}}>
-      <div style={{display:"flex",alignItems:"center",gap:8}}>
-        <div style={{width:4,height:18,background:accent||"#E10600",borderRadius:2}}/>
-        <span style={{fontWeight:700,fontSize:14}}>{title}</span>
+    <div style={{ padding: "14px 18px", borderBottom: "1px solid #1c1c1c", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "#0a0a0a", zIndex: 2 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ width: 4, height: 18, background: accent || "#E10600", borderRadius: 2 }} />
+        <span style={{ fontWeight: 700, fontSize: 14, fontFamily: "'Orbitron', sans-serif", letterSpacing: "0.2px" }}>{title}</span>
       </div>
-      <button onClick={onClose} style={{background:"transparent",border:"1px solid #222",color:"#666",width:28,height:28,borderRadius:6,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+      <button onClick={onClose} style={{ background: "transparent", border: "1px solid #222", color: "#666", width: 28, height: 28, borderRadius: 6, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
     </div>
   );
 }
 
-function MiniStatGrid({items}) {
+function MiniStatGrid({ items }) {
   return (
-    <div style={{display:"grid",gridTemplateColumns:`repeat(${Math.min(items.length,4)},1fr)`,gap:8,marginBottom:16}}>
-      {items.map(([l,v,accent]) => (
-        <div key={l} style={{background:"#111",borderRadius:6,padding:"8px 6px",textAlign:"center"}}>
-          <div style={{fontSize:10,color:"#444",textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>{l}</div>
-          <div style={{fontSize:17,fontWeight:700,color:accent||"#fff",...mono}}>{v??"—"}</div>
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(items.length, 4)},1fr)`, gap: 8, marginBottom: 16 }}>
+      {items.map(([l, v, accent]) => (
+        <div key={l} style={{ background: "#111", borderRadius: 6, padding: "8px 6px", textAlign: "center" }}>
+          <div style={{ fontSize: 10, color: "#444", textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>{l}</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: accent || "#fff", ...mono }}>{v ?? "—"}</div>
         </div>
       ))}
     </div>
@@ -1224,11 +1230,11 @@ function MiniStatGrid({items}) {
 }
 
 // All page components below (DriverStandings, RaceResultsPage, etc.) - same as original file
-function DriverStandings({season}) {
-  const [data,setData]=useState([]);
-  const [races,setRaces]=useState([]);
-  const [loading,setLoading]=useState(true);
-  useEffect(()=>{
+function DriverStandings({ season }) {
+  const [data, setData] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       fetchDriverStandings(season, { limit: 100, fetcher: apiFetch }),
@@ -1239,50 +1245,50 @@ function DriverStandings({season}) {
         setRaces(seasonRaces);
         setLoading(false);
       })
-      .catch(()=>setLoading(false));
-  },[season]);
-  if(loading) return <Spinner/>;
-  if(!data.length) return <Empty/>;
-  const max=Number(data[0]?.points)||1;
-  const leaderPts=Number(data[0]?.points)||0;
-  const leader=data[0];
-  const tc=col(leader?.Constructors?.[0]?.constructorId);
+      .catch(() => setLoading(false));
+  }, [season]);
+  if (loading) return <Spinner />;
+  if (!data.length) return <Empty />;
+  const max = Number(data[0]?.points) || 1;
+  const leaderPts = Number(data[0]?.points) || 0;
+  const leader = data[0];
+  const tc = col(leader?.Constructors?.[0]?.constructorId);
   const latestRaceContext = buildLatestRaceWinnerContext(races);
   return (
     <div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10,marginBottom:24}}>
-        <StatCard label="Leader"  value={leader?.Driver?.familyName} sub={leader?.Constructors?.[0]?.name} accent={tc} delay={0}/>
-        <StatCard label="Points"  value={leader?.points} sub="championship pts" accent="#FFD700" delay={60}/>
-        <StatCard label="Season Wins" value={leader?.wins} sub="race victories so far" accent="#E10600" delay={120}/>
-        <StatCard label="Latest GP Winner" value={latestRaceContext?.driverFamilyName || "—"} sub={latestRaceContext?.raceName || "No completed race yet"} accent={latestRaceContext?.teamColor} delay={180}/>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 10, marginBottom: 24 }}>
+        <StatCard label="Leader" value={leader?.Driver?.familyName} sub={leader?.Constructors?.[0]?.name} accent={tc} delay={0} />
+        <StatCard label="Points" value={leader?.points} sub="championship pts" accent="#FFD700" delay={60} />
+        <StatCard label="Season Wins" value={leader?.wins} sub="race victories so far" accent="#E10600" delay={120} />
+        <StatCard label="Latest GP Winner" value={latestRaceContext?.driverFamilyName || "—"} sub={latestRaceContext?.raceName || "No completed race yet"} accent={latestRaceContext?.teamColor} delay={180} />
       </div>
-      <div style={{overflowX:"auto"}}>
-        <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:560}}>
-          <thead><tr style={{borderBottom:"1px solid #E10600"}}>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 560 }}>
+          <thead><tr style={{ borderBottom: "1px solid #E10600" }}>
             <TH>Pos</TH><TH>Driver</TH><TH>Team</TH><TH right>Wins</TH><TH right>Gap</TH><TH>Points</TH>
           </tr></thead>
           <tbody>
-            {data.map(d=>{
-              const drv=d.Driver, team=d.Constructors?.[0], tc=col(team?.constructorId);
+            {data.map(d => {
+              const drv = d.Driver, team = d.Constructors?.[0], tc = col(team?.constructorId);
               const gap = leaderPts - Number(d.points);
               return (
                 <TRow key={drv.driverId}>
-                  <td style={{padding:"11px 12px"}}><PosBadge pos={d.position}/></td>
-                  <td style={{padding:"11px 12px"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{width:3,height:28,borderRadius:2,background:tc,flexShrink:0}}/>
+                  <td style={{ padding: "11px 12px" }}><PosBadge pos={d.position} /></td>
+                  <td style={{ padding: "11px 12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 3, height: 28, borderRadius: 2, background: tc, flexShrink: 0 }} />
                       <div>
-                        <div style={{color:"#fff",fontWeight:600,fontSize:14}}>{drv.givenName} <span style={{color:"#aaa"}}>{drv.familyName}</span></div>
-                        <div style={{color:"#444",fontSize:11,...mono}}>#{drv.permanentNumber}</div>
+                        <div style={{ color: "#fff", fontWeight: 600, fontSize: 14 }}>{drv.givenName} <span style={{ color: "#aaa" }}>{drv.familyName}</span></div>
+                        <div style={{ color: "#444", fontSize: 11, ...mono }}>#{drv.permanentNumber}</div>
                       </div>
                     </div>
                   </td>
-                  <td style={{padding:"11px 12px",color:tc,fontSize:12,fontWeight:500,whiteSpace:"nowrap"}}>{team?.name||"—"}</td>
-                  <td style={{padding:"11px 12px",textAlign:"right",...mono,color:"#fff"}}>{d.wins}</td>
-                  <td style={{padding:"11px 12px",textAlign:"right",...mono,fontSize:12,color:gap===0?"#FFD700":"#666"}}>
-                    {gap===0?"—":`-${gap}`}
+                  <td style={{ padding: "11px 12px", color: tc, fontSize: 12, fontWeight: 500, whiteSpace: "nowrap" }}>{team?.name || "—"}</td>
+                  <td style={{ padding: "11px 12px", textAlign: "right", ...mono, color: "#fff" }}>{d.wins}</td>
+                  <td style={{ padding: "11px 12px", textAlign: "right", ...mono, fontSize: 12, color: gap === 0 ? "#FFD700" : "#666" }}>
+                    {gap === 0 ? "—" : `-${gap}`}
                   </td>
-                  <td style={{padding:"11px 12px",minWidth:130}}><PtsBar points={Number(d.points)} max={max}/></td>
+                  <td style={{ padding: "11px 12px", minWidth: 130 }}><PtsBar points={Number(d.points)} max={max} /></td>
                 </TRow>
               );
             })}
@@ -1293,40 +1299,40 @@ function DriverStandings({season}) {
   );
 }
 
-function ConstructorStandings({season}) {
-  const [data,setData]=useState([]); const [loading,setLoading]=useState(true);
-  useEffect(()=>{
+function ConstructorStandings({ season }) {
+  const [data, setData] = useState([]); const [loading, setLoading] = useState(true);
+  useEffect(() => {
     setLoading(true);
     fetchConstructorStandings(season, { limit: 15, fetcher: apiFetch })
       .then(data => { setData(data); setLoading(false); })
-      .catch(()=>setLoading(false));
-  },[season]);
-  if(loading) return <Spinner/>;
-  if(!data.length) return <Empty/>;
-  const max=Number(data[0]?.points)||1;
-  const leaderPts=Number(data[0]?.points)||0;
+      .catch(() => setLoading(false));
+  }, [season]);
+  if (loading) return <Spinner />;
+  if (!data.length) return <Empty />;
+  const max = Number(data[0]?.points) || 1;
+  const leaderPts = Number(data[0]?.points) || 0;
   return (
-    <div style={{overflowX:"auto"}}>
-      <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:400}}>
-        <thead><tr style={{borderBottom:"1px solid #E10600"}}>
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 400 }}>
+        <thead><tr style={{ borderBottom: "1px solid #E10600" }}>
           <TH>Pos</TH><TH>Constructor</TH><TH right>Wins</TH><TH right>Gap</TH><TH>Points</TH>
         </tr></thead>
         <tbody>
-          {data.map(c=>{
-            const team=c.Constructor, tc=col(team?.constructorId);
-            const gap=leaderPts-Number(c.points);
+          {data.map(c => {
+            const team = c.Constructor, tc = col(team?.constructorId);
+            const gap = leaderPts - Number(c.points);
             return (
               <TRow key={team.constructorId}>
-                <td style={{padding:"11px 12px"}}><PosBadge pos={c.position}/></td>
-                <td style={{padding:"11px 12px"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{width:14,height:14,borderRadius:"50%",background:tc,flexShrink:0}}/>
-                    <span style={{color:"#fff",fontWeight:600}}>{team.name}</span>
+                <td style={{ padding: "11px 12px" }}><PosBadge pos={c.position} /></td>
+                <td style={{ padding: "11px 12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 14, height: 14, borderRadius: "50%", background: tc, flexShrink: 0 }} />
+                    <span style={{ color: "#fff", fontWeight: 600 }}>{team.name}</span>
                   </div>
                 </td>
-                <td style={{padding:"11px 12px",textAlign:"right",...mono,color:"#fff"}}>{c.wins}</td>
-                <td style={{padding:"11px 12px",textAlign:"right",...mono,fontSize:12,color:gap===0?"#FFD700":"#666"}}>{gap===0?"—":`-${gap}`}</td>
-                <td style={{padding:"11px 12px",minWidth:130}}><PtsBar points={Number(c.points)} max={max} color={tc}/></td>
+                <td style={{ padding: "11px 12px", textAlign: "right", ...mono, color: "#fff" }}>{c.wins}</td>
+                <td style={{ padding: "11px 12px", textAlign: "right", ...mono, fontSize: 12, color: gap === 0 ? "#FFD700" : "#666" }}>{gap === 0 ? "—" : `-${gap}`}</td>
+                <td style={{ padding: "11px 12px", minWidth: 130 }}><PtsBar points={Number(c.points)} max={max} color={tc} /></td>
               </TRow>
             );
           })}
@@ -1336,23 +1342,23 @@ function ConstructorStandings({season}) {
   );
 }
 
-function StandingsPage({season}) {
-  const [tab,setTab]=useState("drivers");
+function StandingsPage({ season }) {
+  const [tab, setTab] = useState("drivers");
   return (
     <div>
-      <Tabs tabs={[["drivers","Driver Championship"],["constructors","Constructor Championship"]]} active={tab} onSelect={setTab}/>
-      {tab==="drivers"?<DriverStandings season={season}/>:<ConstructorStandings season={season}/>}
+      <Tabs tabs={[["drivers", "Driver Championship"], ["constructors", "Constructor Championship"]]} active={tab} onSelect={setTab} />
+      {tab === "drivers" ? <DriverStandings season={season} /> : <ConstructorStandings season={season} />}
     </div>
   );
 }
 
 // Simplified stub for remaining components - just to get the app running
-function LapTimesChart({season,round}) { return <Empty msg="Lap Times - Coming Soon"/>; }
-function FastestLapLeaderboard({season}) { return <Empty msg="Fastest Lap Data - Coming Soon"/>; }
+function LapTimesChart({ season, round }) { return <Empty msg="Lap Times - Coming Soon" />; }
+function FastestLapLeaderboard({ season }) { return <Empty msg="Fastest Lap Data - Coming Soon" />; }
 
-function RaceResultsPage({season,isMobile}) {
-  const [races,setRaces]=useState([]); const [loading,setLoading]=useState(true);
-  useEffect(()=>{
+function RaceResultsPage({ season, isMobile }) {
+  const [races, setRaces] = useState([]); const [loading, setLoading] = useState(true);
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       fetchSeasonRaces(season, { limit: 40, fetcher: apiFetch }),
@@ -1374,68 +1380,68 @@ function RaceResultsPage({season,isMobile}) {
         setRaces(filtered);
         setLoading(false);
       })
-      .catch(()=>setLoading(false));
-  },[season]);
+      .catch(() => setLoading(false));
+  }, [season]);
 
-  if(loading) return <Spinner/>;
-  if(!races.length) return <Empty msg="No races found"/>;
+  if (loading) return <Spinner />;
+  if (!races.length) return <Empty msg="No races found" />;
   return (
     <div>
-      <div style={{overflowX:"auto"}}>
-      <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:700}}>
-        <thead><tr style={{borderBottom:"1px solid #E10600"}}>
-          <TH>Round</TH><TH>Grand Prix</TH><TH>Circuit</TH><TH>Location</TH><TH>Date</TH><TH>Winner</TH>
-        </tr></thead>
-        <tbody>
-          {races.map(r=>(
-            <TRow key={r.round}>
-              <td style={{padding:"11px 12px"}}>
-                <span style={{
-                  display:"inline-flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  width:26,
-                  height:26,
-                  borderRadius:"50%",
-                  fontSize:11,
-                  fontWeight:800,
-                  background:"rgba(225, 6, 0, 0.1)",
-                  color:"#FF3830",
-                  border:"1px solid rgba(225, 6, 0, 0.35)",
-                  boxShadow:"0 0 8px rgba(225, 6, 0, 0.1)",
-                  ...mono
-                }}>
-                  {r.round}
-                </span>
-              </td>
-              <td style={{padding:"11px 12px",fontWeight:600,minWidth:120}}>{gpName(r.raceName)}</td>
-              <td style={{padding:"11px 12px",color:"#FFD700",fontWeight:500,minWidth:100}}>{r.Circuit?.circuitName||"—"}</td>
-              <td style={{padding:"11px 12px",color:"#888",fontSize:11}}>{r.Circuit?.Location?.country} {flagOf(r.Circuit?.Location?.country)}</td>
-              <td style={{padding:"11px 12px",...mono,fontSize:11,color:"#666"}}>{r.date}</td>
-              <td style={{padding:"11px 12px",fontWeight:600,color:r.Results?.[0]?.Constructor?.constructorId ? col(r.Results[0].Constructor.constructorId) : "#666",minWidth:80}}>
-                {r.Results?.[0]?.Driver?.familyName ? (
-                  r.Results[0].Driver.familyName
-                ) : (
-                  (() => {
-                    const now = new Date();
-                    const raceDate = new Date(`${r.date}T${r.time || "12:00:00Z"}`);
-                    if (raceDate > now) {
-                      return <span style={{color:"#555",fontSize:11,fontWeight:500,letterSpacing:0.5}}>Upcoming</span>;
-                    }
-                    return <span style={{color:"#FFD700",fontSize:11,fontWeight:600,letterSpacing:0.5}}>Pending</span>;
-                  })()
-                )}
-              </td>
-            </TRow>
-          ))}
-        </tbody>
-      </table>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 700 }}>
+          <thead><tr style={{ borderBottom: "1px solid #E10600" }}>
+            <TH>Round</TH><TH>Grand Prix</TH><TH>Circuit</TH><TH>Location</TH><TH>Date</TH><TH>Winner</TH>
+          </tr></thead>
+          <tbody>
+            {races.map(r => (
+              <TRow key={r.round}>
+                <td style={{ padding: "11px 12px" }}>
+                  <span style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 26,
+                    height: 26,
+                    borderRadius: "50%",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    background: "rgba(225, 6, 0, 0.1)",
+                    color: "#FF3830",
+                    border: "1px solid rgba(225, 6, 0, 0.35)",
+                    boxShadow: "0 0 8px rgba(225, 6, 0, 0.1)",
+                    ...mono
+                  }}>
+                    {r.round}
+                  </span>
+                </td>
+                <td style={{ padding: "11px 12px", fontWeight: 600, minWidth: 120 }}>{gpName(r.raceName)}</td>
+                <td style={{ padding: "11px 12px", color: "#FFD700", fontWeight: 500, minWidth: 100 }}>{r.Circuit?.circuitName || "—"}</td>
+                <td style={{ padding: "11px 12px", color: "#888", fontSize: 11 }}>{r.Circuit?.Location?.country} {flagOf(r.Circuit?.Location?.country)}</td>
+                <td style={{ padding: "11px 12px", ...mono, fontSize: 11, color: "#666" }}>{r.date}</td>
+                <td style={{ padding: "11px 12px", fontWeight: 600, color: r.Results?.[0]?.Constructor?.constructorId ? col(r.Results[0].Constructor.constructorId) : "#666", minWidth: 80 }}>
+                  {r.Results?.[0]?.Driver?.familyName ? (
+                    r.Results[0].Driver.familyName
+                  ) : (
+                    (() => {
+                      const now = new Date();
+                      const raceDate = new Date(`${r.date}T${r.time || "12:00:00Z"}`);
+                      if (raceDate > now) {
+                        return <span style={{ color: "#555", fontSize: 11, fontWeight: 500, letterSpacing: 0.5 }}>Upcoming</span>;
+                      }
+                      return <span style={{ color: "#FFD700", fontSize: 11, fontWeight: 600, letterSpacing: 0.5 }}>Pending</span>;
+                    })()
+                  )}
+                </td>
+              </TRow>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-function asNum(value, fallback=0) {
+function asNum(value, fallback = 0) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 }
@@ -1794,12 +1800,12 @@ function buildHeadToHeadDuels(leftMetric, rightMetric) {
   return { leftWins, rightWins, ties, commonRounds: leftWins + rightWins + ties, recent };
 }
 
-function PointsChartPage({season, isMobile=false}) {
-  const [standings,setStandings]=useState([]);
-  const [races,setRaces]=useState([]);
-  const [loading,setLoading]=useState(true);
+function PointsChartPage({ season, isMobile = false }) {
+  const [standings, setStandings] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       fetchDriverStandings(season, { limit: 100, fetcher: apiFetch }),
@@ -1810,8 +1816,8 @@ function PointsChartPage({season, isMobile=false}) {
         setRaces(nextRaces);
         setLoading(false);
       })
-      .catch(()=>setLoading(false));
-  },[season]);
+      .catch(() => setLoading(false));
+  }, [season]);
 
   const driverMetrics = useMemo(() => buildDriverSeasonMetrics(standings, races), [standings, races]);
   const progression = useMemo(() => buildPointsProgressionData(standings, races, 6), [standings, races]);
@@ -1825,42 +1831,42 @@ function PointsChartPage({season, isMobile=false}) {
       ? Math.abs(asNum(featuredMetrics[0]?.currentPoints) - asNum(featuredMetrics[1]?.currentPoints))
       : 0;
 
-  if(loading) return <Spinner/>;
-  if(!standings.length) return <Empty icon="📈" msg="No championship progression data available"/>;
+  if (loading) return <Spinner />;
+  if (!standings.length) return <Empty icon="📈" msg="No championship progression data available" />;
 
   return (
     <div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:22}}>
-        <StatCard label="Leader" value={leader?.familyName || "—"} sub={leader ? `${leader.currentPoints} pts` : undefined} accent={leader?.teamColor}/>
-        <StatCard label="Closest Gap" value={`${closestGap} pts`} sub={featuredMetrics.length > 1 ? `${featuredMetrics[0]?.familyName} vs ${featuredMetrics[1]?.familyName}` : "Single driver snapshot"} accent="#FFD700"/>
-        <StatCard label="Rounds Tracked" value={progression.data.length || 0} sub="Completed grands prix" accent="#27F4D2"/>
-        <StatCard label="Featured Drivers" value={progression.series.length} sub="Main chart lines" accent="#a855f7"/>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 22 }}>
+        <StatCard label="Leader" value={leader?.familyName || "—"} sub={leader ? `${leader.currentPoints} pts` : undefined} accent={leader?.teamColor} />
+        <StatCard label="Closest Gap" value={`${closestGap} pts`} sub={featuredMetrics.length > 1 ? `${featuredMetrics[0]?.familyName} vs ${featuredMetrics[1]?.familyName}` : "Single driver snapshot"} accent="#FFD700" />
+        <StatCard label="Rounds Tracked" value={progression.data.length || 0} sub="Completed grands prix" accent="#27F4D2" />
+        <StatCard label="Featured Drivers" value={progression.series.length} sub="Main chart lines" accent="#a855f7" />
       </div>
 
       <div style={{
-        display:"grid",
+        display: "grid",
         gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.6fr) minmax(0,1fr)",
-        gap:18,
-        alignItems:"start",
+        gap: 18,
+        alignItems: "start",
       }}>
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18,minWidth:0}}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18, minWidth: 0 }}>
           <SecLabel>Round-by-round championship evolution</SecLabel>
           {progression.data.length ? (
-            <div style={{height: isMobile ? 280 : 410}}>
+            <div style={{ height: isMobile ? 280 : 410 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={progression.data} margin={{ top:20, right:24, left:0, bottom:10 }}>
-                  <CartesianGrid stroke="#1a1a1a"/>
-                  <XAxis dataKey="roundLabel" stroke="#666" tick={{fontSize:11}}/>
-                  <YAxis stroke="#666" tick={{fontSize:11}}/>
+                <LineChart data={progression.data} margin={{ top: 20, right: 24, left: 0, bottom: 10 }}>
+                  <CartesianGrid stroke="#1a1a1a" />
+                  <XAxis dataKey="roundLabel" stroke="#666" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#666" tick={{ fontSize: 11 }} />
                   <Tooltip
-                    contentStyle={{background:"#111",border:"1px solid #E10600",borderRadius:8}}
+                    contentStyle={{ background: "#111", border: "1px solid #E10600", borderRadius: 8 }}
                     labelFormatter={(value, payload) => {
                       const raceName = payload?.[0]?.payload?.raceName;
                       return raceName ? `${value} · ${raceName}` : value;
                     }}
                     formatter={(value) => [`${value} pts`, "Points"]}
                   />
-                  <Legend wrapperStyle={{color:"#888",fontSize:11,paddingTop:10}}/>
+                  <Legend wrapperStyle={{ color: "#888", fontSize: 11, paddingTop: 10 }} />
                   {progression.series.map((driver) => (
                     <Line
                       key={driver.key}
@@ -1877,40 +1883,40 @@ function PointsChartPage({season, isMobile=false}) {
               </ResponsiveContainer>
             </div>
           ) : (
-            <Empty icon="🟰" msg="No completed rounds yet. Current standings will populate a progression chart once races are run."/>
+            <Empty icon="🟰" msg="No completed rounds yet. Current standings will populate a progression chart once races are run." />
           )}
         </div>
 
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18,minWidth:0}}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18, minWidth: 0 }}>
           <SecLabel>Current order</SecLabel>
-          <div style={{display:"grid",gap:10}}>
+          <div style={{ display: "grid", gap: 10 }}>
             {featuredMetrics.map((metric) => {
               const gap = leader ? Math.max(0, asNum(leader.currentPoints) - asNum(metric.currentPoints)) : 0;
               return (
-                <div key={metric.driverId} style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:10,padding:"12px 14px"}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:10}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
-                      <PosBadge pos={metric.standingsPosition}/>
-                      <div style={{width:4,height:28,borderRadius:999,background:metric.teamColor,flexShrink:0}}/>
-                      <div style={{minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:700,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{metric.name}</div>
-                        <div style={{fontSize:11,color:"#555"}}>{metric.teamName}</div>
+                <div key={metric.driverId} style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <PosBadge pos={metric.standingsPosition} />
+                      <div style={{ width: 4, height: 28, borderRadius: 999, background: metric.teamColor, flexShrink: 0 }} />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{metric.name}</div>
+                        <div style={{ fontSize: 11, color: "#555" }}>{metric.teamName}</div>
                       </div>
                     </div>
-                    <div style={{textAlign:"right",flexShrink:0}}>
-                      <div style={{fontSize:18,fontWeight:800,color:"#FFD700",...mono}}>{metric.currentPoints}</div>
-                      <div style={{fontSize:10,color:"#555"}}>{gap ? `-${gap} to lead` : "Championship lead"}</div>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: "#FFD700", ...mono }}>{metric.currentPoints}</div>
+                      <div style={{ fontSize: 10, color: "#555" }}>{gap ? `-${gap} to lead` : "Championship lead"}</div>
                     </div>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
                     {[
                       ["Wins", metric.currentWins, "#E10600"],
                       ["Podiums", metric.podiums, "#27F4D2"],
                       ["Avg Finish", metric.averageFinish ?? "—", "#a855f7"],
                     ].map(([label, value, accent]) => (
-                      <div key={label} style={{background:"#0d0d0d",borderRadius:8,padding:"8px 9px"}}>
-                        <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                        <div style={{fontSize:16,fontWeight:800,color:accent,...mono}}>{value}</div>
+                      <div key={label} style={{ background: "#0d0d0d", borderRadius: 8, padding: "8px 9px" }}>
+                        <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: accent, ...mono }}>{value}</div>
                       </div>
                     ))}
                   </div>
@@ -1924,25 +1930,25 @@ function PointsChartPage({season, isMobile=false}) {
   );
 }
 
-function SeasonRecordsPage({season, isMobile=false}) {
-  const [drivers,setDrivers]=useState([]);
-  const [constructors,setConstructors]=useState([]);
-  const [races,setRaces]=useState([]);
-  const [loading,setLoading]=useState(true);
+function SeasonRecordsPage({ season, isMobile = false }) {
+  const [drivers, setDrivers] = useState([]);
+  const [constructors, setConstructors] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       fetchDriverStandings(season, { limit: 100, fetcher: apiFetch }),
       fetchConstructorStandings(season, { limit: 15, fetcher: apiFetch }),
       fetchSeasonResults(season, { limit: 600, fetcher: apiFetch }),
-    ]).then(([nextDrivers,nextConstructors,nextRaces])=>{
+    ]).then(([nextDrivers, nextConstructors, nextRaces]) => {
       setDrivers(nextDrivers);
       setConstructors(nextConstructors);
       setRaces(nextRaces);
       setLoading(false);
-    }).catch(()=>setLoading(false));
-  },[season]);
+    }).catch(() => setLoading(false));
+  }, [season]);
 
   const driverMetrics = useMemo(() => buildDriverSeasonMetrics(drivers, races), [drivers, races]);
   const constructorMetrics = useMemo(() => buildConstructorSeasonMetrics(constructors, races), [constructors, races]);
@@ -1954,45 +1960,45 @@ function SeasonRecordsPage({season, isMobile=false}) {
   const mostPodiums = [...driverMetrics].sort((a, b) => b.podiums - a.podiums)[0];
   const constructorLeader = constructorMetrics[0];
 
-  if(loading) return <Spinner/>;
-  if(!driverMetrics.length) return <Empty icon="🥇" msg="No season records available for this year"/>;
+  if (loading) return <Spinner />;
+  if (!driverMetrics.length) return <Empty icon="🥇" msg="No season records available for this year" />;
 
   return (
     <div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:22}}>
-        <StatCard label="Completed Rounds" value={races.length || 0} sub="Results processed" accent="#27F4D2"/>
-        <StatCard label="Unique Winners" value={uniqueWinners || "—"} sub="Different race winners" accent="#E10600"/>
-        <StatCard label="Most Podiums" value={mostPodiums?.familyName || "—"} sub={mostPodiums ? `${mostPodiums.podiums} podiums` : undefined} accent={mostPodiums?.teamColor}/>
-        <StatCard label="Most Consistent" value={mostConsistent?.familyName || "—"} sub={mostConsistent?.averageFinish ? `Avg finish ${mostConsistent.averageFinish}` : "No benchmark yet"} accent="#a855f7"/>
-        <StatCard label="Constructor Leader" value={constructorLeader?.name || "—"} sub={constructorLeader ? `${constructorLeader.currentPoints} pts` : undefined} accent={constructorLeader?.color}/>
-        <StatCard label="Total DNFs" value={totalDnfs} sub="Across tracked drivers" accent="#FFD700"/>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 22 }}>
+        <StatCard label="Completed Rounds" value={races.length || 0} sub="Results processed" accent="#27F4D2" />
+        <StatCard label="Unique Winners" value={uniqueWinners || "—"} sub="Different race winners" accent="#E10600" />
+        <StatCard label="Most Podiums" value={mostPodiums?.familyName || "—"} sub={mostPodiums ? `${mostPodiums.podiums} podiums` : undefined} accent={mostPodiums?.teamColor} />
+        <StatCard label="Most Consistent" value={mostConsistent?.familyName || "—"} sub={mostConsistent?.averageFinish ? `Avg finish ${mostConsistent.averageFinish}` : "No benchmark yet"} accent="#a855f7" />
+        <StatCard label="Constructor Leader" value={constructorLeader?.name || "—"} sub={constructorLeader ? `${constructorLeader.currentPoints} pts` : undefined} accent={constructorLeader?.color} />
+        <StatCard label="Total DNFs" value={totalDnfs} sub="Across tracked drivers" accent="#FFD700" />
       </div>
 
       <div style={{
-        display:"grid",
+        display: "grid",
         gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.2fr) minmax(0,1fr)",
-        gap:18,
-        alignItems:"start",
+        gap: 18,
+        alignItems: "start",
       }}>
-        <div style={{display:"grid",gap:18,minWidth:0}}>
-          <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+        <div style={{ display: "grid", gap: 18, minWidth: 0 }}>
+          <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
             <SecLabel>Driver leaders</SecLabel>
-            <div style={{overflowX:"auto"}}>
-              <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:560}}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 560 }}>
                 <thead>
-                  <tr style={{borderBottom:"1px solid #E10600"}}>
+                  <tr style={{ borderBottom: "1px solid #E10600" }}>
                     <TH>Pos</TH><TH>Driver</TH><TH>Team</TH><TH right>Pts</TH><TH right>Wins</TH><TH right>Podiums</TH>
                   </tr>
                 </thead>
                 <tbody>
                   {driverMetrics.slice(0, 6).map((driver) => (
                     <TRow key={driver.driverId}>
-                      <td style={{padding:"10px 12px"}}><PosBadge pos={driver.standingsPosition}/></td>
-                      <td style={{padding:"10px 12px",fontWeight:700,color:"#fff"}}>{driver.name}</td>
-                      <td style={{padding:"10px 12px",color:driver.teamColor}}>{driver.teamName}</td>
-                      <td style={{padding:"10px 12px",textAlign:"right",...mono,fontWeight:700,color:"#FFD700"}}>{driver.currentPoints}</td>
-                      <td style={{padding:"10px 12px",textAlign:"right",...mono,color:"#E10600"}}>{driver.currentWins}</td>
-                      <td style={{padding:"10px 12px",textAlign:"right",...mono,color:"#27F4D2"}}>{driver.podiums}</td>
+                      <td style={{ padding: "10px 12px" }}><PosBadge pos={driver.standingsPosition} /></td>
+                      <td style={{ padding: "10px 12px", fontWeight: 700, color: "#fff" }}>{driver.name}</td>
+                      <td style={{ padding: "10px 12px", color: driver.teamColor }}>{driver.teamName}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", ...mono, fontWeight: 700, color: "#FFD700" }}>{driver.currentPoints}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", ...mono, color: "#E10600" }}>{driver.currentWins}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "right", ...mono, color: "#27F4D2" }}>{driver.podiums}</td>
                     </TRow>
                   ))}
                 </tbody>
@@ -2000,9 +2006,9 @@ function SeasonRecordsPage({season, isMobile=false}) {
             </div>
           </div>
 
-          <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+          <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
             <SecLabel>Consistency and attrition</SecLabel>
-            <div style={{display:"grid",gap:10}}>
+            <div style={{ display: "grid", gap: 10 }}>
               {[...driverMetrics]
                 .filter((driver) => driver.races > 0)
                 .sort((a, b) => {
@@ -2013,26 +2019,26 @@ function SeasonRecordsPage({season, isMobile=false}) {
                 })
                 .slice(0, 5)
                 .map((driver) => (
-                  <div key={driver.driverId} style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:10,padding:"12px 14px"}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:8}}>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <div style={{width:4,height:24,borderRadius:999,background:driver.teamColor}}/>
+                  <div key={driver.driverId} style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 10, padding: "12px 14px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 4, height: 24, borderRadius: 999, background: driver.teamColor }} />
                         <div>
-                          <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>{driver.name}</div>
-                          <div style={{fontSize:11,color:"#555"}}>{driver.teamName}</div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{driver.name}</div>
+                          <div style={{ fontSize: 11, color: "#555" }}>{driver.teamName}</div>
                         </div>
                       </div>
-                      <div style={{fontSize:18,fontWeight:800,color:"#a855f7",...mono}}>{driver.averageFinish ?? "—"}</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: "#a855f7", ...mono }}>{driver.averageFinish ?? "—"}</div>
                     </div>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
                       {[
                         ["Finish Rate", `${driver.finishRate}%`, "#27F4D2"],
                         ["Top 10 Rate", `${driver.top10Rate}%`, "#64C4FF"],
                         ["DNFs", driver.dnfs, driver.dnfs ? "#E10600" : "#FFD700"],
                       ].map(([label, value, accent]) => (
-                        <div key={label} style={{background:"#0d0d0d",borderRadius:8,padding:"8px 9px"}}>
-                          <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                          <div style={{fontSize:15,fontWeight:800,color:accent,...mono}}>{value}</div>
+                        <div key={label} style={{ background: "#0d0d0d", borderRadius: 8, padding: "8px 9px" }}>
+                          <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: accent, ...mono }}>{value}</div>
                         </div>
                       ))}
                     </div>
@@ -2042,29 +2048,29 @@ function SeasonRecordsPage({season, isMobile=false}) {
           </div>
         </div>
 
-        <div style={{display:"grid",gap:18,minWidth:0}}>
-          <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+        <div style={{ display: "grid", gap: 18, minWidth: 0 }}>
+          <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
             <SecLabel>Constructor leaderboard</SecLabel>
-            <div style={{display:"grid",gap:10}}>
+            <div style={{ display: "grid", gap: 10 }}>
               {constructorMetrics.slice(0, 5).map((team) => (
-                <div key={team.constructorId} style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:10,padding:"12px 14px"}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:10}}>
-                    <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
-                      <PosBadge pos={team.standingsPosition}/>
-                      <div style={{width:4,height:24,borderRadius:999,background:team.color}}/>
-                      <div style={{fontSize:14,fontWeight:700,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{team.name}</div>
+                <div key={team.constructorId} style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <PosBadge pos={team.standingsPosition} />
+                      <div style={{ width: 4, height: 24, borderRadius: 999, background: team.color }} />
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{team.name}</div>
                     </div>
-                    <div style={{fontSize:18,fontWeight:800,color:"#FFD700",...mono}}>{team.currentPoints}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#FFD700", ...mono }}>{team.currentPoints}</div>
                   </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
                     {[
                       ["Wins", team.currentWins, "#E10600"],
                       ["Podiums", team.podiums, "#27F4D2"],
                       ["Avg Finish", team.averageFinish ?? "—", "#64C4FF"],
                     ].map(([label, value, accent]) => (
-                      <div key={label} style={{background:"#0d0d0d",borderRadius:8,padding:"8px 9px"}}>
-                        <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                        <div style={{fontSize:15,fontWeight:800,color:accent,...mono}}>{value}</div>
+                      <div key={label} style={{ background: "#0d0d0d", borderRadius: 8, padding: "8px 9px" }}>
+                        <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: accent, ...mono }}>{value}</div>
                       </div>
                     ))}
                   </div>
@@ -2073,33 +2079,33 @@ function SeasonRecordsPage({season, isMobile=false}) {
             </div>
           </div>
 
-          <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+          <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
             <SecLabel>Season highlights</SecLabel>
-            <div style={{display:"grid",gap:10}}>
+            <div style={{ display: "grid", gap: 10 }}>
               {[
                 {
-                  label:"Best one-lap to flag consistency",
+                  label: "Best one-lap to flag consistency",
                   driver: mostConsistent?.name || "—",
                   value: mostConsistent?.averageFinish ? `Avg finish ${mostConsistent.averageFinish}` : "No consistent finisher yet",
-                  accent:"#a855f7",
+                  accent: "#a855f7",
                 },
                 {
-                  label:"Most podium pressure",
+                  label: "Most podium pressure",
                   driver: mostPodiums?.name || "—",
                   value: mostPodiums ? `${mostPodiums.podiums} podiums across ${mostPodiums.races} starts` : "No podium trend yet",
-                  accent:"#27F4D2",
+                  accent: "#27F4D2",
                 },
                 {
-                  label:"Toughest reliability story",
+                  label: "Toughest reliability story",
                   driver: [...driverMetrics].sort((a, b) => b.dnfs - a.dnfs)[0]?.name || "—",
                   value: `${[...driverMetrics].sort((a, b) => b.dnfs - a.dnfs)[0]?.dnfs || 0} DNFs`,
-                  accent:"#E10600",
+                  accent: "#E10600",
                 },
               ].map((item) => (
-                <div key={item.label} style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:10,padding:"12px 14px"}}>
-                  <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.3,marginBottom:6}}>{item.label}</div>
-                  <div style={{fontSize:16,fontWeight:800,color:item.accent,marginBottom:4}}>{item.driver}</div>
-                  <div style={{fontSize:12,color:"#777"}}>{item.value}</div>
+                <div key={item.label} style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 10, padding: "12px 14px" }}>
+                  <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.3, marginBottom: 6 }}>{item.label}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: item.accent, marginBottom: 4 }}>{item.driver}</div>
+                  <div style={{ fontSize: 12, color: "#777" }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -2110,58 +2116,58 @@ function SeasonRecordsPage({season, isMobile=false}) {
   );
 }
 
-function DrvCard({drv, standing, headshotUrl=null, latestRaceContext, watchlist, onToggle, onClick, watchlistDisabled=false}) {
-  const team    = standing.Constructors?.[0];
+function DrvCard({ drv, standing, headshotUrl = null, latestRaceContext, watchlist, onToggle, onClick, watchlistDisabled = false }) {
+  const team = standing.Constructors?.[0];
   const teamCol = col(team?.constructorId);
-  const medal   = ["1","2","3"].includes(standing.position);
+  const medal = ["1", "2", "3"].includes(standing.position);
   const isLatestWinner = latestRaceContext?.driverId === drv.driverId;
 
   return (
     <div
       onClick={onClick}
       style={{
-        background:"#0a0a0a", border:`1px solid #1a1a1a`,
-        borderRadius:12, overflow:"hidden", cursor:"pointer",
-        transition:"all 0.2s ease", position:"relative",
+        background: "#0a0a0a", border: `1px solid #1a1a1a`,
+        borderRadius: 12, overflow: "hidden", cursor: "pointer",
+        transition: "all 0.2s ease", position: "relative",
       }}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = teamCol;
-        e.currentTarget.style.transform   = "translateY(-3px)";
-        e.currentTarget.style.boxShadow   = `0 8px 24px ${teamCol}22`;
+        e.currentTarget.style.transform = "translateY(-3px)";
+        e.currentTarget.style.boxShadow = `0 8px 24px ${teamCol}22`;
       }}
       onMouseLeave={e => {
         e.currentTarget.style.borderColor = "#1a1a1a";
-        e.currentTarget.style.transform   = "translateY(0)";
-        e.currentTarget.style.boxShadow   = "none";
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "none";
       }}
     >
       {/* Photo area */}
-      <div style={{ position:"relative", height:160, overflow:"hidden", background:`radial-gradient(circle at top left, ${teamCol}22, transparent 45%), linear-gradient(135deg, #101010 0%, #0a0a0a 72%)` }}>
-        <div style={{ position:"absolute", inset:0, background:`linear-gradient(90deg, ${teamCol}10, transparent 55%)` }}/>
+      <div style={{ position: "relative", height: 160, overflow: "hidden", background: `radial-gradient(circle at top left, ${teamCol}22, transparent 45%), linear-gradient(135deg, #101010 0%, #0a0a0a 72%)` }}>
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, ${teamCol}10, transparent 55%)` }} />
         <div style={{
-          position:"absolute",
-          left:12,
-          top:12,
-          fontSize:56,
-          fontWeight:900,
-          letterSpacing:-3,
-          color:teamCol,
-          opacity:0.9,
-          lineHeight:0.9,
-          pointerEvents:"none",
+          position: "absolute",
+          left: 12,
+          top: 12,
+          fontSize: 56,
+          fontWeight: 900,
+          letterSpacing: -3,
+          color: teamCol,
+          opacity: 0.9,
+          lineHeight: 0.9,
+          pointerEvents: "none",
         }}>
           {`${drv.givenName?.[0] || ""}${drv.familyName?.[0] || ""}` || "F1"}
         </div>
         <div style={{
-          position:"absolute",
-          right:12,
-          bottom:0,
-          width:106,
-          height:148,
-          display:"flex",
-          alignItems:"flex-end",
-          justifyContent:"center",
-          pointerEvents:"none",
+          position: "absolute",
+          right: 12,
+          bottom: 0,
+          width: 106,
+          height: 148,
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "center",
+          pointerEvents: "none",
         }}>
           <DriverPhoto
             firstName={drv.givenName}
@@ -2171,76 +2177,76 @@ function DrvCard({drv, standing, headshotUrl=null, latestRaceContext, watchlist,
             headshotVariant="6col"
             teamColor={teamCol}
             style={{
-              width:"100%",
-              height:"100%",
-              display:"block",
-              objectFit:"contain",
-              objectPosition:"center bottom",
-              filter:"drop-shadow(0 8px 18px rgba(0,0,0,0.42))",
-              background:"transparent",
-              border:"none",
+              width: "100%",
+              height: "100%",
+              display: "block",
+              objectFit: "contain",
+              objectPosition: "center bottom",
+              filter: "drop-shadow(0 8px 18px rgba(0,0,0,0.42))",
+              background: "transparent",
+              border: "none",
             }}
           />
         </div>
         {/* gradient overlay */}
-        <div style={{ position:"absolute", inset:0, background:`linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(10,10,10,0.94) 100%)` }}/>
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(10,10,10,0.94) 100%)` }} />
         {/* Top-left position badge */}
         <div style={{
-          position:"absolute", top:8, left:8,
-          background: medal ? (standing.position==="1"?"#FFD700":standing.position==="2"?"#C0C0C0":"#CD7F32") : "rgba(0,0,0,0.7)",
+          position: "absolute", top: 8, left: 8,
+          background: medal ? (standing.position === "1" ? "#FFD700" : standing.position === "2" ? "#C0C0C0" : "#CD7F32") : "rgba(0,0,0,0.7)",
           color: medal ? "#000" : "#fff",
-          width:26, height:26, borderRadius:"50%",
-          display:"flex", alignItems:"center", justifyContent:"center",
-          fontSize:11, fontWeight:800, fontFamily:"monospace",
+          width: 26, height: 26, borderRadius: "50%",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 11, fontWeight: 800, fontFamily: "monospace",
           border: medal ? "none" : "1px solid #333",
         }}>{standing.position}</div>
         {/* Top-right star */}
-        <div style={{ position:"absolute", top:8, right:8 }}>
-          <StarBtn id={drv.driverId} watchlist={watchlist} onToggle={onToggle} itemType="driver" disabled={watchlistDisabled}/>
+        <div style={{ position: "absolute", top: 8, right: 8 }}>
+          <StarBtn id={drv.driverId} watchlist={watchlist} onToggle={onToggle} itemType="driver" disabled={watchlistDisabled} />
         </div>
         {/* Team color bar at bottom of photo */}
-        <div style={{ position:"absolute", bottom:0, left:0, right:0, height:3, background:`linear-gradient(90deg, ${teamCol}, ${teamCol}88)` }}/>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${teamCol}, ${teamCol}88)` }} />
       </div>
 
       {/* Info */}
-      <div style={{ padding:"12px 14px" }}>
-        <div style={{ fontSize:12, color:"#555", marginBottom:2 }}>{drv.givenName}</div>
-        <div style={{ fontSize:16, fontWeight:800, color:"#fff", letterSpacing:0.3 }}>{drv.familyName}</div>
-        <div style={{ fontSize:11, color:teamCol, marginTop:4, fontWeight:600 }}>{team?.name}</div>
+      <div style={{ padding: "12px 14px" }}>
+        <div style={{ fontSize: 12, color: "#555", marginBottom: 2 }}>{drv.givenName}</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: "#fff", letterSpacing: 0.3 }}>{drv.familyName}</div>
+        <div style={{ fontSize: 11, color: teamCol, marginTop: 4, fontWeight: 600 }}>{team?.name}</div>
         {isLatestWinner && (
           <div style={{
-            marginTop:8,
-            display:"inline-flex",
-            alignItems:"center",
-            gap:6,
-            padding:"4px 8px",
-            borderRadius:999,
-            background:"#FFD70014",
-            border:"1px solid #FFD70033",
-            color:"#FFD700",
-            fontSize:10,
-            fontWeight:700,
-            letterSpacing:0.4,
+            marginTop: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "4px 8px",
+            borderRadius: 999,
+            background: "#FFD70014",
+            border: "1px solid #FFD70033",
+            color: "#FFD700",
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 0.4,
           }}>
             <span>Latest GP winner</span>
-            <span style={{ color:"#888", fontWeight:600 }}>{latestRaceContext.raceName}</span>
+            <span style={{ color: "#888", fontWeight: 600 }}>{latestRaceContext.raceName}</span>
           </div>
         )}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:10, paddingTop:10, borderTop:"1px solid #141414" }}>
-          <span style={{ fontSize:10, color:"#333", fontFamily:"monospace" }}>#{drv.permanentNumber}</span>
-          <span style={{ fontSize:14, fontWeight:800, color:"#FFD700", fontFamily:"monospace" }}>{standing.points} <span style={{ fontSize:10, color:"#555", fontWeight:400 }}>pts</span></span>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10, paddingTop: 10, borderTop: "1px solid #141414" }}>
+          <span style={{ fontSize: 10, color: "#333", fontFamily: "monospace" }}>#{drv.permanentNumber}</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: "#FFD700", fontFamily: "monospace" }}>{standing.points} <span style={{ fontSize: 10, color: "#555", fontWeight: 400 }}>pts</span></span>
         </div>
       </div>
     </div>
   );
 }
 
-function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMobile}) {
+function DrvPanel({ standing, headshotUrl = null, latestRaceContext, onClose, isMobile }) {
   if (!standing) return null;
-  const drv     = standing.Driver;
-  const team    = standing.Constructors?.[0];
+  const drv = standing.Driver;
+  const team = standing.Constructors?.[0];
   const teamCol = col(team?.constructorId);
-  const medal   = ["1","2","3"].includes(standing.position);
+  const medal = ["1", "2", "3"].includes(standing.position);
   const isLatestWinner = latestRaceContext?.driverId === drv.driverId;
 
   return (
@@ -2261,45 +2267,45 @@ function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMob
         minHeight: 0,
       }}
     >
-      <PanelHeader title={`${drv.givenName} ${drv.familyName}`} accent={teamCol} onClose={onClose}/>
-      <div style={{ overflowY:"auto", flex:1, minHeight:0, overscrollBehavior:"contain" }}>
+      <PanelHeader title={`${drv.givenName} ${drv.familyName}`} accent={teamCol} onClose={onClose} />
+      <div style={{ overflowY: "auto", flex: 1, minHeight: 0, overscrollBehavior: "contain" }}>
         {/* Hero photo */}
-        <div style={{ position:"relative", height:280, overflow:"hidden" }}>
+        <div style={{ position: "relative", height: 280, overflow: "hidden" }}>
           <DriverPhoto
             firstName={drv.givenName} lastName={drv.familyName} wikiUrl={drv.url} headshotUrl={headshotUrl} headshotVariant="12col"
             teamColor={teamCol}
-            style={{ width:"100%", height:280, display:"block", objectFit:headshotUrl ? "contain" : "cover", objectPosition:headshotUrl ? "center bottom" : "center top", background:headshotUrl ? `radial-gradient(circle at top left, ${teamCol}18, transparent 42%), linear-gradient(135deg, #111, #0a0a0a 78%)` : undefined, border:headshotUrl ? "none" : undefined }}
+            style={{ width: "100%", height: 280, display: "block", objectFit: headshotUrl ? "contain" : "cover", objectPosition: headshotUrl ? "center bottom" : "center top", background: headshotUrl ? `radial-gradient(circle at top left, ${teamCol}18, transparent 42%), linear-gradient(135deg, #111, #0a0a0a 78%)` : undefined, border: headshotUrl ? "none" : undefined }}
           />
-          <div style={{ position:"absolute", inset:0, background:`linear-gradient(to bottom, transparent 50%, #0a0a0a 100%)` }}/>
+          <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, transparent 50%, #0a0a0a 100%)` }} />
           {/* Race number overlay */}
-          <div style={{ position:"absolute", bottom:14, left:18, fontFamily:"monospace", fontSize:52, fontWeight:900, color:teamCol, opacity:0.25, lineHeight:1 }}>
+          <div style={{ position: "absolute", bottom: 14, left: 18, fontFamily: "monospace", fontSize: 52, fontWeight: 900, color: teamCol, opacity: 0.25, lineHeight: 1 }}>
             {drv.permanentNumber}
           </div>
           {/* Championship position */}
           <div style={{
-            position:"absolute", bottom:14, right:18,
-            background: medal ? (standing.position==="1"?"#FFD700":standing.position==="2"?"#C0C0C0":"#CD7F32") : "#111",
+            position: "absolute", bottom: 14, right: 18,
+            background: medal ? (standing.position === "1" ? "#FFD700" : standing.position === "2" ? "#C0C0C0" : "#CD7F32") : "#111",
             color: medal ? "#000" : "#fff",
-            padding:"4px 12px", borderRadius:20,
-            fontFamily:"monospace", fontWeight:800, fontSize:13,
+            padding: "4px 12px", borderRadius: 20,
+            fontFamily: "monospace", fontWeight: 800, fontSize: 13,
             border: medal ? "none" : "1px solid #2a2a2a",
           }}>P{standing.position}</div>
         </div>
 
         {/* Team color bar */}
-        <div style={{ height:3, background:`linear-gradient(90deg, ${teamCol}, ${teamCol}44, transparent)` }}/>
+        <div style={{ height: 3, background: `linear-gradient(90deg, ${teamCol}, ${teamCol}44, transparent)` }} />
 
-        <div style={{ padding:"16px" }}>
+        <div style={{ padding: "16px" }}>
           {/* Season stats */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginBottom: 18 }}>
             {[
               ["Points", standing.points, "#FFD700"],
               ["Season Wins", standing.wins, "#E10600"],
-              ["Podiums",standing.podiums, "#a855f7"],
-            ].map(([l,v,ac]) => (
-              <div key={l} style={{ background:"#111", borderRadius:8, padding:"10px 8px", textAlign:"center" }}>
-                <div style={{ fontSize:9, color:"#444", textTransform:"uppercase", letterSpacing:1.5, marginBottom:4 }}>{l}</div>
-                <div style={{ fontSize:22, fontWeight:800, color:ac, fontFamily:"monospace" }}>{v ?? "—"}</div>
+              ["Podiums", standing.podiums, "#a855f7"],
+            ].map(([l, v, ac]) => (
+              <div key={l} style={{ background: "#111", borderRadius: 8, padding: "10px 8px", textAlign: "center" }}>
+                <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>{l}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: ac, fontFamily: "monospace" }}>{v ?? "—"}</div>
               </div>
             ))}
           </div>
@@ -2307,16 +2313,16 @@ function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMob
           {latestRaceContext && (
             <>
               <SecLabel>Latest Grand Prix Context</SecLabel>
-              <div style={{ background:"#0f0f0f", borderRadius:8, padding:12, marginBottom:14, fontSize:13 }}>
+              <div style={{ background: "#0f0f0f", borderRadius: 8, padding: 12, marginBottom: 14, fontSize: 13 }}>
                 {isLatestWinner && (
                   <div style={{
-                    padding:"10px 12px",
-                    borderRadius:8,
-                    background:"#FFD70014",
-                    border:"1px solid #FFD70033",
-                    color:"#FFD700",
-                    fontWeight:700,
-                    marginBottom:10,
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    background: "#FFD70014",
+                    border: "1px solid #FFD70033",
+                    color: "#FFD700",
+                    fontWeight: 700,
+                    marginBottom: 10,
                   }}>
                     Won the most recent race: {latestRaceContext.raceName}
                   </div>
@@ -2327,9 +2333,9 @@ function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMob
                   ["Winning Team", latestRaceContext.teamName],
                   ["Race Date", latestRaceContext.date || "—"],
                 ].map(([label, val]) => (
-                  <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid #141414" }}>
-                    <span style={{ color:"#555", fontSize:12 }}>{label}</span>
-                    <span style={{ color: label==="Winning Team" ? latestRaceContext.teamColor : "#ccc", fontWeight: label==="Winning Team" ? 600 : 400, fontSize:12, textAlign:"right" }}>{val}</span>
+                  <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #141414" }}>
+                    <span style={{ color: "#555", fontSize: 12 }}>{label}</span>
+                    <span style={{ color: label === "Winning Team" ? latestRaceContext.teamColor : "#ccc", fontWeight: label === "Winning Team" ? 600 : 400, fontSize: 12, textAlign: "right" }}>{val}</span>
                   </div>
                 ))}
               </div>
@@ -2337,7 +2343,7 @@ function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMob
           )}
 
           <SecLabel>Driver Info</SecLabel>
-          <div style={{ background:"#0f0f0f", borderRadius:8, padding:12, marginBottom:14, fontSize:13 }}>
+          <div style={{ background: "#0f0f0f", borderRadius: 8, padding: 12, marginBottom: 14, fontSize: 13 }}>
             {[
               ["Nationality", drv.nationality],
               ["Date of Birth", drv.dob || "—"],
@@ -2345,9 +2351,9 @@ function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMob
               ["Code", drv.code || "—"],
               ["Team", team?.name || "—"],
             ].map(([label, val]) => (
-              <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid #141414" }}>
-                <span style={{ color:"#555", fontSize:12 }}>{label}</span>
-                <span style={{ color: label==="Team" ? teamCol : "#ccc", fontWeight: label==="Team" ? 600 : 400, fontSize:12 }}>{val}</span>
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #141414" }}>
+                <span style={{ color: "#555", fontSize: 12 }}>{label}</span>
+                <span style={{ color: label === "Team" ? teamCol : "#ccc", fontWeight: label === "Team" ? 600 : 400, fontSize: 12 }}>{val}</span>
               </div>
             ))}
           </div>
@@ -2357,13 +2363,13 @@ function DrvPanel({standing, headshotUrl=null, latestRaceContext, onClose, isMob
   );
 }
 
-function DriversPage({season,watchlist,onToggle,watchlistDisabled=false,isMobile=false}) {
-  const [drivers,setDrivers]=useState([]);
-  const [races,setRaces]=useState([]);
-  const [headshots,setHeadshots]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const [selectedDriver,setSelectedDriver]=useState(null);
-  useEffect(()=>{
+function DriversPage({ season, watchlist, onToggle, watchlistDisabled = false, isMobile = false }) {
+  const [drivers, setDrivers] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [headshots, setHeadshots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       fetchDriverStandings(season, { limit: 100, fetcher: apiFetch }),
@@ -2376,19 +2382,19 @@ function DriversPage({season,watchlist,onToggle,watchlistDisabled=false,isMobile
         setHeadshots(Array.isArray(headshotPayload?.drivers) ? headshotPayload.drivers : []);
         setLoading(false);
       })
-      .catch(()=>setLoading(false));
-  },[season]);
-  if(loading) return <Spinner/>;
-  if(!drivers.length) return <Empty/>;
+      .catch(() => setLoading(false));
+  }, [season]);
+  if (loading) return <Spinner />;
+  if (!drivers.length) return <Empty />;
   const latestRaceContext = buildLatestRaceWinnerContext(races);
   const headshotLookup = buildDriverHeadshotLookup(headshots);
   return (
     <div>
-      <div style={{ display:"flex", flexDirection:isMobile ? "column" : "row", gap:20, minHeight:520 }}>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:14}}>
-            {drivers.map((d,i)=>(
-              <div key={d.Driver.driverId} style={{animation:`cardIn 0.25s ease-out ${i*30}ms both`}}>
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 20, minHeight: 520 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(180px,1fr))", gap: 14 }}>
+            {drivers.map((d, i) => (
+              <div key={d.Driver.driverId} style={{ animation: `cardIn 0.25s ease-out ${i * 30}ms both` }}>
                 <DrvCard
                   drv={d.Driver}
                   standing={d}
@@ -2396,7 +2402,7 @@ function DriversPage({season,watchlist,onToggle,watchlistDisabled=false,isMobile
                   latestRaceContext={latestRaceContext}
                   watchlist={watchlist}
                   onToggle={onToggle}
-                  onClick={()=>setSelectedDriver(d)}
+                  onClick={() => setSelectedDriver(d)}
                   watchlistDisabled={watchlistDisabled}
                 />
               </div>
@@ -2408,7 +2414,7 @@ function DriversPage({season,watchlist,onToggle,watchlistDisabled=false,isMobile
             standing={selectedDriver}
             headshotUrl={resolveDriverHeadshotUrl(selectedDriver.Driver, headshotLookup)}
             latestRaceContext={latestRaceContext}
-            onClose={()=>setSelectedDriver(null)}
+            onClose={() => setSelectedDriver(null)}
             isMobile={isMobile}
           />
         )}
@@ -2417,23 +2423,23 @@ function DriversPage({season,watchlist,onToggle,watchlistDisabled=false,isMobile
   );
 }
 
-function ConCard({standing, meta, watchlist, onToggle, onClick, watchlistDisabled=false}) {
+function ConCard({ standing, meta, watchlist, onToggle, onClick, watchlistDisabled = false }) {
   const team = standing.Constructor;
   const tc = col(team?.constructorId);
   return (
     <div
       onClick={onClick}
       style={{
-        background:"#0a0a0a", border:`1px solid ${tc}44`,
-        borderRadius:12, overflow:"hidden", cursor:"pointer",
-        transition:"transform 0.18s, box-shadow 0.18s",
+        background: "#0a0a0a", border: `1px solid ${tc}44`,
+        borderRadius: 12, overflow: "hidden", cursor: "pointer",
+        transition: "transform 0.18s, box-shadow 0.18s",
       }}
-      onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 8px 28px ${tc}28`;}}
-      onMouseLeave={e=>{e.currentTarget.style.transform="none";e.currentTarget.style.boxShadow="none";}}
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = `0 8px 28px ${tc}28`; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}
     >
-      <div style={{height:5, background:`linear-gradient(90deg, ${tc}, ${tc}66, transparent)`}}/>
-      <div style={{padding:"16px 18px"}}>
-        <div style={{marginBottom:14}}>
+      <div style={{ height: 5, background: `linear-gradient(90deg, ${tc}, ${tc}66, transparent)` }} />
+      <div style={{ padding: "16px 18px" }}>
+        <div style={{ marginBottom: 14 }}>
           <ConstructorLogo
             constructorId={team?.constructorId}
             teamName={team?.name || "Constructor"}
@@ -2443,21 +2449,21 @@ function ConCard({standing, meta, watchlist, onToggle, onClick, watchlistDisable
             compact
           />
         </div>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-          <PosBadge pos={standing.position}/>
-          {watchlist && <StarBtn id={team.constructorId} watchlist={watchlist} onToggle={onToggle} itemType="team" disabled={watchlistDisabled}/>}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <PosBadge pos={standing.position} />
+          {watchlist && <StarBtn id={team.constructorId} watchlist={watchlist} onToggle={onToggle} itemType="team" disabled={watchlistDisabled} />}
         </div>
-        <div style={{fontSize:18,fontWeight:800,color:"#fff",marginBottom:3,letterSpacing:-0.3}}>{team.name}</div>
-        <div style={{fontSize:11,color:"#444",marginBottom:6}}>{team.nationality}</div>
-        {!!meta?.principal && <div style={{fontSize:11,color:tc,marginBottom:14,fontWeight:600}}>TP · {meta.principal}</div>}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          <div style={{background:`${tc}11`,border:`1px solid ${tc}22`,borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
-            <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Wins</div>
-            <div style={{fontSize:22,fontWeight:800,color:tc,fontFamily:"monospace"}}>{standing.wins}</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 3, letterSpacing: -0.3 }}>{team.name}</div>
+        <div style={{ fontSize: 11, color: "#444", marginBottom: 6 }}>{team.nationality}</div>
+        {!!meta?.principal && <div style={{ fontSize: 11, color: tc, marginBottom: 14, fontWeight: 600 }}>TP · {meta.principal}</div>}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div style={{ background: `${tc}11`, border: `1px solid ${tc}22`, borderRadius: 8, padding: "10px 8px", textAlign: "center" }}>
+            <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Wins</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: tc, fontFamily: "monospace" }}>{standing.wins}</div>
           </div>
-          <div style={{background:"#FFD70011",border:"1px solid #FFD70022",borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
-            <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Points</div>
-            <div style={{fontSize:22,fontWeight:800,color:"#FFD700",fontFamily:"monospace"}}>{standing.points}</div>
+          <div style={{ background: "#FFD70011", border: "1px solid #FFD70022", borderRadius: 8, padding: "10px 8px", textAlign: "center" }}>
+            <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Points</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#FFD700", fontFamily: "monospace" }}>{standing.points}</div>
           </div>
         </div>
       </div>
@@ -2465,7 +2471,7 @@ function ConCard({standing, meta, watchlist, onToggle, onClick, watchlistDisable
   );
 }
 
-function ConPanel({standing, isMobile, onClose}) {
+function ConPanel({ standing, isMobile, onClose }) {
   if (!standing) return null;
 
   const team = standing.Constructor;
@@ -2490,10 +2496,10 @@ function ConPanel({standing, isMobile, onClose}) {
         minHeight: 0,
       }}
     >
-      <PanelHeader title={team?.name || "Constructor"} accent={tc} onClose={onClose}/>
-      <div style={{ overflowY:"auto", flex:1, minHeight:0, overscrollBehavior:"contain" }}>
-        <div style={{padding:"18px"}}>
-          <div style={{marginBottom:16}}>
+      <PanelHeader title={team?.name || "Constructor"} accent={tc} onClose={onClose} />
+      <div style={{ overflowY: "auto", flex: 1, minHeight: 0, overscrollBehavior: "contain" }}>
+        <div style={{ padding: "18px" }}>
+          <div style={{ marginBottom: 16 }}>
             <ConstructorLogo
               constructorId={team?.constructorId}
               teamName={team?.name || "Constructor"}
@@ -2503,94 +2509,94 @@ function ConPanel({standing, isMobile, onClose}) {
             />
           </div>
 
-          <div style={{background:"#111",border:`1px solid ${tc}33`,borderRadius:12,padding:"18px 16px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:4,background:`linear-gradient(90deg, ${tc}, ${tc}44, transparent)`}}/>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:14}}>
+          <div style={{ background: "#111", border: `1px solid ${tc}33`, borderRadius: 12, padding: "18px 16px", marginBottom: 16, position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: `linear-gradient(90deg, ${tc}, ${tc}44, transparent)` }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
               <div>
-                <div style={{fontSize:12,color:tc,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:4}}>{team?.nationality}</div>
-                <div style={{fontSize:22,fontWeight:800,color:"#fff",lineHeight:1.1}}>{team?.name}</div>
-                {meta?.base && <div style={{fontSize:12,color:"#666",marginTop:6}}>{meta.base}</div>}
+                <div style={{ fontSize: 12, color: tc, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 4 }}>{team?.nationality}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{team?.name}</div>
+                {meta?.base && <div style={{ fontSize: 12, color: "#666", marginTop: 6 }}>{meta.base}</div>}
               </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontSize:30,fontWeight:900,color:tc,lineHeight:1}}>P{standing.position}</div>
-                <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1}}>championship</div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 30, fontWeight: 900, color: tc, lineHeight: 1 }}>P{standing.position}</div>
+                <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1 }}>championship</div>
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8 }}>
               {[
                 ["Points", standing.points, "#FFD700"],
                 ["Wins", standing.wins, tc],
                 ["Titles", meta?.constructorsTitles || "0", "#a855f7"],
               ].map(([label, value, accent]) => (
-                <div key={label} style={{background:"#0c0c0c",borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
-                  <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1.2,marginBottom:4}}>{label}</div>
-                  <div style={{fontSize:18,fontWeight:800,color:accent,fontFamily:"monospace"}}>{value}</div>
+                <div key={label} style={{ background: "#0c0c0c", borderRadius: 8, padding: "10px 8px", textAlign: "center" }}>
+                  <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 4 }}>{label}</div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: accent, fontFamily: "monospace" }}>{value}</div>
                 </div>
               ))}
             </div>
           </div>
 
           <SecLabel>Team Structure</SecLabel>
-          <div style={{ background:"#0f0f0f", borderRadius:8, padding:12, marginBottom:14, fontSize:13 }}>
+          <div style={{ background: "#0f0f0f", borderRadius: 8, padding: 12, marginBottom: 14, fontSize: 13 }}>
             {[
               ["Team Principal", meta?.principal || "Not available"],
               ["Technical Chief", meta?.technicalChief || "Not available"],
               ["Founder / Origin", meta?.founder || "Not available"],
               ["Base", meta?.base || "Not available"],
             ].map(([label, val]) => (
-              <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid #141414", gap:10 }}>
-                <span style={{ color:"#555", fontSize:12 }}>{label}</span>
-                <span style={{ color:"#ccc", fontWeight:500, fontSize:12, textAlign:"right", wordBreak:"break-word" }}>{val}</span>
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #141414", gap: 10 }}>
+                <span style={{ color: "#555", fontSize: 12 }}>{label}</span>
+                <span style={{ color: "#ccc", fontWeight: 500, fontSize: 12, textAlign: "right", wordBreak: "break-word" }}>{val}</span>
               </div>
             ))}
           </div>
 
           <SecLabel>Technical Package</SecLabel>
-          <div style={{ background:"#0f0f0f", borderRadius:8, padding:12, marginBottom:14, fontSize:13 }}>
+          <div style={{ background: "#0f0f0f", borderRadius: 8, padding: 12, marginBottom: 14, fontSize: 13 }}>
             {[
               ["Power Unit", meta?.powerUnit || "Not available"],
               ["Chassis", meta?.chassis || "Not available"],
               ["Debut Year", meta?.debutYear || "Not available"],
             ].map(([label, val]) => (
-              <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid #141414", gap:10 }}>
-                <span style={{ color:"#555", fontSize:12 }}>{label}</span>
-                <span style={{ color:"#ccc", fontWeight:500, fontSize:12, textAlign:"right", wordBreak:"break-word" }}>{val}</span>
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #141414", gap: 10 }}>
+                <span style={{ color: "#555", fontSize: 12 }}>{label}</span>
+                <span style={{ color: "#ccc", fontWeight: 500, fontSize: 12, textAlign: "right", wordBreak: "break-word" }}>{val}</span>
               </div>
             ))}
           </div>
 
           <SecLabel>Race Engineers</SecLabel>
-          <div style={{display:"grid",gap:10,marginBottom:14}}>
+          <div style={{ display: "grid", gap: 10, marginBottom: 14 }}>
             {(meta?.raceEngineers?.length ? meta.raceEngineers : ["Not available"]).map((entry) => (
-              <div key={entry} style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:8,padding:"10px 12px"}}>
-                <div style={{fontSize:12,color:"#ddd",fontWeight:600}}>{entry}</div>
+              <div key={entry} style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 8, padding: "10px 12px" }}>
+                <div style={{ fontSize: 12, color: "#ddd", fontWeight: 600 }}>{entry}</div>
               </div>
             ))}
           </div>
 
           <SecLabel>Championship Heritage</SecLabel>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginBottom:14}}>
-            <div style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:8,padding:"12px 10px",textAlign:"center"}}>
-              <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.2,marginBottom:6}}>Constructors' Titles</div>
-              <div style={{fontSize:22,fontWeight:800,color:tc,fontFamily:"monospace"}}>{meta?.constructorsTitles || "0"}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 10, marginBottom: 14 }}>
+            <div style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 8, padding: "12px 10px", textAlign: "center" }}>
+              <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 6 }}>Constructors' Titles</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: tc, fontFamily: "monospace" }}>{meta?.constructorsTitles || "0"}</div>
             </div>
-            <div style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:8,padding:"12px 10px",textAlign:"center"}}>
-              <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.2,marginBottom:6}}>Drivers' Titles</div>
-              <div style={{fontSize:22,fontWeight:800,color:"#FFD700",fontFamily:"monospace"}}>{meta?.driversTitles || "0"}</div>
+            <div style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 8, padding: "12px 10px", textAlign: "center" }}>
+              <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 6 }}>Drivers' Titles</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#FFD700", fontFamily: "monospace" }}>{meta?.driversTitles || "0"}</div>
             </div>
           </div>
 
           <SecLabel>Constructor Info</SecLabel>
-          <div style={{ background:"#0f0f0f", borderRadius:8, padding:12, marginBottom:14, fontSize:13 }}>
+          <div style={{ background: "#0f0f0f", borderRadius: 8, padding: 12, marginBottom: 14, fontSize: 13 }}>
             {[
               ["Championship Position", `P${standing.position}`],
               ["Constructor", team?.name || "—"],
               ["Nationality", team?.nationality || "—"],
               ["Wikipedia", team?.url || "—"],
             ].map(([label, val]) => (
-              <div key={label} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"6px 0", borderBottom:"1px solid #141414", gap:10 }}>
-                <span style={{ color:"#555", fontSize:12 }}>{label}</span>
-                <span style={{ color:"#ccc", fontWeight:500, fontSize:12, textAlign:"right", wordBreak:"break-word" }}>{val}</span>
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid #141414", gap: 10 }}>
+                <span style={{ color: "#555", fontSize: 12 }}>{label}</span>
+                <span style={{ color: "#ccc", fontWeight: 500, fontSize: 12, textAlign: "right", wordBreak: "break-word" }}>{val}</span>
               </div>
             ))}
           </div>
@@ -2600,28 +2606,28 @@ function ConPanel({standing, isMobile, onClose}) {
   );
 }
 
-function ConstructorsPage({season,watchlist,onToggle,watchlistDisabled=false,isMobile=false}) {
-  const [teams,setTeams]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const [selectedTeam,setSelectedTeam]=useState(null);
-  useEffect(()=>{
+function ConstructorsPage({ season, watchlist, onToggle, watchlistDisabled = false, isMobile = false }) {
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  useEffect(() => {
     setLoading(true);
     fetchConstructorStandings(season, { limit: 15, fetcher: apiFetch })
       .then(teams => { setTeams(teams); setLoading(false); })
-      .catch(()=>setLoading(false));
-  },[season]);
-  if(loading) return <Spinner/>;
-  if(!teams.length) return <Empty/>;
+      .catch(() => setLoading(false));
+  }, [season]);
+  if (loading) return <Spinner />;
+  if (!teams.length) return <Empty />;
   return (
     <div>
-      <div style={{ display:"flex", flexDirection:isMobile ? "column" : "row", gap:20, minHeight:520 }}>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:14}}>
-            {teams.map((t,i)=>{
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 20, minHeight: 520 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 14 }}>
+            {teams.map((t, i) => {
               const team = t.Constructor;
               const meta = getConstructorProfileMeta(team?.constructorId);
               return (
-                <div key={team.constructorId} style={{animation:`cardIn 0.25s ease-out ${i*40}ms both`}}>
+                <div key={team.constructorId} style={{ animation: `cardIn 0.25s ease-out ${i * 40}ms both` }}>
                   <ConCard
                     standing={t}
                     meta={meta}
@@ -2636,7 +2642,7 @@ function ConstructorsPage({season,watchlist,onToggle,watchlistDisabled=false,isM
           </div>
         </div>
         {selectedTeam && (
-          <ConPanel standing={selectedTeam} isMobile={isMobile} onClose={()=>setSelectedTeam(null)}/>
+          <ConPanel standing={selectedTeam} isMobile={isMobile} onClose={() => setSelectedTeam(null)} />
         )}
       </div>
     </div>
@@ -2645,26 +2651,26 @@ function ConstructorsPage({season,watchlist,onToggle,watchlistDisabled=false,isM
 
 // ── Strategy helpers ──────────────────────────────────────────────
 function buildStintsFromPits(stops, totalLaps) {
-  const sorted = [...stops].sort((a,b) => Number(a.lap) - Number(b.lap));
+  const sorted = [...stops].sort((a, b) => Number(a.lap) - Number(b.lap));
   const out = []; let prev = 1;
   sorted.forEach((stop, i) => {
     const lap = Number(stop.lap);
-    out.push({ start:prev, end:lap, i, dur:stop.duration });
+    out.push({ start: prev, end: lap, i, dur: stop.duration });
     prev = lap + 1;
   });
-  out.push({ start:prev, end:Number(totalLaps)||65, i:sorted.length });
+  out.push({ start: prev, end: Number(totalLaps) || 65, i: sorted.length });
   return out;
 }
 
-function StrategyPage({season}) {
-  const [races, setRaces]       = useState([]);
-  const [round, setRound]       = useState(null);
+function StrategyPage({ season }) {
+  const [races, setRaces] = useState([]);
+  const [round, setRound] = useState(null);
   const [stintData, setStintData] = useState([]);
   const [totalLaps, setTotalLaps] = useState(60);
-  const [selRace, setSelRace]   = useState(null);
-  const [hovered, setHovered]   = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [dl, setDl]             = useState(false);
+  const [selRace, setSelRace] = useState(null);
+  const [hovered, setHovered] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dl, setDl] = useState(false);
 
   // Load completed races for the season
   useEffect(() => {
@@ -2691,7 +2697,7 @@ function StrategyPage({season}) {
       fetchRoundResultRace(season, round, { limit: 25, fetcher: apiFetch }),
       fetchRoundPitStops(season, round, { limit: 200, fetcher: apiFetch }),
     ]).then(([race, pitstops]) => {
-      const results  = race?.Results || [];
+      const results = race?.Results || [];
       if (!results.length) { setDl(false); return; }
       const laps = Number(results[0]?.laps) || 60;
       setTotalLaps(laps);
@@ -2702,21 +2708,21 @@ function StrategyPage({season}) {
         byDrv[p.driverId].push(p);
       });
       const rows = results.slice(0, 20).map(r => ({
-        id:     r.Driver.driverId,
-        name:   `${r.Driver.givenName[0]}. ${r.Driver.familyName}`,
-        pos:    r.position,
-        tc:     col(r.Constructor?.constructorId),
-        team:   r.Constructor?.name,
+        id: r.Driver.driverId,
+        name: `${r.Driver.givenName[0]}. ${r.Driver.familyName}`,
+        pos: r.position,
+        tc: col(r.Constructor?.constructorId),
+        team: r.Constructor?.name,
         stints: buildStintsFromPits(byDrv[r.Driver.driverId] || [], r.laps || laps),
-        stops:  (byDrv[r.Driver.driverId] || []).length,
+        stops: (byDrv[r.Driver.driverId] || []).length,
       }));
       setStintData(rows);
       setDl(false);
     }).catch(() => setDl(false));
   }, [round, season]);
 
-  if (loading) return <Spinner/>;
-  if (!races.length) return <Empty icon="🎯" msg="No completed races found for this season"/>;
+  if (loading) return <Spinner />;
+  if (!races.length) return <Empty icon="🎯" msg="No completed races found for this season" />;
 
   const avgStop = stintData.length
     ? stintData.reduce((a, d) => a + d.stops, 0) / stintData.length
@@ -2725,7 +2731,7 @@ function StrategyPage({season}) {
   return (
     <div>
       {/* Race selector */}
-      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:20, flexWrap:"wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
         <select
           value={round || ""}
           onChange={e => {
@@ -2733,58 +2739,58 @@ function StrategyPage({season}) {
             setRound(e.target.value);
             setSelRace(r || null);
           }}
-          style={{ background:"#111", border:"1px solid #1e1e1e", color:"#fff", padding:"9px 14px", borderRadius:8, fontSize:13, cursor:"pointer", minWidth:240 }}
+          style={{ background: "#111", border: "1px solid #1e1e1e", color: "#fff", padding: "9px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", minWidth: 240 }}
         >
           {races.map(r => (
             <option key={r.round} value={r.round}>R{r.round} — {gpName(r.raceName)}</option>
           ))}
         </select>
         {selRace && (
-          <span style={{ fontSize:12, color:"#444" }}>
+          <span style={{ fontSize: 12, color: "#444" }}>
             {selRace.Circuit?.circuitName} · {selRace.date}
           </span>
         )}
       </div>
 
-      {dl ? <Spinner/> : !stintData.length ? (
-        <Empty icon="🔧" msg="No pit stop data for this race"/>
+      {dl ? <Spinner /> : !stintData.length ? (
+        <Empty icon="🔧" msg="No pit stop data for this race" />
       ) : (
         <>
           {/* Summary cards */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(110px,1fr))", gap:10, marginBottom:22 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(110px,1fr))", gap: 10, marginBottom: 22 }}>
             {[
-              ["Race",       gpName(selRace?.raceName), undefined],
-              ["Laps",       totalLaps,                 undefined],
+              ["Race", gpName(selRace?.raceName), undefined],
+              ["Laps", totalLaps, undefined],
               ["Most Stops", Math.max(...stintData.map(d => d.stops)), "#E10600"],
-              ["Avg Stops",  avgStop.toFixed(1),         undefined],
+              ["Avg Stops", avgStop.toFixed(1), undefined],
               ["1-Stoppers", stintData.filter(d => d.stops === 1).length, "#27F4D2"],
             ].map(([label, val, accent]) => (
-              <div key={label} style={{ background:"#0f0f0f", border:"1px solid #1e1e1e", borderRadius:8, padding:"12px 14px" }}>
-                <div style={{ fontSize:10, color:"#555", textTransform:"uppercase", letterSpacing:1.2, marginBottom:6 }}>{label}</div>
-                <div style={{ fontSize:20, fontWeight:700, color:accent || "#fff", fontFamily:"monospace" }}>{val}</div>
+              <div key={label} style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: "12px 14px" }}>
+                <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 6 }}>{label}</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: accent || "#fff", fontFamily: "monospace" }}>{val}</div>
               </div>
             ))}
           </div>
 
           {/* Stint legend */}
-          <div style={{ display:"flex", gap:14, marginBottom:16, flexWrap:"wrap", alignItems:"center" }}>
+          <div style={{ display: "flex", gap: 14, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
             {STINT_PAL.slice(0, 4).map((c, i) => (
-              <div key={i} style={{ display:"flex", alignItems:"center", gap:6 }}>
-                <div style={{ width:18, height:10, borderRadius:2, background:c }}/>
-                <span style={{ fontSize:11, color:"#555" }}>Stint {i+1}</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ width: 18, height: 10, borderRadius: 2, background: c }} />
+                <span style={{ fontSize: 11, color: "#555" }}>Stint {i + 1}</span>
               </div>
             ))}
-            <span style={{ fontSize:11, color:"#2a2a2a", marginLeft:"auto" }}>Hover a row to isolate · bar width = laps in stint</span>
+            <span style={{ fontSize: 11, color: "#2a2a2a", marginLeft: "auto" }}>Hover a row to isolate · bar width = laps in stint</span>
           </div>
 
           {/* Stint chart */}
-          <div style={{ background:"#0a0a0a", border:"1px solid #1a1a1a", borderRadius:10, padding:"16px 16px 10px", overflowX:"auto" }}>
-            <div style={{ minWidth:480 }}>
+          <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 10, padding: "16px 16px 10px", overflowX: "auto" }}>
+            <div style={{ minWidth: 480 }}>
               {/* Lap ruler */}
-              <div style={{ display:"flex", paddingLeft:162, marginBottom:10 }}>
-                <div style={{ position:"relative", flex:1, height:16 }}>
-                  {[0,10,20,30,40,50,60,70].filter(l => l <= totalLaps).map(l => (
-                    <div key={l} style={{ position:"absolute", left:`${(l/totalLaps)*100}%`, fontSize:9, color:"#2a2a2a", transform:"translateX(-50%)" }}>{l}</div>
+              <div style={{ display: "flex", paddingLeft: 162, marginBottom: 10 }}>
+                <div style={{ position: "relative", flex: 1, height: 16 }}>
+                  {[0, 10, 20, 30, 40, 50, 60, 70].filter(l => l <= totalLaps).map(l => (
+                    <div key={l} style={{ position: "absolute", left: `${(l / totalLaps) * 100}%`, fontSize: 9, color: "#2a2a2a", transform: "translateX(-50%)" }}>{l}</div>
                   ))}
                 </div>
               </div>
@@ -2794,38 +2800,38 @@ function StrategyPage({season}) {
                   key={driver.id}
                   onMouseEnter={() => setHovered(driver.id)}
                   onMouseLeave={() => setHovered(null)}
-                  style={{ display:"flex", alignItems:"center", gap:10, marginBottom:7, opacity: hovered && hovered !== driver.id ? 0.2 : 1, transition:"opacity 0.18s" }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 7, opacity: hovered && hovered !== driver.id ? 0.2 : 1, transition: "opacity 0.18s" }}
                 >
                   {/* Driver label */}
-                  <div style={{ width:155, flexShrink:0, display:"flex", alignItems:"center", gap:7 }}>
-                    <div style={{ width:3, height:22, background:driver.tc, borderRadius:2, flexShrink:0 }}/>
-                    <div style={{ minWidth:0 }}>
-                      <div style={{ fontSize:12, color:"#ccc", fontWeight:500, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{driver.name}</div>
-                      <div style={{ fontSize:10, color:"#3a3a3a", fontFamily:"monospace" }}>P{driver.pos} · {driver.stops} stop{driver.stops !== 1 ? "s":""}</div>
+                  <div style={{ width: 155, flexShrink: 0, display: "flex", alignItems: "center", gap: 7 }}>
+                    <div style={{ width: 3, height: 22, background: driver.tc, borderRadius: 2, flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 12, color: "#ccc", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{driver.name}</div>
+                      <div style={{ fontSize: 10, color: "#3a3a3a", fontFamily: "monospace" }}>P{driver.pos} · {driver.stops} stop{driver.stops !== 1 ? "s" : ""}</div>
                     </div>
                   </div>
 
                   {/* Stint bars */}
-                  <div style={{ flex:1, height:26, position:"relative", borderRadius:4, overflow:"hidden", background:"#111" }}>
+                  <div style={{ flex: 1, height: 26, position: "relative", borderRadius: 4, overflow: "hidden", background: "#111" }}>
                     {driver.stints.map((st, idx) => {
                       const startPct = ((st.start - 1) / totalLaps) * 100;
                       const widthPct = ((st.end - st.start + 1) / totalLaps) * 100;
-                      const color    = STINT_PAL[Math.min(st.i, STINT_PAL.length - 1)];
+                      const color = STINT_PAL[Math.min(st.i, STINT_PAL.length - 1)];
                       const lapCount = st.end - st.start + 1;
                       return (
                         <div
                           key={idx}
-                          title={`Stint ${st.i+1}: L${st.start}–L${st.end} (${lapCount} laps)${st.dur ? ` · ${st.dur}s stop` : ""}`}
+                          title={`Stint ${st.i + 1}: L${st.start}–L${st.end} (${lapCount} laps)${st.dur ? ` · ${st.dur}s stop` : ""}`}
                           style={{
-                            position:"absolute", left:`${startPct}%`, width:`${widthPct}%`,
-                            height:"100%", background:color, opacity:0.88,
+                            position: "absolute", left: `${startPct}%`, width: `${widthPct}%`,
+                            height: "100%", background: color, opacity: 0.88,
                             borderRight: idx < driver.stints.length - 1 ? "2px solid #0a0a0a" : "none",
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            boxSizing:"border-box",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            boxSizing: "border-box",
                           }}
                         >
                           {widthPct > 7 && (
-                            <span style={{ fontSize:9, fontWeight:700, color:"rgba(0,0,0,0.7)", userSelect:"none" }}>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(0,0,0,0.7)", userSelect: "none" }}>
                               {lapCount}L
                             </span>
                           )}
@@ -2836,49 +2842,51 @@ function StrategyPage({season}) {
                     {driver.stints.slice(0, -1).map((st, idx) => (
                       <div
                         key={`pit-${idx}`}
-                        style={{ position:"absolute", left:`${(st.end / totalLaps) * 100}%`, top:0, width:2, height:"100%", background:"#0a0a0a", zIndex:2 }}
+                        style={{ position: "absolute", left: `${(st.end / totalLaps) * 100}%`, top: 0, width: 2, height: "100%", background: "#0a0a0a", zIndex: 2 }}
                       />
                     ))}
                   </div>
                 </div>
               ))}
-              <div style={{ fontSize:9, color:"#1e1e1e", textAlign:"center", marginTop:10 }}>← Lap number →</div>
+              <div style={{ fontSize: 9, color: "#1e1e1e", textAlign: "center", marginTop: 10 }}>← Lap number →</div>
             </div>
           </div>
 
           {/* Raw pit stop table */}
-          <div style={{ marginTop:24 }}>
-            <div style={{ fontSize:10, color:"#333", textTransform:"uppercase", letterSpacing:2, marginBottom:12, fontWeight:600 }}>All Pit Stops — Sorted by Lap</div>
-            <div style={{ overflowX:"auto" }}>
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+          <div style={{ marginTop: 24 }}>
+            <div style={{ fontSize: 10, color: "#333", textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, fontWeight: 600 }}>All Pit Stops — Sorted by Lap</div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
-                  <tr style={{ borderBottom:"1px solid #E10600" }}>
-                    {["Driver","Stop","Lap","Time of Day","Duration"].map(h => (
-                      <th key={h} style={{ padding:"8px 12px", textAlign:"left", color:"#555", fontWeight:500, fontSize:11, letterSpacing:1, textTransform:"uppercase", whiteSpace:"nowrap" }}>{h}</th>
+                  <tr style={{ borderBottom: "1px solid #E10600" }}>
+                    {["Driver", "Stop", "Lap", "Time of Day", "Duration"].map(h => (
+                      <th key={h} style={{ padding: "8px 12px", textAlign: "left", color: "#555", fontWeight: 500, fontSize: 11, letterSpacing: 1, textTransform: "uppercase", whiteSpace: "nowrap" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {stintData
-                    .flatMap(d => (d.stints.slice(0, -1).map((st, i) => ({ driverId:d.id, name:d.name, tc:d.tc, stop:i+1, lap:st.end, dur:st.dur }))))
+                    .flatMap(d => (d.stints.slice(0, -1).map((st, i) => ({ driverId: d.id, name: d.name, tc: d.tc, stop: i + 1, lap: st.end, dur: st.dur }))))
                     .sort((a, b) => a.lap - b.lap)
                     .map((p, i) => (
-                      <tr key={i} style={{ borderBottom:"1px solid #141414" }}
+                      <tr key={i} style={{ borderBottom: "1px solid #141414" }}
                         onMouseEnter={e => e.currentTarget.style.background = "#0d0d0d"}
                         onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                       >
-                        <td style={{ padding:"8px 12px" }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                            <div style={{ width:3, height:18, background:p.tc, borderRadius:2, flexShrink:0 }}/>
-                            <span style={{ color:"#ccc", fontWeight:500 }}>{p.name}</span>
+                        <td style={{ padding: "8px 12px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <div style={{ width: 3, height: 18, background: p.tc, borderRadius: 2, flexShrink: 0 }} />
+                            <span style={{ color: "#ccc", fontWeight: 500 }}>{p.name}</span>
                           </div>
                         </td>
-                        <td style={{ padding:"8px 12px", fontFamily:"monospace", color:"#555" }}>#{p.stop}</td>
-                        <td style={{ padding:"8px 12px", fontFamily:"monospace", color:"#888" }}>L{p.lap}</td>
-                        <td style={{ padding:"8px 12px", fontFamily:"monospace", color:"#555", fontSize:12 }}>—</td>
-                        <td style={{ padding:"8px 12px" }}>
-                          <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:600,
-                            color: p.dur && parseFloat(p.dur) < 23 ? "#27F4D2" : p.dur && parseFloat(p.dur) < 28 ? "#FFD700" : "#888" }}>
+                        <td style={{ padding: "8px 12px", fontFamily: "monospace", color: "#555" }}>#{p.stop}</td>
+                        <td style={{ padding: "8px 12px", fontFamily: "monospace", color: "#888" }}>L{p.lap}</td>
+                        <td style={{ padding: "8px 12px", fontFamily: "monospace", color: "#555", fontSize: 12 }}>—</td>
+                        <td style={{ padding: "8px 12px" }}>
+                          <span style={{
+                            fontFamily: "monospace", fontSize: 13, fontWeight: 600,
+                            color: p.dur && parseFloat(p.dur) < 23 ? "#27F4D2" : p.dur && parseFloat(p.dur) < 28 ? "#FFD700" : "#888"
+                          }}>
                             {p.dur ? `${p.dur}s` : "—"}
                           </span>
                         </td>
@@ -2895,16 +2903,16 @@ function StrategyPage({season}) {
   );
 }
 
-function HeadToHeadPage({season,isMobile}) {
-  const [d1,setD1]=useState("");
-  const [d2,setD2]=useState("");
-  const [drivers,setDrivers]=useState([]);
-  const [races,setRaces]=useState([]);
-  const [headshots,setHeadshots]=useState([]);
-  const [loading,setLoading]=useState(true);
+function HeadToHeadPage({ season, isMobile }) {
+  const [d1, setD1] = useState("");
+  const [d2, setD2] = useState("");
+  const [drivers, setDrivers] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [headshots, setHeadshots] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { getParams, setParams } = useShareableH2H();
 
-  useEffect(()=>{
+  useEffect(() => {
     setLoading(true);
     Promise.all([
       fetchDriverStandings(season, { limit: 100, fetcher: apiFetch }),
@@ -2917,8 +2925,8 @@ function HeadToHeadPage({season,isMobile}) {
         setHeadshots(Array.isArray(headshotPayload?.drivers) ? headshotPayload.drivers : []);
         setLoading(false);
       })
-      .catch(()=>setLoading(false));
-  },[season]);
+      .catch(() => setLoading(false));
+  }, [season]);
 
   useEffect(() => {
     if (!drivers.length) return;
@@ -2944,42 +2952,42 @@ function HeadToHeadPage({season,isMobile}) {
   const duel = useMemo(() => buildHeadToHeadDuels(leftMetric, rightMetric), [leftMetric, rightMetric]);
   const headshotLookup = useMemo(() => buildDriverHeadshotLookup(headshots), [headshots]);
 
-  if(loading) return <Spinner/>;
-  if(!driverMetrics.length) return <Empty icon="⚔️" msg="No head-to-head comparison data available"/>;
+  if (loading) return <Spinner />;
+  if (!driverMetrics.length) return <Empty icon="⚔️" msg="No head-to-head comparison data available" />;
 
   const comparisonRows = leftMetric && rightMetric ? [
-    { label:"Championship Rank", left:leftMetric.standingsPosition, right:rightMetric.standingsPosition, direction:"lower" },
-    { label:"Points", left:leftMetric.currentPoints, right:rightMetric.currentPoints, direction:"higher" },
-    { label:"Wins", left:leftMetric.currentWins, right:rightMetric.currentWins, direction:"higher" },
-    { label:"Podiums", left:leftMetric.podiums, right:rightMetric.podiums, direction:"higher" },
-    { label:"Average Finish", left:leftMetric.averageFinish, right:rightMetric.averageFinish, direction:"lower" },
-    { label:"Best Finish", left:leftMetric.bestFinish, right:rightMetric.bestFinish, direction:"lower" },
-    { label:"Top 10 Rate", left:leftMetric.top10Rate, right:rightMetric.top10Rate, direction:"higher", suffix:"%" },
-    { label:"DNFs", left:leftMetric.dnfs, right:rightMetric.dnfs, direction:"lower" },
+    { label: "Championship Rank", left: leftMetric.standingsPosition, right: rightMetric.standingsPosition, direction: "lower" },
+    { label: "Points", left: leftMetric.currentPoints, right: rightMetric.currentPoints, direction: "higher" },
+    { label: "Wins", left: leftMetric.currentWins, right: rightMetric.currentWins, direction: "higher" },
+    { label: "Podiums", left: leftMetric.podiums, right: rightMetric.podiums, direction: "higher" },
+    { label: "Average Finish", left: leftMetric.averageFinish, right: rightMetric.averageFinish, direction: "lower" },
+    { label: "Best Finish", left: leftMetric.bestFinish, right: rightMetric.bestFinish, direction: "lower" },
+    { label: "Top 10 Rate", left: leftMetric.top10Rate, right: rightMetric.top10Rate, direction: "higher", suffix: "%" },
+    { label: "DNFs", left: leftMetric.dnfs, right: rightMetric.dnfs, direction: "lower" },
   ] : [];
 
   return (
     <div>
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16,marginBottom:24}}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 24 }}>
         <div>
-          <label style={{display:"block",fontSize:12,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontWeight:600}}>Driver 1</label>
-          <select value={d1} onChange={e=>setD1(e.target.value)} style={{width:"100%",padding:10,background:"#111",border:"1px solid #1e1e1e",color:"#fff",borderRadius:6,fontSize:13}}>
+          <label style={{ display: "block", fontSize: 12, color: "#555", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8, fontWeight: 600 }}>Driver 1</label>
+          <select value={d1} onChange={e => setD1(e.target.value)} style={{ width: "100%", padding: 10, background: "#111", border: "1px solid #1e1e1e", color: "#fff", borderRadius: 6, fontSize: 13 }}>
             <option value="">Select driver...</option>
-            {driverMetrics.map(driver=><option key={driver.driverId} value={driver.driverId}>{driver.name}</option>)}
+            {driverMetrics.map(driver => <option key={driver.driverId} value={driver.driverId}>{driver.name}</option>)}
           </select>
         </div>
         <div>
-          <label style={{display:"block",fontSize:12,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontWeight:600}}>Driver 2</label>
-          <select value={d2} onChange={e=>setD2(e.target.value)} style={{width:"100%",padding:10,background:"#111",border:"1px solid #1e1e1e",color:"#fff",borderRadius:6,fontSize:13}}>
+          <label style={{ display: "block", fontSize: 12, color: "#555", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8, fontWeight: 600 }}>Driver 2</label>
+          <select value={d2} onChange={e => setD2(e.target.value)} style={{ width: "100%", padding: 10, background: "#111", border: "1px solid #1e1e1e", color: "#fff", borderRadius: 6, fontSize: 13 }}>
             <option value="">Select driver...</option>
-            {driverMetrics.map(driver=><option key={driver.driverId} value={driver.driverId}>{driver.name}</option>)}
+            {driverMetrics.map(driver => <option key={driver.driverId} value={driver.driverId}>{driver.name}</option>)}
           </select>
         </div>
       </div>
 
       {(leftMetric && rightMetric) ? (
-        <div style={{display:"grid",gap:18}}>
-          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16}}>
+        <div style={{ display: "grid", gap: 18 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
             {[leftMetric, rightMetric].map((driver) => {
               const headshotUrl = resolveDriverHeadshotUrl({
                 code: driver.code,
@@ -2989,32 +2997,32 @@ function HeadToHeadPage({season,isMobile}) {
               }, headshotLookup);
 
               return (
-                <div key={driver.driverId} style={{background:"#0a0a0a",border:`1px solid ${driver.teamColor}44`,borderRadius:12,overflow:"hidden"}}>
-                  <div style={{height:4,background:`linear-gradient(90deg,${driver.teamColor},${driver.teamColor}44,transparent)`}}/>
-                  <div style={{padding:18}}>
-                    <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+                <div key={driver.driverId} style={{ background: "#0a0a0a", border: `1px solid ${driver.teamColor}44`, borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ height: 4, background: `linear-gradient(90deg,${driver.teamColor},${driver.teamColor}44,transparent)` }} />
+                  <div style={{ padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                       <DriverPhoto firstName={driver.name.split(" ")[0] || driver.familyName} lastName={driver.familyName} wikiUrl={driver.wikiUrl} headshotUrl={headshotUrl} teamColor={driver.teamColor}
-                        style={{width:68,height:68,borderRadius:10,display:"block",flexShrink:0}}/>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:11,color:driver.teamColor,fontWeight:700,textTransform:"uppercase",letterSpacing:1,marginBottom:3}}>{driver.teamName}</div>
-                        <div style={{fontSize:18,fontWeight:800,color:"#fff",letterSpacing:-0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{driver.name}</div>
-                        <div style={{fontSize:11,color:"#444",fontFamily:"monospace",marginTop:3}}>#{driver.number} · {driver.code}</div>
+                        style={{ width: 68, height: 68, borderRadius: 10, display: "block", flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 11, color: driver.teamColor, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>{driver.teamName}</div>
+                        <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", letterSpacing: -0.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{driver.name}</div>
+                        <div style={{ fontSize: 11, color: "#444", fontFamily: "monospace", marginTop: 3 }}>#{driver.number} · {driver.code}</div>
                       </div>
-                      <div style={{textAlign:"center",flexShrink:0}}>
-                        <div style={{fontSize:34,fontWeight:900,color:driver.teamColor,lineHeight:1}}>P{driver.standingsPosition}</div>
-                        <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1}}>rank</div>
+                      <div style={{ textAlign: "center", flexShrink: 0 }}>
+                        <div style={{ fontSize: 34, fontWeight: 900, color: driver.teamColor, lineHeight: 1 }}>P{driver.standingsPosition}</div>
+                        <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1 }}>rank</div>
                       </div>
                     </div>
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8 }}>
                       {[
                         ["Points", driver.currentPoints, "#FFD700"],
                         ["Wins", driver.currentWins, "#E10600"],
                         ["Podiums", driver.podiums, "#27F4D2"],
                         ["Avg", driver.averageFinish ?? "—", "#a855f7"],
-                      ].map(([label,val,accent])=>(
-                        <div key={label} style={{background:"#111",borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
-                          <div style={{fontSize:9,color:"#444",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{label}</div>
-                          <div style={{fontSize:18,fontWeight:800,color:accent,fontFamily:"monospace"}}>{val}</div>
+                      ].map(([label, val, accent]) => (
+                        <div key={label} style={{ background: "#111", borderRadius: 8, padding: "10px 8px", textAlign: "center" }}>
+                          <div style={{ fontSize: 9, color: "#444", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: accent, fontFamily: "monospace" }}>{val}</div>
                         </div>
                       ))}
                     </div>
@@ -3024,7 +3032,7 @@ function HeadToHeadPage({season,isMobile}) {
             })}
           </div>
 
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12 }}>
             <StatCard
               label="Points Gap"
               value={`${Math.abs(leftMetric.currentPoints - rightMetric.currentPoints)} pts`}
@@ -3051,72 +3059,72 @@ function HeadToHeadPage({season,isMobile}) {
             />
           </div>
 
-          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"minmax(0,1.1fr) minmax(0,0.95fr)",gap:18,alignItems:"start"}}>
-            <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.1fr) minmax(0,0.95fr)", gap: 18, alignItems: "start" }}>
+            <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
               <SecLabel>Metric board</SecLabel>
-              <div style={{display:"grid",gap:10}}>
+              <div style={{ display: "grid", gap: 10 }}>
                 {comparisonRows.map((row) => {
                   const winner = getComparisonWinner(row.left, row.right, row.direction);
                   const formatValue = (value) => value === null || value === undefined ? "—" : `${value}${row.suffix || ""}`;
                   return (
-                    <div key={row.label} style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center",gap:12,background:"#111",border:"1px solid #1c1c1c",borderRadius:10,padding:"12px 14px"}}>
-                      <div style={{textAlign:"left",fontSize:18,fontWeight:800,color:winner === "left" ? leftMetric.teamColor : "#bbb",fontFamily:"monospace"}}>{formatValue(row.left)}</div>
-                      <div style={{fontSize:11,color:"#666",textTransform:"uppercase",letterSpacing:1.4,fontWeight:700}}>{row.label}</div>
-                      <div style={{textAlign:"right",fontSize:18,fontWeight:800,color:winner === "right" ? rightMetric.teamColor : "#bbb",fontFamily:"monospace"}}>{formatValue(row.right)}</div>
+                    <div key={row.label} style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 12, background: "#111", border: "1px solid #1c1c1c", borderRadius: 10, padding: "12px 14px" }}>
+                      <div style={{ textAlign: "left", fontSize: 18, fontWeight: 800, color: winner === "left" ? leftMetric.teamColor : "#bbb", fontFamily: "monospace" }}>{formatValue(row.left)}</div>
+                      <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: 1.4, fontWeight: 700 }}>{row.label}</div>
+                      <div style={{ textAlign: "right", fontSize: 18, fontWeight: 800, color: winner === "right" ? rightMetric.teamColor : "#bbb", fontFamily: "monospace" }}>{formatValue(row.right)}</div>
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            <div style={{display:"grid",gap:18}}>
-              <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+            <div style={{ display: "grid", gap: 18 }}>
+              <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
                 <SecLabel>Recent form</SecLabel>
                 {[leftMetric, rightMetric].map((driver) => (
-                  <div key={driver.driverId} style={{marginBottom:driver.driverId === rightMetric.driverId ? 0 : 16}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                      <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>{driver.name}</div>
-                      <div style={{fontSize:11,color:driver.teamColor}}>{driver.teamName}</div>
+                  <div key={driver.driverId} style={{ marginBottom: driver.driverId === rightMetric.driverId ? 0 : 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{driver.name}</div>
+                      <div style={{ fontSize: 11, color: driver.teamColor }}>{driver.teamName}</div>
                     </div>
-                    <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {driver.recentResults.length ? driver.recentResults.map((result) => (
-                        <div key={`${driver.driverId}-${result.round}`} style={{padding:"8px 10px",borderRadius:8,background:`${result.tone}16`,border:`1px solid ${result.tone}33`,minWidth:68}}>
-                          <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>R{result.round}</div>
-                          <div style={{fontSize:14,fontWeight:800,color:result.tone,fontFamily:"monospace"}}>{result.label}</div>
+                        <div key={`${driver.driverId}-${result.round}`} style={{ padding: "8px 10px", borderRadius: 8, background: `${result.tone}16`, border: `1px solid ${result.tone}33`, minWidth: 68 }}>
+                          <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>R{result.round}</div>
+                          <div style={{ fontSize: 14, fontWeight: 800, color: result.tone, fontFamily: "monospace" }}>{result.label}</div>
                         </div>
-                      )) : <div style={{fontSize:12,color:"#555"}}>No recent race form available.</div>}
+                      )) : <div style={{ fontSize: 12, color: "#555" }}>No recent race form available.</div>}
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18}}>
+              <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18 }}>
                 <SecLabel>Race-by-race duel</SecLabel>
                 {duel.recent.length ? (
-                  <div style={{display:"grid",gap:10}}>
+                  <div style={{ display: "grid", gap: 10 }}>
                     {duel.recent.map((entry) => (
-                      <div key={entry.round} style={{background:"#111",border:"1px solid #1c1c1c",borderRadius:10,padding:"12px 14px"}}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:8}}>
-                          <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>{entry.raceName}</div>
-                          <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.2}}>Round {entry.round}</div>
+                      <div key={entry.round} style={{ background: "#111", border: "1px solid #1c1c1c", borderRadius: 10, padding: "12px 14px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 8 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{entry.raceName}</div>
+                          <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.2 }}>Round {entry.round}</div>
                         </div>
-                        <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:10,alignItems:"center"}}>
-                          <div style={{textAlign:"left",fontSize:15,fontWeight:800,color:entry.winner === "left" ? leftMetric.teamColor : "#ccc",fontFamily:"monospace"}}>{entry.left.label}</div>
-                          <div style={{fontSize:10,color:"#444",textTransform:"uppercase",letterSpacing:1.3}}>{entry.winner === "tie" ? "Even" : `${entry.winner === "left" ? leftMetric.familyName : rightMetric.familyName} edge`}</div>
-                          <div style={{textAlign:"right",fontSize:15,fontWeight:800,color:entry.winner === "right" ? rightMetric.teamColor : "#ccc",fontFamily:"monospace"}}>{entry.right.label}</div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 10, alignItems: "center" }}>
+                          <div style={{ textAlign: "left", fontSize: 15, fontWeight: 800, color: entry.winner === "left" ? leftMetric.teamColor : "#ccc", fontFamily: "monospace" }}>{entry.left.label}</div>
+                          <div style={{ fontSize: 10, color: "#444", textTransform: "uppercase", letterSpacing: 1.3 }}>{entry.winner === "tie" ? "Even" : `${entry.winner === "left" ? leftMetric.familyName : rightMetric.familyName} edge`}</div>
+                          <div style={{ textAlign: "right", fontSize: 15, fontWeight: 800, color: entry.winner === "right" ? rightMetric.teamColor : "#ccc", fontFamily: "monospace" }}>{entry.right.label}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <Empty icon="🏁" msg="No shared race results yet for this comparison."/>
+                  <Empty icon="🏁" msg="No shared race results yet for this comparison." />
                 )}
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div style={{textAlign:"center",padding:"60px 0",color:"#333",fontSize:14}}>
+        <div style={{ textAlign: "center", padding: "60px 0", color: "#333", fontSize: 14 }}>
           Select both drivers above to unlock the full comparison board
         </div>
       )}
@@ -3129,86 +3137,86 @@ function HeadToHeadPage({season,isMobile}) {
 // normalised to fit within a ~200×140 viewBox.
 // Circuit metadata (lap length, turns, DRS zones, inaugural year)
 const CIRCUIT_META = {
-  bahrain:       { lap:"5.412 km", turns:15, drs:3, est:2004 },
-  jeddah:        { lap:"6.174 km", turns:27, drs:3, est:2021 },
-  albert_park:   { lap:"5.278 km", turns:16, drs:4, est:1996 },
-  suzuka:        { lap:"5.807 km", turns:18, drs:1, est:1987 },
-  shanghai:      { lap:"5.451 km", turns:16, drs:2, est:2004 },
-  miami:         { lap:"5.412 km", turns:19, drs:3, est:2022 },
-  imola:         { lap:"4.909 km", turns:19, drs:2, est:1980 },
-  monaco:        { lap:"3.337 km", turns:19, drs:1, est:1950 },
-  villeneuve:    { lap:"4.361 km", turns:14, drs:3, est:1978 },
-  catalunya:     { lap:"4.657 km", turns:16, drs:2, est:1991 },
-  silverstone:   { lap:"5.891 km", turns:18, drs:2, est:1950 },
-  hungaroring:   { lap:"4.381 km", turns:14, drs:1, est:1986 },
-  spa:           { lap:"7.004 km", turns:19, drs:2, est:1950 },
-  zandvoort:     { lap:"4.259 km", turns:14, drs:2, est:1985 },
-  monza:         { lap:"5.793 km", turns:11, drs:2, est:1950 },
-  baku:          { lap:"6.003 km", turns:20, drs:2, est:2016 },
-  marina_bay:    { lap:"5.063 km", turns:23, drs:3, est:2008 },
-  americas:      { lap:"5.513 km", turns:20, drs:2, est:2012 },
-  rodriguez:     { lap:"4.304 km", turns:17, drs:3, est:1963 },
-  interlagos:    { lap:"4.309 km", turns:15, drs:2, est:1973 },
-  las_vegas:     { lap:"6.201 km", turns:17, drs:2, est:2023 },
-  vegas:         { lap:"6.201 km", turns:17, drs:2, est:2023 },
-  yas_marina:    { lap:"5.281 km", turns:16, drs:2, est:2009 },
-  losail:        { lap:"5.380 km", turns:16, drs:2, est:2021 },
-  red_bull_ring: { lap:"4.318 km", turns:10, drs:3, est:1970 },
-  madring:       { lap:"5.400 km", turns:21, drs:3, est:2026 },
-  portimao:      { lap:"4.653 km", turns:15, drs:2, est:2020 },
-  istanbul:      { lap:"5.338 km", turns:14, drs:3, est:2005 },
+  bahrain: { lap: "5.412 km", turns: 15, drs: 3, est: 2004 },
+  jeddah: { lap: "6.174 km", turns: 27, drs: 3, est: 2021 },
+  albert_park: { lap: "5.278 km", turns: 16, drs: 4, est: 1996 },
+  suzuka: { lap: "5.807 km", turns: 18, drs: 1, est: 1987 },
+  shanghai: { lap: "5.451 km", turns: 16, drs: 2, est: 2004 },
+  miami: { lap: "5.412 km", turns: 19, drs: 3, est: 2022 },
+  imola: { lap: "4.909 km", turns: 19, drs: 2, est: 1980 },
+  monaco: { lap: "3.337 km", turns: 19, drs: 1, est: 1950 },
+  villeneuve: { lap: "4.361 km", turns: 14, drs: 3, est: 1978 },
+  catalunya: { lap: "4.657 km", turns: 16, drs: 2, est: 1991 },
+  silverstone: { lap: "5.891 km", turns: 18, drs: 2, est: 1950 },
+  hungaroring: { lap: "4.381 km", turns: 14, drs: 1, est: 1986 },
+  spa: { lap: "7.004 km", turns: 19, drs: 2, est: 1950 },
+  zandvoort: { lap: "4.259 km", turns: 14, drs: 2, est: 1985 },
+  monza: { lap: "5.793 km", turns: 11, drs: 2, est: 1950 },
+  baku: { lap: "6.003 km", turns: 20, drs: 2, est: 2016 },
+  marina_bay: { lap: "5.063 km", turns: 23, drs: 3, est: 2008 },
+  americas: { lap: "5.513 km", turns: 20, drs: 2, est: 2012 },
+  rodriguez: { lap: "4.304 km", turns: 17, drs: 3, est: 1963 },
+  interlagos: { lap: "4.309 km", turns: 15, drs: 2, est: 1973 },
+  las_vegas: { lap: "6.201 km", turns: 17, drs: 2, est: 2023 },
+  vegas: { lap: "6.201 km", turns: 17, drs: 2, est: 2023 },
+  yas_marina: { lap: "5.281 km", turns: 16, drs: 2, est: 2009 },
+  losail: { lap: "5.380 km", turns: 16, drs: 2, est: 2021 },
+  red_bull_ring: { lap: "4.318 km", turns: 10, drs: 3, est: 1970 },
+  madring: { lap: "5.400 km", turns: 21, drs: 3, est: 2026 },
+  portimao: { lap: "4.653 km", turns: 15, drs: 2, est: 2020 },
+  istanbul: { lap: "5.338 km", turns: 14, drs: 3, est: 2005 },
 };
 
 // ── Human-readable display name overrides (API sometimes uses raw IDs) ─────
 const CIRCUIT_DISPLAY_NAMES = {
-  madring:    "Circuit de Madrid",
+  madring: "Circuit de Madrid",
   villeneuve: "Circuit Gilles Villeneuve",
-  americas:   "Circuit of the Americas",
-  rodriguez:  "Autódromo Hermanos Rodríguez",
+  americas: "Circuit of the Americas",
+  rodriguez: "Autódromo Hermanos Rodríguez",
   interlagos: "Autódromo José Carlos Pace",
-  losail:     "Lusail International Circuit",
-  portimao:   "Algarve International Circuit",
-  albert_park:"Albert Park Circuit",
+  losail: "Lusail International Circuit",
+  portimao: "Algarve International Circuit",
+  albert_park: "Albert Park Circuit",
   marina_bay: "Marina Bay Street Circuit",
   red_bull_ring: "Red Bull Ring",
   yas_marina: "Yas Marina Circuit",
 };
 
 const OFFICIAL_TRACK_NAMES = {
-  bahrain:       "Bahrain International Circuit",
-  jeddah:        "Jeddah Corniche Circuit",
-  melbourne:     "Albert Park Circuit",
-  albert_park:   "Albert Park Circuit",
-  suzuka:        "Suzuka International Racing Course",
-  shanghai:      "Shanghai International Circuit",
-  miami:         "Miami International Autodrome",
-  imola:         "Autodromo Enzo e Dino Ferrari",
-  monaco:        "Circuit de Monaco",
-  montreal:      "Circuit Gilles Villeneuve",
-  villeneuve:    "Circuit Gilles Villeneuve",
-  barcelona:     "Circuit de Barcelona-Catalunya",
-  catalunya:     "Circuit de Barcelona-Catalunya",
-  spielberg:     "Red Bull Ring",
+  bahrain: "Bahrain International Circuit",
+  jeddah: "Jeddah Corniche Circuit",
+  melbourne: "Albert Park Circuit",
+  albert_park: "Albert Park Circuit",
+  suzuka: "Suzuka International Racing Course",
+  shanghai: "Shanghai International Circuit",
+  miami: "Miami International Autodrome",
+  imola: "Autodromo Enzo e Dino Ferrari",
+  monaco: "Circuit de Monaco",
+  montreal: "Circuit Gilles Villeneuve",
+  villeneuve: "Circuit Gilles Villeneuve",
+  barcelona: "Circuit de Barcelona-Catalunya",
+  catalunya: "Circuit de Barcelona-Catalunya",
+  spielberg: "Red Bull Ring",
   red_bull_ring: "Red Bull Ring",
-  silverstone:   "Silverstone Circuit",
-  hungaroring:   "Hungaroring",
-  spa:           "Circuit de Spa-Francorchamps",
-  zandvoort:     "Circuit Zandvoort",
-  monza:         "Autodromo Nazionale Monza",
-  madring:       "Circuit de Madrid",
-  baku:          "Baku City Circuit",
-  singapore:     "Marina Bay Street Circuit",
-  marina_bay:    "Marina Bay Street Circuit",
-  austin:        "Circuit of the Americas",
-  americas:      "Circuit of the Americas",
-  mexico_city:   "Autódromo Hermanos Rodríguez",
-  rodriguez:     "Autódromo Hermanos Rodríguez",
-  interlagos:    "Autódromo José Carlos Pace",
-  las_vegas:     "Las Vegas Strip Circuit",
-  vegas:         "Las Vegas Strip Circuit",
-  lusail:        "Lusail International Circuit",
-  losail:        "Lusail International Circuit",
-  yas_marina:    "Yas Marina Circuit",
+  silverstone: "Silverstone Circuit",
+  hungaroring: "Hungaroring",
+  spa: "Circuit de Spa-Francorchamps",
+  zandvoort: "Circuit Zandvoort",
+  monza: "Autodromo Nazionale Monza",
+  madring: "Circuit de Madrid",
+  baku: "Baku City Circuit",
+  singapore: "Marina Bay Street Circuit",
+  marina_bay: "Marina Bay Street Circuit",
+  austin: "Circuit of the Americas",
+  americas: "Circuit of the Americas",
+  mexico_city: "Autódromo Hermanos Rodríguez",
+  rodriguez: "Autódromo Hermanos Rodríguez",
+  interlagos: "Autódromo José Carlos Pace",
+  las_vegas: "Las Vegas Strip Circuit",
+  vegas: "Las Vegas Strip Circuit",
+  lusail: "Lusail International Circuit",
+  losail: "Lusail International Circuit",
+  yas_marina: "Yas Marina Circuit",
 };
 
 function getVisualizerCircuitName(c) {
@@ -3552,30 +3560,30 @@ const TRACK_LAPS = {
 
 function isDrsActiveAtPercent(percent, trackType) {
   const drsZones = {
-    silverstone:  [[0.26, 0.32], [0.70, 0.77]],
-    monza:        [[0.00, 0.05], [0.14, 0.22], [0.92, 1.00]],
-    monaco:       [[0.95, 1.00], [0.00, 0.04]],
-    spa:          [[0.02, 0.18], [0.62, 0.72]],
-    bahrain:      [[0.03, 0.13], [0.40, 0.50], [0.62, 0.70]],
-    melbourne:    [[0.05, 0.15], [0.56, 0.64], [0.72, 0.80], [0.90, 0.97]],
-    suzuka:       [[0.88, 1.00], [0.00, 0.05]],
-    singapore:    [[0.02, 0.12], [0.42, 0.50], [0.80, 0.90]],
-    baku:         [[0.02, 0.16], [0.60, 0.72]],
-    jeddah:       [[0.00, 0.08], [0.42, 0.52], [0.74, 0.84]],
-    austin:       [[0.04, 0.14], [0.58, 0.68]],
-    interlagos:   [[0.03, 0.13], [0.68, 0.78]],
-    hungaroring:  [[0.04, 0.14]],
-    zandvoort:    [[0.03, 0.13], [0.58, 0.66]],
-    miami:        [[0.05, 0.15], [0.42, 0.52], [0.72, 0.80]],
-    las_vegas:    [[0.05, 0.20], [0.62, 0.78]],
-    lusail:       [[0.04, 0.14], [0.60, 0.70]],
-    yas_marina:   [[0.05, 0.15], [0.58, 0.68]],
-    imola:        [[0.04, 0.14], [0.72, 0.82]],
-    spielberg:    [[0.04, 0.15], [0.52, 0.60], [0.82, 0.92]],
-    shanghai:     [[0.05, 0.15], [0.60, 0.72]],
-    barcelona:    [[0.03, 0.13], [0.66, 0.74]],
-    montreal:     [[0.04, 0.16], [0.56, 0.64], [0.82, 0.92]],
-    mexico_city:  [[0.04, 0.16], [0.52, 0.62], [0.78, 0.88]],
+    silverstone: [[0.26, 0.32], [0.70, 0.77]],
+    monza: [[0.00, 0.05], [0.14, 0.22], [0.92, 1.00]],
+    monaco: [[0.95, 1.00], [0.00, 0.04]],
+    spa: [[0.02, 0.18], [0.62, 0.72]],
+    bahrain: [[0.03, 0.13], [0.40, 0.50], [0.62, 0.70]],
+    melbourne: [[0.05, 0.15], [0.56, 0.64], [0.72, 0.80], [0.90, 0.97]],
+    suzuka: [[0.88, 1.00], [0.00, 0.05]],
+    singapore: [[0.02, 0.12], [0.42, 0.50], [0.80, 0.90]],
+    baku: [[0.02, 0.16], [0.60, 0.72]],
+    jeddah: [[0.00, 0.08], [0.42, 0.52], [0.74, 0.84]],
+    austin: [[0.04, 0.14], [0.58, 0.68]],
+    interlagos: [[0.03, 0.13], [0.68, 0.78]],
+    hungaroring: [[0.04, 0.14]],
+    zandvoort: [[0.03, 0.13], [0.58, 0.66]],
+    miami: [[0.05, 0.15], [0.42, 0.52], [0.72, 0.80]],
+    las_vegas: [[0.05, 0.20], [0.62, 0.78]],
+    lusail: [[0.04, 0.14], [0.60, 0.70]],
+    yas_marina: [[0.05, 0.15], [0.58, 0.68]],
+    imola: [[0.04, 0.14], [0.72, 0.82]],
+    spielberg: [[0.04, 0.15], [0.52, 0.60], [0.82, 0.92]],
+    shanghai: [[0.05, 0.15], [0.60, 0.72]],
+    barcelona: [[0.03, 0.13], [0.66, 0.74]],
+    montreal: [[0.04, 0.16], [0.56, 0.64], [0.82, 0.92]],
+    mexico_city: [[0.04, 0.16], [0.52, 0.62], [0.78, 0.88]],
   };
   const zones = drsZones[trackType] || [];
   return zones.some(([start, end]) => percent >= start && percent <= end);
@@ -3633,7 +3641,7 @@ function getTelemetryAtPercent(percent, driverCode, trackType) {
 
 function getDriverAverageStats(driverCode, trackType) {
   const hash = driverCode.charCodeAt(0) + (driverCode.charCodeAt(1) || 0);
-  
+
   let baseSpeed, baseThrottle, baseBrakingTime, baseDrsTime, baseGear;
   if (trackType === 'monaco') {
     baseSpeed = 138.4;
@@ -3993,7 +4001,7 @@ function LapVisualizerPage({ season = "2026", isMobile = false }) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              
+
               <path
                 d={pathD}
                 fill="none"
@@ -4115,14 +4123,14 @@ function LapVisualizerPage({ season = "2026", isMobile = false }) {
           </div>
         </div>
 
-        <div style={{ 
-          flex: isMobile ? "1 1 auto" : "0 0 360px", 
-          minWidth: isMobile ? "auto" : "360px", 
-          maxWidth: isMobile ? "none" : "360px", 
+        <div style={{
+          flex: isMobile ? "1 1 auto" : "0 0 360px",
+          minWidth: isMobile ? "auto" : "360px",
+          maxWidth: isMobile ? "none" : "360px",
           width: isMobile ? "100%" : "360px",
-          display: "flex", 
-          flexDirection: "column", 
-          gap: 16 
+          display: "flex",
+          flexDirection: "column",
+          gap: 16
         }}>
           <div style={{ background: "#0b0b0b", border: "1px solid #1a1a1a", borderRadius: 12, padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #1a1a1a", paddingBottom: 12 }}>
@@ -4145,48 +4153,48 @@ function LapVisualizerPage({ season = "2026", isMobile = false }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <MetricComparisonCard 
-                title="Speed" 
-                unit="kmh" 
-                live1={t1.speed} 
-                live2={t2.speed} 
-                avg1={avg1.avgSpeed} 
-                avg2={avg2.avgSpeed} 
+              <MetricComparisonCard
+                title="Speed"
+                unit="kmh"
+                live1={t1.speed}
+                live2={t2.speed}
+                avg1={avg1.avgSpeed}
+                avg2={avg2.avgSpeed}
               />
-              <MetricComparisonCard 
-                title="Throttle" 
-                unit="%" 
-                live1={t1.throttle} 
-                live2={t2.throttle} 
-                avg1={avg1.avgThrottle} 
-                avg2={avg2.avgThrottle} 
+              <MetricComparisonCard
+                title="Throttle"
+                unit="%"
+                live1={t1.throttle}
+                live2={t2.throttle}
+                avg1={avg1.avgThrottle}
+                avg2={avg2.avgThrottle}
                 isPercent={true}
                 highlightThreshold="throttle"
               />
-              <MetricComparisonCard 
-                title="Brake" 
-                live1={t1.braking > 10 ? "BRAKE" : "OFF"} 
-                live2={t2.braking > 10 ? "BRAKE" : "OFF"} 
-                avg1={avg1.pctBraking} 
-                avg2={avg2.pctBraking} 
+              <MetricComparisonCard
+                title="Brake"
+                live1={t1.braking > 10 ? "BRAKE" : "OFF"}
+                live2={t2.braking > 10 ? "BRAKE" : "OFF"}
+                avg1={avg1.pctBraking}
+                avg2={avg2.pctBraking}
                 isPercent={true}
                 highlightThreshold="brake"
               />
-              <MetricComparisonCard 
-                title="DRS" 
-                live1={t1.drs ? "DRS" : "OFF"} 
-                live2={t2.drs ? "DRS" : "OFF"} 
-                avg1={avg1.pctDrs} 
-                avg2={avg2.pctDrs} 
+              <MetricComparisonCard
+                title="DRS"
+                live1={t1.drs ? "DRS" : "OFF"}
+                live2={t2.drs ? "DRS" : "OFF"}
+                avg1={avg1.pctDrs}
+                avg2={avg2.pctDrs}
                 isPercent={true}
                 highlightThreshold="drs"
               />
-              <MetricComparisonCard 
-                title="Gear" 
-                live1={t1.gear} 
-                live2={t2.gear} 
-                avg1={avg1.avgGear} 
-                avg2={avg2.avgGear} 
+              <MetricComparisonCard
+                title="Gear"
+                live1={t1.gear}
+                live2={t2.gear}
+                avg1={avg1.avgGear}
+                avg2={avg2.avgGear}
               />
             </div>
           </div>
@@ -4201,11 +4209,11 @@ function LapVisualizerPage({ season = "2026", isMobile = false }) {
 function CircuitsPage({ season, isMobile }) {
   const [circuits, setCircuits] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sel, setSel]         = useState(null);
-  const [detail, setDetail]   = useState(null);
-  const [dl, setDl]           = useState(false);
+  const [sel, setSel] = useState(null);
+  const [detail, setDetail] = useState(null);
+  const [dl, setDl] = useState(false);
   const [raceResults, setRaceResults] = useState([]);
-  const [search, setSearch]   = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     setLoading(true); setSel(null);
@@ -4230,8 +4238,8 @@ function CircuitsPage({ season, isMobile }) {
     }).catch(() => setDl(false));
   }, [sel, season]);
 
-  if (loading) return <Spinner/>;
-  if (!circuits.length) return <Empty/>;
+  if (loading) return <Spinner />;
+  if (!circuits.length) return <Empty />;
 
   const filtered = circuits.filter(c => {
     if (!search) return true;
@@ -4247,182 +4255,182 @@ function CircuitsPage({ season, isMobile }) {
 
   return (
     <div>
-      <div style={{ display:"flex", flexDirection: isMobile ? "column" : "row", gap:20, minHeight:500 }}>
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 20, minHeight: 500 }}>
 
-      {/* ── Circuit grid ──────────────────────────────────────── */}
-      <div style={{ flex:1, minWidth:0 }}>
-        {/* Search */}
-        <div style={{ position:"relative", marginBottom:16 }}>
-          <span style={{ position:"absolute", left:10, top:"50%", transform:"translateY(-50%)", color:"#444", fontSize:13, pointerEvents:"none" }}>🔍</span>
-          <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search circuits or countries…"
-            style={{ width:"100%", background:"#0f0f0f", border:"1px solid #1e1e1e", color:"#fff", padding:"9px 12px 9px 32px", borderRadius:8, fontSize:13, outline:"none", boxSizing:"border-box" }}
-          />
-        </div>
-
-        <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill,minmax(190px,1fr))", gap:10 }}>
-          {filtered.map((c, idx) => {
-            const isSel = sel?.circuitId === c.circuitId;
-            return (
-              <div
-                key={c.circuitId}
-                onClick={() => setSel(isSel ? null : c)}
-                style={{
-                  background: isSel ? "linear-gradient(180deg, #141414 0%, #080808 100%)" : "#060606",
-                  border: `1px solid ${isSel ? "#27F4D2" : "#1a1a1a"}`,
-                  borderRadius:10, padding:"10px 10px 12px",
-                  cursor:"pointer", transition:"all 0.22s ease",
-                  position:"relative", overflow:"hidden",
-                  boxShadow: isSel ? "0 0 16px rgba(39, 244, 210, 0.25)" : "none",
-                }}
-                onMouseEnter={e => { if (!isSel) { e.currentTarget.style.borderColor = "#27F4D2"; e.currentTarget.style.background = "#0e0e0e"; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(39, 244, 210, 0.15)"; }}}
-                onMouseLeave={e => { if (!isSel) { e.currentTarget.style.borderColor = "#1a1a1a"; e.currentTarget.style.background = "#060606"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}}
-              >
-                {/* Round badge */}
-                {c.round && <span style={{ position:"absolute", top:8, right:8, fontFamily:"monospace", fontSize:9, color:isSel?"#27F4D2":"#444", fontWeight:700, zIndex:2 }}>R{c.round}</span>}
-
-                {/* Wikipedia circuit layout image */}
-                <div style={{ borderRadius:6, overflow:"hidden", marginBottom:10, border:`1px solid ${isSel?"rgba(39, 244, 210, 0.3)":"#121212"}` }}>
-                  <CircuitImage
-                    circuitId={c.circuitId}
-                    circuitName={c.circuitName}
-                    wikiUrl={c.url}
-                    locality={c.Location?.locality}
-                    country={c.Location?.country}
-                    height={isMobile ? 90 : 110}
-                  />
-                </div>
-
-                <div style={{ fontSize:13, fontWeight:700, color:isSel?"#fff":"#bbb", marginBottom:3, lineHeight:1.2 }}>{getCircuitDisplayName(c)}</div>
-                <div style={{ display:"flex", alignItems:"center", gap:5, marginBottom:4 }}>
-                  <span style={{ fontSize:12 }}>{flagOf(c.Location?.country)}</span>
-                  <span style={{ fontSize:11, color:"#666" }}>{c.Location?.locality}, {c.Location?.country}</span>
-                </div>
-                {CIRCUIT_META[c.circuitId] && (
-                  <div style={{
-                    fontSize:9,
-                    fontWeight:600,
-                    color:"#27F4D2",
-                    background:"rgba(39, 244, 210, 0.06)",
-                    border:"1px solid rgba(39, 244, 210, 0.12)",
-                    padding:"2px 6px",
-                    borderRadius:4,
-                    display:"inline-block",
-                    fontFamily:"monospace",
-                    marginTop:6
-                  }}>
-                    {CIRCUIT_META[c.circuitId].lap} · {CIRCUIT_META[c.circuitId].turns} turns
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Detail panel ──────────────────────────────────────── */}
-      {sel && (
-        <div style={{
-          width: isMobile ? "100%" : 340,
-          flexShrink:0, background:"#080808",
-          border:"1px solid #1a1a1a", borderRadius:12,
-          overflow:"hidden", alignSelf:"flex-start",
-          position: isMobile ? "relative" : "sticky", top:0,
-          maxHeight: isMobile ? "none" : "calc(100vh - 140px)",
-          display:"flex",
-          flexDirection:"column",
-          minHeight:0,
-          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-        }}>
-          {/* Header */}
-          <div style={{ padding:"14px 18px", borderBottom:"1px solid #141414", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            <span style={{ fontWeight:700, fontSize:14, color:"#fff" }}>Circuit Detail</span>
-            <button
-              onClick={() => setSel(null)}
-              style={{
-                background:"transparent", border:"1px solid #222", color:"#999",
-                width:26, height:26, borderRadius:6, cursor:"pointer",
-                fontSize:13, display:"flex", alignItems:"center", justifyContent:"center",
-                transition: "all 0.15s ease"
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "#27F4D2"; e.currentTarget.style.color = "#27F4D2"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "#222"; e.currentTarget.style.color = "#666"; }}
-            >
-              ✕
-            </button>
+        {/* ── Circuit grid ──────────────────────────────────────── */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Search */}
+          <div style={{ position: "relative", marginBottom: 16 }}>
+            <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#444", fontSize: 13, pointerEvents: "none" }}>🔍</span>
+            <input
+              value={search} onChange={e => setSearch(e.target.value)}
+              placeholder="Search circuits or countries…"
+              style={{ width: "100%", background: "#0f0f0f", border: "1px solid #1e1e1e", color: "#fff", padding: "9px 12px 9px 32px", borderRadius: 8, fontSize: 13, outline: "none", boxSizing: "border-box" }}
+            />
           </div>
 
-          <div style={{ padding:"18px", overflowY:"auto", flex:1, minHeight:0, overscrollBehavior:"contain" }}>
-            {/* Large Wikipedia circuit layout */}
-            <div style={{ background:"#060606", borderRadius:10, overflow:"hidden", marginBottom:16, border:"1px solid rgba(39, 244, 210, 0.2)" }}>
-              <CircuitImage
-                circuitId={sel.circuitId}
-                circuitName={sel.circuitName}
-                wikiUrl={sel.url}
-                locality={sel.Location?.locality}
-                country={sel.Location?.country}
-                height={200}
-              />
-            </div>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(auto-fill,minmax(190px,1fr))", gap: 10 }}>
+            {filtered.map((c, idx) => {
+              const isSel = sel?.circuitId === c.circuitId;
+              return (
+                <div
+                  key={c.circuitId}
+                  onClick={() => setSel(isSel ? null : c)}
+                  style={{
+                    background: isSel ? "linear-gradient(180deg, #141414 0%, #080808 100%)" : "#060606",
+                    border: `1px solid ${isSel ? "#27F4D2" : "#1a1a1a"}`,
+                    borderRadius: 10, padding: "10px 10px 12px",
+                    cursor: "pointer", transition: "all 0.22s ease",
+                    position: "relative", overflow: "hidden",
+                    boxShadow: isSel ? "0 0 16px rgba(39, 244, 210, 0.25)" : "none",
+                  }}
+                  onMouseEnter={e => { if (!isSel) { e.currentTarget.style.borderColor = "#27F4D2"; e.currentTarget.style.background = "#0e0e0e"; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(39, 244, 210, 0.15)"; } }}
+                  onMouseLeave={e => { if (!isSel) { e.currentTarget.style.borderColor = "#1a1a1a"; e.currentTarget.style.background = "#060606"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; } }}
+                >
+                  {/* Round badge */}
+                  {c.round && <span style={{ position: "absolute", top: 8, right: 8, fontFamily: "monospace", fontSize: 9, color: isSel ? "#27F4D2" : "#444", fontWeight: 700, zIndex: 2 }}>R{c.round}</span>}
 
-            {/* Name + location */}
-            <div style={{ marginBottom:14 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
-                <span style={{ fontSize:22 }}>{flagOf(sel.Location?.country)}</span>
-                <div>
-                  <div style={{ fontSize:16, fontWeight:800, color:"#fff", lineHeight:1.1 }}>{getCircuitDisplayName(sel)}</div>
-                  <div style={{ fontSize:12, color:"#666", marginTop:2 }}>{sel.Location?.locality} · {sel.Location?.country}</div>
-                </div>
-              </div>
-              <a href={sel.url} target="_blank" rel="noreferrer" style={{ fontSize:11, color:"#27F4D2", textDecoration:"none", fontWeight:600 }}>
-                Wikipedia →
-              </a>
-            </div>
-
-            {/* Stats grid */}
-            {meta && (
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:16 }}>
-                {[
-                  ["Lap Length", meta.lap],
-                  ["Turns",      meta.turns],
-                  ["DRS Zones",  meta.drs],
-                  ["First GP",   meta.est],
-                ].map(([l, v]) => (
-                  <div key={l} style={{ background:"linear-gradient(135deg, #111 0%, #0c0c0c 100%)", border:"1px solid #1a1a1a", borderRadius:7, padding:"10px 12px" }}>
-                    <div style={{ fontSize:10, color:"#27F4D2", opacity:0.8, textTransform:"uppercase", letterSpacing:1, marginBottom:3 }}>{l}</div>
-                    <div style={{ fontSize:15, fontWeight:700, color:"#fff", fontFamily:"monospace" }}>{v}</div>
+                  {/* Wikipedia circuit layout image */}
+                  <div style={{ borderRadius: 6, overflow: "hidden", marginBottom: 10, border: `1px solid ${isSel ? "rgba(39, 244, 210, 0.3)" : "#121212"}` }}>
+                    <CircuitImage
+                      circuitId={c.circuitId}
+                      circuitName={c.circuitName}
+                      wikiUrl={c.url}
+                      locality={c.Location?.locality}
+                      country={c.Location?.country}
+                      height={isMobile ? 90 : 110}
+                    />
                   </div>
-                ))}
-              </div>
-            )}
 
-            {/* Recent race result */}
-            {dl ? <Spinner/> : detail ? (
-              <>
-                <div style={{ fontSize:10, color:"#27F4D2", opacity:0.9, textTransform:"uppercase", letterSpacing:2, marginBottom:10, fontWeight:600 }}>
-                  {season} Race · {detail.date}
-                </div>
-                <div style={{ fontSize:13, color:"#888", marginBottom:10, fontWeight:500 }}>{detail.raceName}</div>
-                {(detail.Results || []).slice(0, 5).map(r => (
-                  <div key={r.Driver.driverId} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom:"1px solid #141414" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: isSel ? "#fff" : "#bbb", marginBottom: 3, lineHeight: 1.2 }}>{getCircuitDisplayName(c)}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 4 }}>
+                    <span style={{ fontSize: 12 }}>{flagOf(c.Location?.country)}</span>
+                    <span style={{ fontSize: 11, color: "#666" }}>{c.Location?.locality}, {c.Location?.country}</span>
+                  </div>
+                  {CIRCUIT_META[c.circuitId] && (
                     <div style={{
-                      width:24, height:24, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center",
-                      background: r.position==="1"?"#FFD700":r.position==="2"?"#C0C0C0":r.position==="3"?"#CD7F32":"transparent",
-                      border: ["1","2","3"].includes(r.position)?"none":"1px solid #222",
-                      fontSize:11, fontWeight:700, color: ["1","2","3"].includes(r.position)?"#000":"#888",
-                      fontFamily:"monospace", flexShrink:0,
-                    }}>{r.position}</div>
-                    <div style={{ width:3, height:18, background:col(r.Constructor?.constructorId), borderRadius:2, flexShrink:0 }}/>
-                    <span style={{ flex:1, color:"#ccc", fontSize:13 }}>{r.Driver.givenName[0]}. {r.Driver.familyName}</span>
-                    <span style={{ fontFamily:"monospace", fontSize:11, color:"#888" }}>{r.Time?.time || r.status}</span>
-                  </div>
-                ))}
-              </>
-            ) : null}
+                      fontSize: 9,
+                      fontWeight: 600,
+                      color: "#27F4D2",
+                      background: "rgba(39, 244, 210, 0.06)",
+                      border: "1px solid rgba(39, 244, 210, 0.12)",
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      display: "inline-block",
+                      fontFamily: "monospace",
+                      marginTop: 6
+                    }}>
+                      {CIRCUIT_META[c.circuitId].lap} · {CIRCUIT_META[c.circuitId].turns} turns
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
-      )}
+
+        {/* ── Detail panel ──────────────────────────────────────── */}
+        {sel && (
+          <div style={{
+            width: isMobile ? "100%" : 340,
+            flexShrink: 0, background: "#080808",
+            border: "1px solid #1a1a1a", borderRadius: 12,
+            overflow: "hidden", alignSelf: "flex-start",
+            position: isMobile ? "relative" : "sticky", top: 0,
+            maxHeight: isMobile ? "none" : "calc(100vh - 140px)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
+          }}>
+            {/* Header */}
+            <div style={{ padding: "14px 18px", borderBottom: "1px solid #141414", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 700, fontSize: 14, color: "#fff" }}>Circuit Detail</span>
+              <button
+                onClick={() => setSel(null)}
+                style={{
+                  background: "transparent", border: "1px solid #222", color: "#999",
+                  width: 26, height: 26, borderRadius: 6, cursor: "pointer",
+                  fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "all 0.15s ease"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#27F4D2"; e.currentTarget.style.color = "#27F4D2"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#222"; e.currentTarget.style.color = "#666"; }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ padding: "18px", overflowY: "auto", flex: 1, minHeight: 0, overscrollBehavior: "contain" }}>
+              {/* Large Wikipedia circuit layout */}
+              <div style={{ background: "#060606", borderRadius: 10, overflow: "hidden", marginBottom: 16, border: "1px solid rgba(39, 244, 210, 0.2)" }}>
+                <CircuitImage
+                  circuitId={sel.circuitId}
+                  circuitName={sel.circuitName}
+                  wikiUrl={sel.url}
+                  locality={sel.Location?.locality}
+                  country={sel.Location?.country}
+                  height={200}
+                />
+              </div>
+
+              {/* Name + location */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 22 }}>{flagOf(sel.Location?.country)}</span>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{getCircuitDisplayName(sel)}</div>
+                    <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>{sel.Location?.locality} · {sel.Location?.country}</div>
+                  </div>
+                </div>
+                <a href={sel.url} target="_blank" rel="noreferrer" style={{ fontSize: 11, color: "#27F4D2", textDecoration: "none", fontWeight: 600 }}>
+                  Wikipedia →
+                </a>
+              </div>
+
+              {/* Stats grid */}
+              {meta && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+                  {[
+                    ["Lap Length", meta.lap],
+                    ["Turns", meta.turns],
+                    ["DRS Zones", meta.drs],
+                    ["First GP", meta.est],
+                  ].map(([l, v]) => (
+                    <div key={l} style={{ background: "linear-gradient(135deg, #111 0%, #0c0c0c 100%)", border: "1px solid #1a1a1a", borderRadius: 7, padding: "10px 12px" }}>
+                      <div style={{ fontSize: 10, color: "#27F4D2", opacity: 0.8, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>{l}</div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: "#fff", fontFamily: "monospace" }}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Recent race result */}
+              {dl ? <Spinner /> : detail ? (
+                <>
+                  <div style={{ fontSize: 10, color: "#27F4D2", opacity: 0.9, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10, fontWeight: 600 }}>
+                    {season} Race · {detail.date}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#888", marginBottom: 10, fontWeight: 500 }}>{detail.raceName}</div>
+                  {(detail.Results || []).slice(0, 5).map(r => (
+                    <div key={r.Driver.driverId} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid #141414" }}>
+                      <div style={{
+                        width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                        background: r.position === "1" ? "#FFD700" : r.position === "2" ? "#C0C0C0" : r.position === "3" ? "#CD7F32" : "transparent",
+                        border: ["1", "2", "3"].includes(r.position) ? "none" : "1px solid #222",
+                        fontSize: 11, fontWeight: 700, color: ["1", "2", "3"].includes(r.position) ? "#000" : "#888",
+                        fontFamily: "monospace", flexShrink: 0,
+                      }}>{r.position}</div>
+                      <div style={{ width: 3, height: 18, background: col(r.Constructor?.constructorId), borderRadius: 2, flexShrink: 0 }} />
+                      <span style={{ flex: 1, color: "#ccc", fontSize: 13 }}>{r.Driver.givenName[0]}. {r.Driver.familyName}</span>
+                      <span style={{ fontFamily: "monospace", fontSize: 11, color: "#888" }}>{r.Time?.time || r.status}</span>
+                    </div>
+                  ))}
+                </>
+              ) : null}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -4434,8 +4442,8 @@ const F1_BROADCAST_INFO_URL = "https://www.formula1.com/en/information/f1-broadc
 
 function splitDriverName(fullName = "") {
   const parts = String(fullName).trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return { firstName:"", lastName:"" };
-  if (parts.length === 1) return { firstName:parts[0], lastName:"" };
+  if (!parts.length) return { firstName: "", lastName: "" };
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
   return {
     firstName: parts.slice(0, -1).join(" "),
     lastName: parts[parts.length - 1],
@@ -4446,11 +4454,11 @@ function formatEventDateTime(value) {
   if (!value) return "Start time unavailable";
   try {
     return new Date(value).toLocaleString("en-US", {
-      weekday:"short",
-      month:"short",
-      day:"numeric",
-      hour:"2-digit",
-      minute:"2-digit",
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
     return "Start time unavailable";
@@ -4460,57 +4468,57 @@ function formatEventDateTime(value) {
 function getLiveStatusMeta(status) {
   if (status === "live") {
     return {
-      label:"Live Now",
-      accent:"#E10600",
-      chipBg:"#E1060014",
-      chipBorder:"#E1060033",
-      summary:"Official watch links and current timing snapshot",
+      label: "Live Now",
+      accent: "#E10600",
+      chipBg: "#E1060014",
+      chipBorder: "#E1060033",
+      summary: "Official watch links and current timing snapshot",
     };
   }
 
   if (status === "recent") {
     return {
-      label:"Recent Session",
-      accent:"#FFD700",
-      chipBg:"#FFD70014",
-      chipBorder:"#FFD70033",
-      summary:"Latest completed session with official replay/watch options",
+      label: "Recent Session",
+      accent: "#FFD700",
+      chipBg: "#FFD70014",
+      chipBorder: "#FFD70033",
+      summary: "Latest completed session with official replay/watch options",
     };
   }
 
   if (status === "upcoming") {
     return {
-      label:"Upcoming Race",
-      accent:"#27F4D2",
-      chipBg:"#27F4D214",
-      chipBorder:"#27F4D233",
-      summary:"Countdown, official watch options, and next race planning",
+      label: "Upcoming Race",
+      accent: "#27F4D2",
+      chipBg: "#27F4D214",
+      chipBorder: "#27F4D233",
+      summary: "Countdown, official watch options, and next race planning",
     };
   }
 
   return {
-    label:"Unavailable",
-    accent:"#888",
-    chipBg:"#88888814",
-    chipBorder:"#88888833",
-    summary:"Official links are available even when live timing is offline",
+    label: "Unavailable",
+    accent: "#888",
+    chipBg: "#88888814",
+    chipBorder: "#88888833",
+    summary: "Official links are available even when live timing is offline",
   };
 }
 
-function ActionLinkCard({href, eyebrow, title, body, accent}) {
+function ActionLinkCard({ href, eyebrow, title, body, accent }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
       style={{
-        background:"#111",
-        border:`1px solid ${accent}22`,
-        borderRadius:10,
-        padding:"14px 16px",
-        textDecoration:"none",
-        display:"block",
-        transition:"transform 0.18s, box-shadow 0.18s, border-color 0.18s",
+        background: "#111",
+        border: `1px solid ${accent}22`,
+        borderRadius: 10,
+        padding: "14px 16px",
+        textDecoration: "none",
+        display: "block",
+        transition: "transform 0.18s, box-shadow 0.18s, border-color 0.18s",
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = "translateY(-2px)";
@@ -4523,34 +4531,34 @@ function ActionLinkCard({href, eyebrow, title, body, accent}) {
         e.currentTarget.style.borderColor = `${accent}22`;
       }}
     >
-      <div style={{fontSize:10,color:accent,textTransform:"uppercase",letterSpacing:1.3,fontWeight:700,marginBottom:8}}>{eyebrow}</div>
-      <div style={{fontSize:16,fontWeight:800,color:"#fff",marginBottom:6}}>{title}</div>
-      <div style={{fontSize:12,color:"#777",lineHeight:1.5}}>{body}</div>
+      <div style={{ fontSize: 10, color: accent, textTransform: "uppercase", letterSpacing: 1.3, fontWeight: 700, marginBottom: 8 }}>{eyebrow}</div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: "#fff", marginBottom: 6 }}>{title}</div>
+      <div style={{ fontSize: 12, color: "#777", lineHeight: 1.5 }}>{body}</div>
     </a>
   );
 }
 
-function CountdownBlocks({countdown, accent = "#27F4D2"}) {
+function CountdownBlocks({ countdown, accent = "#27F4D2" }) {
   if (!countdown) return null;
 
   return (
-    <div style={{display:"grid",gridTemplateColumns:"repeat(4, minmax(0, 1fr))",gap:8}}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
       {[
         ["Days", countdown.d],
         ["Hours", countdown.h],
         ["Mins", countdown.m],
         ["Secs", countdown.s],
       ].map(([label, value]) => (
-        <div key={label} style={{background:"#111",border:`1px solid ${accent}22`,borderRadius:10,padding:"10px 6px",textAlign:"center",minWidth:0}}>
-          <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4,fontWeight:600}}>{label}</div>
-          <div style={{fontSize:"clamp(18px, 4vw, 22px)",fontWeight:800,color:"#fff",...mono}}>{pad2(value)}</div>
+        <div key={label} style={{ background: "#111", border: `1px solid ${accent}22`, borderRadius: 10, padding: "10px 6px", textAlign: "center", minWidth: 0 }}>
+          <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4, fontWeight: 600 }}>{label}</div>
+          <div style={{ fontSize: "clamp(18px, 4vw, 22px)", fontWeight: 800, color: "#fff", ...mono }}>{pad2(value)}</div>
         </div>
       ))}
     </div>
   );
 }
 
-function WatchCoverageStrip({compact = false}) {
+function WatchCoverageStrip({ compact = false }) {
   const links = [
     { href: F1_TV_URL, label: "F1 TV", accent: "#E10600" },
     { href: F1_BROADCAST_INFO_URL, label: "Find Broadcaster", accent: "#27F4D2" },
@@ -4559,80 +4567,80 @@ function WatchCoverageStrip({compact = false}) {
 
   return (
     <div style={{
-      display:"flex",
-      flexWrap:"wrap",
+      display: "flex",
+      flexWrap: "wrap",
       gap: compact ? 8 : 10,
-      alignItems:"center",
+      alignItems: "center",
     }}>
       {links.map((link) => {
         const isPrimary = link.accent === "#E10600";
         return (
-        <a
-          key={link.href}
-          href={link.href}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            display:"inline-flex",
-            alignItems:"center",
-            gap:8,
-            padding: compact ? "9px 12px" : "10px 14px",
-            borderRadius:10,
-            border:`1px solid ${link.accent}33`,
-            background: isPrimary ? "#E10600" : "#111",
-            color: isPrimary ? "#fff" : "#ddd",
-            textDecoration:"none",
-            fontSize:12,
-            fontWeight:700,
-            flex:"1 1 160px",
-            justifyContent:"center",
-            transition:"transform 0.18s, box-shadow 0.18s, border-color 0.18s, background 0.18s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = `0 8px 24px ${link.accent}22`;
-            e.currentTarget.style.borderColor = `${link.accent}66`;
-            if (!isPrimary) {
-              e.currentTarget.style.background = "#161616";
-              e.currentTarget.style.color = "#fff";
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "none";
-            e.currentTarget.style.boxShadow = "none";
-            e.currentTarget.style.borderColor = `${link.accent}33`;
-            if (!isPrimary) {
-              e.currentTarget.style.background = "#111";
-              e.currentTarget.style.color = "#ddd";
-            }
-          }}
-        >
-          {link.label}
-        </a>
+          <a
+            key={link.href}
+            href={link.href}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: compact ? "9px 12px" : "10px 14px",
+              borderRadius: 10,
+              border: `1px solid ${link.accent}33`,
+              background: isPrimary ? "#E10600" : "#111",
+              color: isPrimary ? "#fff" : "#ddd",
+              textDecoration: "none",
+              fontSize: 12,
+              fontWeight: 700,
+              flex: "1 1 160px",
+              justifyContent: "center",
+              transition: "transform 0.18s, box-shadow 0.18s, border-color 0.18s, background 0.18s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = `0 8px 24px ${link.accent}22`;
+              e.currentTarget.style.borderColor = `${link.accent}66`;
+              if (!isPrimary) {
+                e.currentTarget.style.background = "#161616";
+                e.currentTarget.style.color = "#fff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.borderColor = `${link.accent}33`;
+              if (!isPrimary) {
+                e.currentTarget.style.background = "#111";
+                e.currentTarget.style.color = "#ddd";
+              }
+            }}
+          >
+            {link.label}
+          </a>
         );
       })}
     </div>
   );
 }
 
-function SessionContextContent({liveData, statusMeta, heading, subtitle, sessionLabel, locationLabel, leader}) {
+function SessionContextContent({ liveData, statusMeta, heading, subtitle, sessionLabel, locationLabel, leader }) {
   const isUpcoming = liveData.status === "upcoming";
 
   return (
     <>
-      <div style={{display:"inline-flex",padding:"6px 12px",borderRadius:999,border:`1px solid ${statusMeta.chipBorder}`,background:statusMeta.chipBg,fontSize:10,color:statusMeta.accent,textTransform:"uppercase",letterSpacing:1.6,fontWeight:700,marginBottom:14}}>
+      <div style={{ display: "inline-flex", padding: "6px 12px", borderRadius: 999, border: `1px solid ${statusMeta.chipBorder}`, background: statusMeta.chipBg, fontSize: 10, color: statusMeta.accent, textTransform: "uppercase", letterSpacing: 1.6, fontWeight: 700, marginBottom: 14 }}>
         {statusMeta.label}
       </div>
-      <div style={{fontSize:"clamp(22px, 5vw, 30px)",fontWeight:800,marginBottom:8,color:"#fff",lineHeight:1.05}}>{heading}</div>
-      <div style={{fontSize:13,color:"#aaa",marginBottom:8}}>{subtitle || "Latest timing summary"}</div>
-      <div style={{fontSize:12,color:"#666",marginBottom:18,lineHeight:1.6}}>{liveData.message}</div>
+      <div style={{ fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 800, marginBottom: 8, color: "#fff", lineHeight: 1.05 }}>{heading}</div>
+      <div style={{ fontSize: 13, color: "#aaa", marginBottom: 8 }}>{subtitle || "Latest timing summary"}</div>
+      <div style={{ fontSize: 12, color: "#666", marginBottom: 18, lineHeight: 1.6 }}>{liveData.message}</div>
 
       {!isUpcoming ? (
-        <div style={{display:"grid",gap:10}}>
-          <div style={{fontSize:11,color:"#666",textTransform:"uppercase",letterSpacing:1.2,fontWeight:600}}>
+        <div style={{ display: "grid", gap: 10 }}>
+          <div style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 600 }}>
             {liveData.status === "live" ? "Live Session" : "Latest Session"}
           </div>
-          <div style={{fontSize:12,color:"#777",marginBottom:4,lineHeight:1.5}}>
+          <div style={{ fontSize: 12, color: "#777", marginBottom: 4, lineHeight: 1.5 }}>
             {[locationLabel, formatEventDateTime(liveData.session?.startTime)].filter(Boolean).join(" • ")}
           </div>
           {[
@@ -4641,14 +4649,14 @@ function SessionContextContent({liveData, statusMeta, heading, subtitle, session
             ["Leading Driver", leader?.name || "No timing leader"],
             ["Latest Lap", leader?.lastLap != null ? `${leader.lastLap.toFixed(3)}s` : "No lap yet"],
           ].map(([label, value]) => (
-            <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:10,background:"#111",border:"1px solid #1d1d1d"}}>
-              <span style={{fontSize:11,color:"#666",textTransform:"uppercase",letterSpacing:1.1}}>{label}</span>
-              <span style={{fontSize:12,color:"#fff",fontWeight:700,textAlign:"right"}}>{value}</span>
+            <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, background: "#111", border: "1px solid #1d1d1d" }}>
+              <span style={{ fontSize: 11, color: "#666", textTransform: "uppercase", letterSpacing: 1.1 }}>{label}</span>
+              <span style={{ fontSize: 12, color: "#fff", fontWeight: 700, textAlign: "right" }}>{value}</span>
             </div>
           ))}
         </div>
       ) : (
-        <div style={{fontSize:12,color:"#777",lineHeight:1.6}}>
+        <div style={{ fontSize: 12, color: "#777", lineHeight: 1.6 }}>
           Countdown and start time are shown in the next race panel below.
         </div>
       )}
@@ -4656,7 +4664,7 @@ function SessionContextContent({liveData, statusMeta, heading, subtitle, session
   );
 }
 
-function NextRaceHubCard({race, countdown, prominent = false, embedded = false}) {
+function NextRaceHubCard({ race, countdown, prominent = false, embedded = false }) {
   if (!race) return null;
 
   const raceName = gpName(race.raceName || "Upcoming Race");
@@ -4669,64 +4677,64 @@ function NextRaceHubCard({race, countdown, prominent = false, embedded = false})
       border: embedded ? "none" : "1px solid #27F4D233",
       borderRadius: embedded ? 0 : 14,
       padding: embedded ? 0 : (prominent ? 20 : 16),
-      position:"relative",
-      overflow:"hidden",
+      position: "relative",
+      overflow: "hidden",
     }}>
       {!embedded ? (
-        <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg, #27F4D2, #27F4D255, transparent)"}}/>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #27F4D2, #27F4D255, transparent)" }} />
       ) : null}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:12,flexWrap:"wrap"}}>
-        <div style={{minWidth:0}}>
-          <div style={{fontSize:10,color:"#27F4D2",textTransform:"uppercase",letterSpacing:1.3,fontWeight:700,marginBottom:4}}>Next Grand Prix</div>
-          <div style={{fontSize:prominent ? 24 : 20,fontWeight:800,color:"#fff",lineHeight:1.1,marginBottom:2}}>{raceName}</div>
-          <div style={{fontSize:12,color:"#888"}}>{race.circuitName || "Circuit TBA"}</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 10, color: "#27F4D2", textTransform: "uppercase", letterSpacing: 1.3, fontWeight: 700, marginBottom: 4 }}>Next Grand Prix</div>
+          <div style={{ fontSize: prominent ? 24 : 20, fontWeight: 800, color: "#fff", lineHeight: 1.1, marginBottom: 2 }}>{raceName}</div>
+          <div style={{ fontSize: 12, color: "#888" }}>{race.circuitName || "Circuit TBA"}</div>
         </div>
         {race.round ? (
-          <div style={{padding:"6px 10px",borderRadius:999,background:"#27F4D214",border:"1px solid #27F4D233",fontSize:11,fontWeight:800,color:"#27F4D2",...mono,flexShrink:0}}>
+          <div style={{ padding: "6px 10px", borderRadius: 999, background: "#27F4D214", border: "1px solid #27F4D233", fontSize: 11, fontWeight: 800, color: "#27F4D2", ...mono, flexShrink: 0 }}>
             R{race.round}
           </div>
         ) : null}
       </div>
 
       {countdown ? (
-        <div style={{marginBottom:12}}>
-          <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.1,marginBottom:6,fontWeight:600}}>Race starts in</div>
-          <CountdownBlocks countdown={countdown}/>
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 6, fontWeight: 600 }}>Race starts in</div>
+          <CountdownBlocks countdown={countdown} />
         </div>
       ) : (
-        <div style={{marginBottom:12,padding:"10px 12px",borderRadius:10,background:"#111",border:"1px solid #1d1d1d",fontSize:12,color:"#888"}}>
+        <div style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 10, background: "#111", border: "1px solid #1d1d1d", fontSize: 12, color: "#888" }}>
           Start time will appear once the schedule is confirmed.
         </div>
       )}
 
-      <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-        <div style={{flex:"1 1 140px",background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:"8px 10px"}}>
-          <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:2}}>Location</div>
-          <div style={{fontSize:12,color:"#fff",fontWeight:700,lineHeight:1.35}}>{location || "TBA"}</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div style={{ flex: "1 1 140px", background: "#111", border: "1px solid #1d1d1d", borderRadius: 10, padding: "8px 10px" }}>
+          <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 2 }}>Location</div>
+          <div style={{ fontSize: 12, color: "#fff", fontWeight: 700, lineHeight: 1.35 }}>{location || "TBA"}</div>
         </div>
-        <div style={{flex:"1 1 140px",background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:"8px 10px"}}>
-          <div style={{fontSize:10,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:2}}>Race Start</div>
-          <div style={{fontSize:12,color:"#fff",fontWeight:700,lineHeight:1.35}}>{startLabel}</div>
+        <div style={{ flex: "1 1 140px", background: "#111", border: "1px solid #1d1d1d", borderRadius: 10, padding: "8px 10px" }}>
+          <div style={{ fontSize: 10, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 2 }}>Race Start</div>
+          <div style={{ fontSize: 12, color: "#fff", fontWeight: 700, lineHeight: 1.35 }}>{startLabel}</div>
         </div>
       </div>
     </div>
   );
 }
 
-function CompactLeaderboardSnippet({leaderboard = []}) {
+function CompactLeaderboardSnippet({ leaderboard = [] }) {
   if (!leaderboard.length) return null;
 
   return (
-    <div style={{marginTop:12,paddingTop:12,borderTop:"1px solid #1d1d1d"}}>
-      <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.2,fontWeight:700,marginBottom:8}}>Quick Timing</div>
-      <div style={{display:"grid",gap:8}}>
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #1d1d1d" }}>
+      <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", letterSpacing: 1.2, fontWeight: 700, marginBottom: 8 }}>Quick Timing</div>
+      <div style={{ display: "grid", gap: 8 }}>
         {leaderboard.slice(0, 3).map((driver) => (
-          <div key={`${driver.driverNumber}-${driver.code}`} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:8,background:"#111",border:"1px solid #1d1d1d"}}>
-            <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
-              <PosBadge pos={driver.position ?? "—"}/>
-              <span style={{fontSize:12,color:"#fff",fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{driver.code}</span>
+          <div key={`${driver.driverNumber}-${driver.code}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, background: "#111", border: "1px solid #1d1d1d" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+              <PosBadge pos={driver.position ?? "—"} />
+              <span style={{ fontSize: 12, color: "#fff", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{driver.code}</span>
             </div>
-            <span style={{fontSize:11,color:driver.teamColor,fontWeight:700,...mono,flexShrink:0}}>
+            <span style={{ fontSize: 11, color: driver.teamColor, fontWeight: 700, ...mono, flexShrink: 0 }}>
               {driver.lastLap != null ? `${driver.lastLap.toFixed(3)}s` : "—"}
             </span>
           </div>
@@ -4761,16 +4769,16 @@ function LiveWeekendHub({
   };
 
   return (
-    <div style={{marginBottom:20}}>
+    <div style={{ marginBottom: 20 }}>
       <div style={{
-        display:"grid",
+        display: "grid",
         gridTemplateColumns: showSessionPanel && hasNextRace && !isMobile ? "repeat(2, minmax(0, 1fr))" : "1fr",
-        gap:18,
-        alignItems:"stretch",
+        gap: 18,
+        alignItems: "stretch",
       }}>
         {showSessionPanel ? (
           <div style={cardShell}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg, ${statusMeta.accent}, ${statusMeta.accent}55, transparent)`}}/>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${statusMeta.accent}, ${statusMeta.accent}55, transparent)` }} />
             <SessionContextContent
               liveData={liveData}
               statusMeta={statusMeta}
@@ -4786,17 +4794,17 @@ function LiveWeekendHub({
         {hasNextRace ? (
           <div style={{
             ...cardShell,
-            display:"flex",
-            flexDirection:"column",
-            minHeight:"100%",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100%",
           }}>
-            <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:"linear-gradient(90deg, #27F4D2, #27F4D255, transparent)"}}/>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #27F4D2, #27F4D255, transparent)" }} />
             {!showSessionPanel ? (
-              <div style={{marginBottom:14}}>
-                <div style={{display:"inline-flex",padding:"6px 12px",borderRadius:999,border:`1px solid ${statusMeta.chipBorder}`,background:statusMeta.chipBg,fontSize:10,color:statusMeta.accent,textTransform:"uppercase",letterSpacing:1.6,fontWeight:700,marginBottom:10}}>
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: "inline-flex", padding: "6px 12px", borderRadius: 999, border: `1px solid ${statusMeta.chipBorder}`, background: statusMeta.chipBg, fontSize: 10, color: statusMeta.accent, textTransform: "uppercase", letterSpacing: 1.6, fontWeight: 700, marginBottom: 10 }}>
                   {statusMeta.label}
                 </div>
-                <div style={{fontSize:12,color:"#666",lineHeight:1.6}}>{liveData.message}</div>
+                <div style={{ fontSize: 12, color: "#666", lineHeight: 1.6 }}>{liveData.message}</div>
               </div>
             ) : null}
             <NextRaceHubCard
@@ -4806,22 +4814,22 @@ function LiveWeekendHub({
               embedded
             />
             {showSessionPanel ? (
-              <CompactLeaderboardSnippet leaderboard={liveData.leaderboard}/>
+              <CompactLeaderboardSnippet leaderboard={liveData.leaderboard} />
             ) : null}
           </div>
         ) : null}
       </div>
 
       <div style={{
-        marginTop:18,
-        padding:"16px 20px",
-        background:"#0f0f0f",
-        border:"1px solid #1e1e1e",
-        borderRadius:14,
+        marginTop: 18,
+        padding: "16px 20px",
+        background: "#0f0f0f",
+        border: "1px solid #1e1e1e",
+        borderRadius: 14,
       }}>
-        <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.3,fontWeight:700,marginBottom:10}}>Watch & Coverage</div>
-        <WatchCoverageStrip compact/>
-        <div style={{fontSize:11,color:"#555",lineHeight:1.5,marginTop:10}}>
+        <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", letterSpacing: 1.3, fontWeight: 700, marginBottom: 10 }}>Watch & Coverage</div>
+        <WatchCoverageStrip compact />
+        <div style={{ fontSize: 11, color: "#555", lineHeight: 1.5, marginTop: 10 }}>
           Official links only. Availability varies by territory.
         </div>
       </div>
@@ -4830,15 +4838,15 @@ function LiveWeekendHub({
 }
 
 function LivePage({ isMobile = false }) {
-  const [liveData,setLiveData]=useState(null); 
-  const [loading,setLoading]=useState(true);
-  const [error,setError]=useState(null);
-  const [countdown,setCountdown]=useState(null);
-  
-  useEffect(()=>{
+  const [liveData, setLiveData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [countdown, setCountdown] = useState(null);
+
+  useEffect(() => {
     let active = true;
 
-    const loadLiveRace=async()=>{
+    const loadLiveRace = async () => {
       try {
         const data = await apiFetch("/api/live/race", 60000);
         if (!active) return;
@@ -4858,11 +4866,11 @@ function LivePage({ isMobile = false }) {
       active = false;
       clearInterval(poller);
     };
-  },[]);
-  
-  useEffect(()=>{
+  }, []);
+
+  useEffect(() => {
     const target = liveData?.nextRace?.startTime;
-    if(!target) {
+    if (!target) {
       setCountdown(null);
       return;
     }
@@ -4873,7 +4881,7 @@ function LivePage({ isMobile = false }) {
         const now = new Date();
         const diff = raceDate - now;
 
-        if(diff > 0) {
+        if (diff > 0) {
           setCountdown({
             d: Math.floor(diff / (1000 * 60 * 60 * 24)),
             h: Math.floor((diff / (1000 * 60 * 60)) % 24),
@@ -4887,15 +4895,15 @@ function LivePage({ isMobile = false }) {
         setCountdown(null);
       }
     };
-    
+
     updateCountdown();
     const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
   }, [liveData?.nextRace?.startTime]);
 
-  if(loading) return <Spinner/>;
-  if(error) return <Empty icon="⚠️" msg={error}/>;
-  if(!liveData) return <Empty msg="No live race data available"/>;
+  if (loading) return <Spinner />;
+  if (error) return <Empty icon="⚠️" msg={error} />;
+  if (!liveData) return <Empty msg="No live race data available" />;
 
   const statusMeta = getLiveStatusMeta(liveData.status);
   const heading = liveData.session?.meetingName || gpName(liveData.nextRace?.raceName || "Upcoming Race");
@@ -4926,72 +4934,72 @@ function LivePage({ isMobile = false }) {
         isMobile={isMobile}
       />
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:18,alignItems:"start",marginBottom:20}}>
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20}}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 18, alignItems: "start", marginBottom: 20 }}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 20 }}>
           <SecLabel>{liveData.leaderboard?.length ? "Live Leaderboard" : "Timing Snapshot"}</SecLabel>
           {liveData.leaderboard?.length ? (
-            <div style={{display:"grid",gap:10}}>
+            <div style={{ display: "grid", gap: 10 }}>
               {liveData.leaderboard.slice(0, 6).map((driver) => {
                 const { firstName, lastName } = splitDriverName(driver.name);
                 return (
-                  <div key={`${driver.driverNumber}-${driver.code}`} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",borderRadius:10,background:"#111",border:"1px solid #1e1e1e",gap:12}}>
-                    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-                      <PosBadge pos={driver.position ?? "—"}/>
+                  <div key={`${driver.driverNumber}-${driver.code}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", borderRadius: 10, background: "#111", border: "1px solid #1e1e1e", gap: 12 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                      <PosBadge pos={driver.position ?? "—"} />
                       <DriverPhoto
                         firstName={firstName}
                         lastName={lastName}
                         headshotUrl={driver.headshotUrl}
                         teamColor={driver.teamColor}
                         headshotVariant="2col"
-                        style={{width:44,height:52,display:"block",objectFit:"contain",objectPosition:"center bottom",background:"transparent",border:"none",flexShrink:0}}
+                        style={{ width: 44, height: 52, display: "block", objectFit: "contain", objectPosition: "center bottom", background: "transparent", border: "none", flexShrink: 0 }}
                       />
-                      <div style={{minWidth:0}}>
-                        <div style={{fontSize:13,fontWeight:700,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{driver.name}</div>
-                        <div style={{fontSize:11,color:"#666"}}>{driver.team} • {driver.code}</div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{driver.name}</div>
+                        <div style={{ fontSize: 11, color: "#666" }}>{driver.team} • {driver.code}</div>
                       </div>
                     </div>
-                    <div style={{textAlign:"right",flexShrink:0}}>
-                      <div style={{fontSize:12,fontWeight:700,color:driver.teamColor,...mono}}>
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: driver.teamColor, ...mono }}>
                         {driver.lastLap != null ? `${driver.lastLap.toFixed(3)}s` : "No lap yet"}
                       </div>
-                      <div style={{fontSize:11,color:"#555"}}>{driver.lapCount} laps</div>
+                      <div style={{ fontSize: 11, color: "#555" }}>{driver.lapCount} laps</div>
                     </div>
                   </div>
                 );
               })}
             </div>
-          ) : <Empty icon="⏱️" msg="No session timing entries available yet."/>}
+          ) : <Empty icon="⏱️" msg="No session timing entries available yet." />}
         </div>
 
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:20}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:14,flexWrap:"wrap"}}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 20 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
             <div>
               <SecLabel>Lap Time Progression</SecLabel>
-              <div style={{fontSize:11,color:"#666"}}>Top timing trend from the current or latest official timing snapshot</div>
+              <div style={{ fontSize: 11, color: "#666" }}>Top timing trend from the current or latest official timing snapshot</div>
             </div>
             {leader ? (
-              <div style={{fontSize:11,color:"#666"}}>
-                Leader: <span style={{color:leader.teamColor,fontWeight:700}}>{leader.name}</span>
+              <div style={{ fontSize: 11, color: "#666" }}>
+                Leader: <span style={{ color: leader.teamColor, fontWeight: 700 }}>{leader.name}</span>
               </div>
             ) : null}
           </div>
           {liveData.lapSeries?.length && liveData.lapSeriesDrivers?.length ? (
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={liveData.lapSeries}>
-                <CartesianGrid stroke="#1a1a1a"/>
-                <XAxis dataKey="lap" stroke="#666" tick={{fontSize:11}}/>
-                <YAxis stroke="#666" tick={{fontSize:11}}/>
+                <CartesianGrid stroke="#1a1a1a" />
+                <XAxis dataKey="lap" stroke="#666" tick={{ fontSize: 11 }} />
+                <YAxis stroke="#666" tick={{ fontSize: 11 }} />
                 <Tooltip
-                  contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}
+                  contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }}
                   formatter={(value) => typeof value === "number" ? `${value.toFixed(3)}s` : value}
                 />
                 {liveData.lapSeriesDrivers.map((driver) => (
-                  <Line key={driver.key} type="monotone" dataKey={driver.key} stroke={driver.color} dot={false} strokeWidth={2}/>
+                  <Line key={driver.key} type="monotone" dataKey={driver.key} stroke={driver.color} dot={false} strokeWidth={2} />
                 ))}
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <Empty icon="📈" msg="Lap history is not available for this session yet."/>
+            <Empty icon="📈" msg="Lap history is not available for this session yet." />
           )}
         </div>
       </div>
@@ -4999,13 +5007,13 @@ function LivePage({ isMobile = false }) {
   );
 }
 
-function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,watchlistDisabled=false}) {
-  const [drivers,setDrivers]=useState([]);
-  const [teams,setTeams]=useState([]);
-  const [races,setRaces]=useState([]);
-  const [headshots,setHeadshots]=useState([]);
-  const [loading,setLoading]=useState(true);
-  useEffect(()=>{
+function WatchlistPage({ season, watchlist, onToggle, trackedCount, watchlistReady, watchlistDisabled = false }) {
+  const [drivers, setDrivers] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [races, setRaces] = useState([]);
+  const [headshots, setHeadshots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
     let active = true;
     setLoading(true);
     Promise.all([
@@ -5032,7 +5040,7 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
     return () => {
       active = false;
     };
-  },[season]);
+  }, [season]);
 
   const watchedDrivers = useMemo(
     () => drivers.filter(d => watchlist.drivers.has(d.Driver.driverId)),
@@ -5057,35 +5065,35 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
     ? watchedTeams.find((entry) => entry.Constructor?.name === latestRaceContext.teamName) || null
     : null;
 
-  if(loading || !watchlistReady) return <Spinner/>;
-  if(!watchedDrivers.length && !watchedTeams.length) {
-    return <Empty icon="⭐" msg="No favorites yet. Star drivers or constructors to track them here!"/>;
+  if (loading || !watchlistReady) return <Spinner />;
+  if (!watchedDrivers.length && !watchedTeams.length) {
+    return <Empty icon="⭐" msg="No favorites yet. Star drivers or constructors to track them here!" />;
   }
 
   return (
     <div>
 
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:24}}>
-        <StatCard label="Tracked Drivers" value={watchedDrivers.length} sub="Favorite drivers" accent="#27F4D2"/>
-        <StatCard label="Tracked Constructors" value={watchedTeams.length} sub="Favorite teams" accent="#64C4FF"/>
-        <StatCard label="Driver Points" value={totalDriverPoints} sub="Combined favorite drivers" accent="#FFD700"/>
-        <StatCard label="Constructor Points" value={totalConstructorPoints} sub="Combined favorite teams" accent="#a855f7"/>
-        <StatCard label="Top Driver" value={topDriver?.Driver?.familyName || "—"} sub={topDriver ? `P${topDriver.position} · ${topDriver.points} pts` : "No driver tracked"} accent={col(topDriver?.Constructors?.[0]?.constructorId)}/>
-        <StatCard label="Top Team" value={topTeam?.Constructor?.name || "—"} sub={topTeam ? `P${topTeam.position} · ${topTeam.points} pts` : "No constructor tracked"} accent={col(topTeam?.Constructor?.constructorId)}/>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 12, marginBottom: 24 }}>
+        <StatCard label="Tracked Drivers" value={watchedDrivers.length} sub="Favorite drivers" accent="#27F4D2" />
+        <StatCard label="Tracked Constructors" value={watchedTeams.length} sub="Favorite teams" accent="#64C4FF" />
+        <StatCard label="Driver Points" value={totalDriverPoints} sub="Combined favorite drivers" accent="#FFD700" />
+        <StatCard label="Constructor Points" value={totalConstructorPoints} sub="Combined favorite teams" accent="#a855f7" />
+        <StatCard label="Top Driver" value={topDriver?.Driver?.familyName || "—"} sub={topDriver ? `P${topDriver.position} · ${topDriver.points} pts` : "No driver tracked"} accent={col(topDriver?.Constructors?.[0]?.constructorId)} />
+        <StatCard label="Top Team" value={topTeam?.Constructor?.name || "—"} sub={topTeam ? `P${topTeam.position} · ${topTeam.points} pts` : "No constructor tracked"} accent={col(topTeam?.Constructor?.constructorId)} />
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:14,marginBottom:24}}>
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:16}}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14, marginBottom: 24 }}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 16 }}>
           <SecLabel>Latest GP Watchlist Hit</SecLabel>
-          <div style={{fontSize:18,fontWeight:800,color:"#fff",marginBottom:8}}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 8 }}>
             {latestWatchedDriver
               ? `${latestWatchedDriver.Driver.familyName} won`
               : latestWatchedTeam
                 ? `${latestWatchedTeam.Constructor.name} won`
                 : "No tracked winner"}
           </div>
-          <div style={{fontSize:12,color:"#777",lineHeight:1.5}}>
+          <div style={{ fontSize: 12, color: "#777", lineHeight: 1.5 }}>
             {latestRaceContext
               ? latestWatchedDriver || latestWatchedTeam
                 ? `${latestRaceContext.raceName} was won by one of your favorites.`
@@ -5094,47 +5102,47 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
           </div>
         </div>
 
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:16}}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 16 }}>
           <SecLabel>Driver Spotlight</SecLabel>
-          <div style={{fontSize:18,fontWeight:800,color:"#fff",marginBottom:8}}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 8 }}>
             {topDriver ? `${topDriver.Driver.givenName} ${topDriver.Driver.familyName}` : "No driver tracked"}
           </div>
-          <div style={{fontSize:12,color:topDriver ? col(topDriver.Constructors?.[0]?.constructorId) : "#777",fontWeight:700,marginBottom:10}}>
+          <div style={{ fontSize: 12, color: topDriver ? col(topDriver.Constructors?.[0]?.constructorId) : "#777", fontWeight: 700, marginBottom: 10 }}>
             {topDriver?.Constructors?.[0]?.name || "Track a driver to surface insights"}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
             {[
               ["Pos", topDriver ? `P${topDriver.position}` : "—", "#fff"],
               ["Points", topDriver?.points || "—", "#FFD700"],
               ["Wins", topDriver?.wins || "—", "#E10600"],
             ].map(([label, value, accent]) => (
-              <div key={label} style={{background:"#111",borderRadius:8,padding:"8px 10px"}}>
-                <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                <div style={{fontSize:15,fontWeight:800,color:accent,...mono}}>{value}</div>
+              <div key={label} style={{ background: "#111", borderRadius: 8, padding: "8px 10px" }}>
+                <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: accent, ...mono }}>{value}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:16}}>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 16 }}>
           <SecLabel>Constructor Spotlight</SecLabel>
-          <div style={{fontSize:18,fontWeight:800,color:"#fff",marginBottom:8}}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 8 }}>
             {topTeam?.Constructor?.name || "No constructor tracked"}
           </div>
-          <div style={{fontSize:12,color:"#777",lineHeight:1.5,marginBottom:10}}>
+          <div style={{ fontSize: 12, color: "#777", lineHeight: 1.5, marginBottom: 10 }}>
             {topTeam
               ? `${getConstructorProfileMeta(topTeam.Constructor?.constructorId)?.principal || "Team principal unavailable"} · ${topTeam.wins} win${asNum(topTeam.wins) === 1 ? "" : "s"}`
               : "Track a constructor to see season snapshot highlights."}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
             {[
               ["Pos", topTeam ? `P${topTeam.position}` : "—", "#fff"],
               ["Points", topTeam?.points || "—", "#FFD700"],
               ["Combined Wins", totalWins, "#27F4D2"],
             ].map(([label, value, accent]) => (
-              <div key={label} style={{background:"#111",borderRadius:8,padding:"8px 10px"}}>
-                <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                <div style={{fontSize:15,fontWeight:800,color:accent,...mono}}>{value}</div>
+              <div key={label} style={{ background: "#111", borderRadius: 8, padding: "8px 10px" }}>
+                <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: accent, ...mono }}>{value}</div>
               </div>
             ))}
           </div>
@@ -5142,9 +5150,9 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
       </div>
 
       {!!watchedDrivers.length && (
-        <div style={{marginBottom:24}}>
+        <div style={{ marginBottom: 24 }}>
           <SecLabel>Tracked Drivers</SecLabel>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14 }}>
             {watchedDrivers.map((entry) => {
               const drv = entry.Driver;
               const team = entry.Constructors?.[0];
@@ -5152,29 +5160,29 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
               const headshotUrl = resolveDriverHeadshotUrl(drv, headshotLookup);
               const isLatestWinner = latestRaceContext?.driverId === drv.driverId;
               return (
-                <div key={drv.driverId} style={{background:"#0f0f0f",border:`1px solid ${teamCol}33`,borderRadius:12,overflow:"hidden"}}>
-                  <div style={{height:4,background:`linear-gradient(90deg, ${teamCol}, ${teamCol}44, transparent)`}}/>
-                  <div style={{padding:16}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:14}}>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <PosBadge pos={entry.position}/>
+                <div key={drv.driverId} style={{ background: "#0f0f0f", border: `1px solid ${teamCol}33`, borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ height: 4, background: `linear-gradient(90deg, ${teamCol}, ${teamCol}44, transparent)` }} />
+                  <div style={{ padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <PosBadge pos={entry.position} />
                         <div>
-                          <div style={{fontSize:18,fontWeight:800,color:"#fff",lineHeight:1.1}}>{drv.givenName} {drv.familyName}</div>
-                          <div style={{fontSize:12,color:teamCol,fontWeight:700,marginTop:4}}>{team?.name || "Unknown team"}</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{drv.givenName} {drv.familyName}</div>
+                          <div style={{ fontSize: 12, color: teamCol, fontWeight: 700, marginTop: 4 }}>{team?.name || "Unknown team"}</div>
                         </div>
                       </div>
-                      <StarBtn id={drv.driverId} watchlist={watchlist} onToggle={onToggle} itemType="driver" disabled={watchlistDisabled}/>
+                      <StarBtn id={drv.driverId} watchlist={watchlist} onToggle={onToggle} itemType="driver" disabled={watchlistDisabled} />
                     </div>
 
-                    <div style={{display:"grid",gridTemplateColumns:"minmax(0,1fr) 96px",gap:12,alignItems:"end",marginBottom:14}}>
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 96px", gap: 12, alignItems: "end", marginBottom: 14 }}>
                       <div>
-                        <div style={{fontSize:12,color:"#666",marginBottom:8}}>{drv.nationality || "Unknown nationality"} · #{drv.permanentNumber || "—"}</div>
+                        <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>{drv.nationality || "Unknown nationality"} · #{drv.permanentNumber || "—"}</div>
                         {isLatestWinner ? (
-                          <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 9px",borderRadius:999,background:"#FFD70014",border:"1px solid #FFD70033",color:"#FFD700",fontSize:10,fontWeight:700,letterSpacing:0.4}}>
+                          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 9px", borderRadius: 999, background: "#FFD70014", border: "1px solid #FFD70033", color: "#FFD700", fontSize: 10, fontWeight: 700, letterSpacing: 0.4 }}>
                             Latest GP winner · {latestRaceContext.raceName}
                           </div>
                         ) : (
-                          <div style={{fontSize:11,color:"#555"}}>{asNum(entry.wins)} season win{asNum(entry.wins) === 1 ? "" : "s"}</div>
+                          <div style={{ fontSize: 11, color: "#555" }}>{asNum(entry.wins)} season win{asNum(entry.wins) === 1 ? "" : "s"}</div>
                         )}
                       </div>
                       <DriverPhoto
@@ -5184,19 +5192,19 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
                         headshotUrl={headshotUrl}
                         headshotVariant="6col"
                         teamColor={teamCol}
-                        style={{width:96,height:116,display:"block",objectFit:"contain",objectPosition:"center bottom",background:"transparent",border:"none",filter:"drop-shadow(0 6px 16px rgba(0,0,0,0.38))"}}
+                        style={{ width: 96, height: 116, display: "block", objectFit: "contain", objectPosition: "center bottom", background: "transparent", border: "none", filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.38))" }}
                       />
                     </div>
 
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
                       {[
                         ["Position", `P${entry.position}`, "#fff"],
                         ["Points", entry.points, "#FFD700"],
                         ["Wins", entry.wins, "#E10600"],
                       ].map(([label, value, accent]) => (
-                        <div key={label} style={{background:"#111",borderRadius:8,padding:"9px 10px"}}>
-                          <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                          <div style={{fontSize:15,fontWeight:800,color:accent,...mono}}>{value}</div>
+                        <div key={label} style={{ background: "#111", borderRadius: 8, padding: "9px 10px" }}>
+                          <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: accent, ...mono }}>{value}</div>
                         </div>
                       ))}
                     </div>
@@ -5211,28 +5219,28 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
       {!!watchedTeams.length && (
         <div>
           <SecLabel>Tracked Constructors</SecLabel>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", gap: 14 }}>
             {watchedTeams.map((entry) => {
               const team = entry.Constructor;
               const teamCol = col(team?.constructorId);
               const meta = getConstructorProfileMeta(team?.constructorId);
               const isLatestWinner = latestRaceContext?.teamName === team?.name;
               return (
-                <div key={team.constructorId} style={{background:"#0f0f0f",border:`1px solid ${teamCol}33`,borderRadius:12,overflow:"hidden"}}>
-                  <div style={{height:4,background:`linear-gradient(90deg, ${teamCol}, ${teamCol}44, transparent)`}}/>
-                  <div style={{padding:16}}>
-                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:14}}>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <PosBadge pos={entry.position}/>
+                <div key={team.constructorId} style={{ background: "#0f0f0f", border: `1px solid ${teamCol}33`, borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ height: 4, background: `linear-gradient(90deg, ${teamCol}, ${teamCol}44, transparent)` }} />
+                  <div style={{ padding: 16 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <PosBadge pos={entry.position} />
                         <div>
-                          <div style={{fontSize:18,fontWeight:800,color:"#fff",lineHeight:1.1}}>{team?.name}</div>
-                          <div style={{fontSize:12,color:"#777",marginTop:4}}>{team?.nationality || "Unknown nationality"}</div>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{team?.name}</div>
+                          <div style={{ fontSize: 12, color: "#777", marginTop: 4 }}>{team?.nationality || "Unknown nationality"}</div>
                         </div>
                       </div>
-                      <StarBtn id={team.constructorId} watchlist={watchlist} onToggle={onToggle} itemType="team" disabled={watchlistDisabled}/>
+                      <StarBtn id={team.constructorId} watchlist={watchlist} onToggle={onToggle} itemType="team" disabled={watchlistDisabled} />
                     </div>
 
-                    <div style={{marginBottom:14}}>
+                    <div style={{ marginBottom: 14 }}>
                       <ConstructorLogo
                         constructorId={team?.constructorId}
                         teamName={team?.name || "Constructor"}
@@ -5243,25 +5251,25 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
                       />
                     </div>
 
-                    <div style={{fontSize:12,color:teamCol,fontWeight:700,marginBottom:6}}>TP · {meta?.principal || "Not available"}</div>
-                    <div style={{fontSize:11,color:"#666",marginBottom:10}}>
+                    <div style={{ fontSize: 12, color: teamCol, fontWeight: 700, marginBottom: 6 }}>TP · {meta?.principal || "Not available"}</div>
+                    <div style={{ fontSize: 11, color: "#666", marginBottom: 10 }}>
                       {meta?.powerUnit || "Power unit unknown"} · {meta?.base || "Base unknown"}
                     </div>
                     {isLatestWinner && (
-                      <div style={{display:"inline-flex",alignItems:"center",gap:6,padding:"5px 9px",borderRadius:999,background:"#FFD70014",border:"1px solid #FFD70033",color:"#FFD700",fontSize:10,fontWeight:700,letterSpacing:0.4,marginBottom:12}}>
+                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 9px", borderRadius: 999, background: "#FFD70014", border: "1px solid #FFD70033", color: "#FFD700", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, marginBottom: 12 }}>
                         Latest GP winning team · {latestRaceContext.raceName}
                       </div>
                     )}
 
-                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
                       {[
                         ["Position", `P${entry.position}`, "#fff"],
                         ["Points", entry.points, "#FFD700"],
                         ["Wins", entry.wins, teamCol],
                       ].map(([label, value, accent]) => (
-                        <div key={label} style={{background:"#111",borderRadius:8,padding:"9px 10px"}}>
-                          <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:4}}>{label}</div>
-                          <div style={{fontSize:15,fontWeight:800,color:accent,...mono}}>{value}</div>
+                        <div key={label} style={{ background: "#111", borderRadius: 8, padding: "9px 10px" }}>
+                          <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 4 }}>{label}</div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: accent, ...mono }}>{value}</div>
                         </div>
                       ))}
                     </div>
@@ -5276,24 +5284,24 @@ function WatchlistPage({season,watchlist,onToggle,trackedCount,watchlistReady,wa
   );
 }
 
-function TelemetryMetricCard({label, value, unit, color}) {
+function TelemetryMetricCard({ label, value, unit, color }) {
   return (
-    <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:"12px 10px",textAlign:"center"}}>
-      <p style={{fontSize:10,color:"#555",textTransform:"uppercase",marginBottom:8,letterSpacing:1}}>{label}</p>
-      <p style={{fontSize:18,fontWeight:700,color:color||"#fff",...mono}}>{value}</p>
-      <p style={{fontSize:10,color:"#444",marginTop:4}}>{unit}</p>
+    <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: "12px 10px", textAlign: "center" }}>
+      <p style={{ fontSize: 10, color: "#555", textTransform: "uppercase", marginBottom: 8, letterSpacing: 1 }}>{label}</p>
+      <p style={{ fontSize: 18, fontWeight: 700, color: color || "#fff", ...mono }}>{value}</p>
+      <p style={{ fontSize: 10, color: "#444", marginTop: 4 }}>{unit}</p>
     </div>
   );
 }
 
 function TelemetryPage({ season = "2026", isMobile = false }) {
-  const [telemetryData,setTelemetryData]=useState([]);
-  const [selectedDriver,setSelectedDriver]=useState("VER");
-  const [currentMetrics,setCurrentMetrics]=useState(null);
-  const [drivers,setDrivers]=useState([]);
-  const [payload,setPayload]=useState(null);
-  const [loading,setLoading]=useState(true);
-  const [error,setError]=useState(null);
+  const [telemetryData, setTelemetryData] = useState([]);
+  const [selectedDriver, setSelectedDriver] = useState("VER");
+  const [currentMetrics, setCurrentMetrics] = useState(null);
+  const [drivers, setDrivers] = useState([]);
+  const [payload, setPayload] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [availableSessions, setAvailableSessions] = useState([]);
   const [selectedSessionKey, setSelectedSessionKey] = useState("");
@@ -5376,8 +5384,8 @@ function TelemetryPage({ season = "2026", isMobile = false }) {
     };
   }, [selectedDriver, selectedSessionKey]);
 
-  if(loading) return <Spinner/>;
-  if(error) return <Empty icon="⚠️" msg={error}/>;
+  if (loading) return <Spinner />;
+  if (error) return <Empty icon="⚠️" msg={error} />;
 
   const sessionContext = payload?.session || null;
   const usingEstimatedTelemetry = payload?.source === "lap-data";
@@ -5398,17 +5406,17 @@ function TelemetryPage({ season = "2026", isMobile = false }) {
 
   return (
     <div>
-      <div style={{ display:"flex", flexDirection:isMobile?"column":"row", gap:16, marginBottom:20 }}>
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 16, marginBottom: 20 }}>
         {availableSessions.length > 0 && (
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{fontSize:12,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:10,fontWeight:600}}>Select GP & Session</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, color: "#555", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10, fontWeight: 600 }}>Select GP & Session</div>
             <select
               value={selectedSessionKey}
               onChange={e => {
                 setSelectedSessionKey(e.target.value);
                 setLoading(true);
               }}
-              style={{background:"#111",border:"1px solid #1e1e1e",color:"#fff",padding:"8px 12px",borderRadius:6,fontSize:13,cursor:"pointer",width:"100%"}}
+              style={{ background: "#111", border: "1px solid #1e1e1e", color: "#fff", padding: "8px 12px", borderRadius: 6, fontSize: 13, cursor: "pointer", width: "100%" }}
             >
               {availableSessions.map(s => {
                 const dateStr = s.date_start ? new Date(s.date_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : "";
@@ -5422,186 +5430,186 @@ function TelemetryPage({ season = "2026", isMobile = false }) {
           </div>
         )}
 
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{fontSize:12,color:"#555",textTransform:"uppercase",letterSpacing:1,marginBottom:10,fontWeight:600}}>Select Driver</div>
-          <select value={selectedDriver} onChange={e=>setSelectedDriver(e.target.value)} style={{background:"#111",border:"1px solid #1e1e1e",color:"#fff",padding:"8px 12px",borderRadius:6,fontSize:13,cursor:"pointer",...mono,width:"100%"}}>
-            {drivers.map(d=><option key={d.code} value={d.code}>{d.name} ({d.code})</option>)}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, color: "#555", textTransform: "uppercase", letterSpacing: 1, marginBottom: 10, fontWeight: 600 }}>Select Driver</div>
+          <select value={selectedDriver} onChange={e => setSelectedDriver(e.target.value)} style={{ background: "#111", border: "1px solid #1e1e1e", color: "#fff", padding: "8px 12px", borderRadius: 6, fontSize: 13, cursor: "pointer", ...mono, width: "100%" }}>
+            {drivers.map(d => <option key={d.code} value={d.code}>{d.name} ({d.code})</option>)}
           </select>
         </div>
       </div>
 
-      <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:12,padding:18,marginBottom:18}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:14,flexWrap:"wrap"}}>
+      <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 12, padding: 18, marginBottom: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14, flexWrap: "wrap" }}>
           <div>
-            <div style={{fontSize:10,color:"#666",textTransform:"uppercase",letterSpacing:1.4,fontWeight:700,marginBottom:8}}>Telemetry Session</div>
-            <div style={{fontSize:22,fontWeight:800,color:"#fff",lineHeight:1.1,marginBottom:6}}>
+            <div style={{ fontSize: 10, color: "#666", textTransform: "uppercase", letterSpacing: 1.4, fontWeight: 700, marginBottom: 8 }}>Telemetry Session</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", lineHeight: 1.1, marginBottom: 6 }}>
               {sessionContext?.meetingName || sessionContext?.circuit || "Telemetry Feed"}
             </div>
-            <div style={{fontSize:12,color:"#777"}}>
+            <div style={{ fontSize: 12, color: "#777" }}>
               {[sessionContext?.sessionName, sessionContext?.circuit, sessionContext?.country].filter(Boolean).join(" • ")}
             </div>
           </div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <div style={{
-              display:"inline-flex",
-              padding:"6px 10px",
-              borderRadius:999,
-              border:`1px solid ${usingEstimatedTelemetry ? "#FFD70033" : "#27F4D233"}`,
-              background:usingEstimatedTelemetry ? "#FFD70014" : "#27F4D214",
-              color:usingEstimatedTelemetry ? "#FFD700" : "#27F4D2",
-              fontSize:10,
-              fontWeight:700,
-              textTransform:"uppercase",
-              letterSpacing:1.1,
+              display: "inline-flex",
+              padding: "6px 10px",
+              borderRadius: 999,
+              border: `1px solid ${usingEstimatedTelemetry ? "#FFD70033" : "#27F4D233"}`,
+              background: usingEstimatedTelemetry ? "#FFD70014" : "#27F4D214",
+              color: usingEstimatedTelemetry ? "#FFD700" : "#27F4D2",
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: 1.1,
             }}>
               {sourceLabel}
             </div>
             <div style={{
-              display:"inline-flex",
-              padding:"6px 10px",
-              borderRadius:999,
-              border:"1px solid #1f1f1f",
-              background:"#111",
-              color:"#aaa",
-              fontSize:10,
-              fontWeight:700,
-              textTransform:"uppercase",
-              letterSpacing:1.1,
+              display: "inline-flex",
+              padding: "6px 10px",
+              borderRadius: 999,
+              border: "1px solid #1f1f1f",
+              background: "#111",
+              color: "#aaa",
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: 1.1,
             }}>
               Driver · {payload?.selectedDriver?.code || selectedDriver}
             </div>
           </div>
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10,marginTop:16}}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10, marginTop: 16 }}>
           {telemetryContextRows.map(([label, value]) => (
-            <div key={label} style={{background:"#111",border:"1px solid #1d1d1d",borderRadius:10,padding:"10px 12px"}}>
-              <div style={{fontSize:9,color:"#555",textTransform:"uppercase",letterSpacing:1.1,marginBottom:5}}>{label}</div>
-              <div style={{fontSize:13,color:"#fff",fontWeight:700,wordBreak:"break-word"}}>{value}</div>
+            <div key={label} style={{ background: "#111", border: "1px solid #1d1d1d", borderRadius: 10, padding: "10px 12px" }}>
+              <div style={{ fontSize: 9, color: "#555", textTransform: "uppercase", letterSpacing: 1.1, marginBottom: 5 }}>{label}</div>
+              <div style={{ fontSize: 13, color: "#fff", fontWeight: 700, wordBreak: "break-word" }}>{value}</div>
             </div>
           ))}
         </div>
       </div>
 
       {usingEstimatedTelemetry && payload?.derivedMetricsNotice && (
-        <div style={{marginBottom:20,padding:"10px 12px",borderRadius:10,background:"#FFD70010",border:"1px solid #FFD70022",fontSize:11,color:"#C9B46B",lineHeight:1.5}}>
-          <strong style={{color:"#FFD700"}}>Estimated telemetry:</strong> {payload.derivedMetricsNotice.toLowerCase()}
+        <div style={{ marginBottom: 20, padding: "10px 12px", borderRadius: 10, background: "#FFD70010", border: "1px solid #FFD70022", fontSize: 11, color: "#C9B46B", lineHeight: 1.5 }}>
+          <strong style={{ color: "#FFD700" }}>Estimated telemetry:</strong> {payload.derivedMetricsNotice.toLowerCase()}
         </div>
       )}
 
-      {currentMetrics&&(
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10,marginBottom:24}}>
-          <TelemetryMetricCard label="Speed" value={currentMetrics.speed.toFixed(0)} unit="km/h" color="#E10600"/>
-          <TelemetryMetricCard label="Throttle" value={currentMetrics.throttle.toFixed(0)} unit="%" color="#27F4D2"/>
-          <TelemetryMetricCard label="Brake" value={currentMetrics.braking.toFixed(0)} unit="%" color="#FF6B6B"/>
-          <TelemetryMetricCard label="Gear" value={currentMetrics.gear} unit="" color="#FFD700"/>
-          <TelemetryMetricCard label="RPM" value={Math.round(currentMetrics.rpm/100)} unit="x100" color="#4AFF00"/>
-          <TelemetryMetricCard label="Fuel" value={currentMetrics.fuel.toFixed(1)} unit="L" color="#FF9500"/>
-          <TelemetryMetricCard label="Position" value={currentMetrics.position ?? "—"} unit="" color="#64C4FF"/>
-          <TelemetryMetricCard label="Lap" value={currentMetrics.lap ?? "—"} unit="" color="#a855f7"/>
+      {currentMetrics && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginBottom: 24 }}>
+          <TelemetryMetricCard label="Speed" value={currentMetrics.speed.toFixed(0)} unit="km/h" color="#E10600" />
+          <TelemetryMetricCard label="Throttle" value={currentMetrics.throttle.toFixed(0)} unit="%" color="#27F4D2" />
+          <TelemetryMetricCard label="Brake" value={currentMetrics.braking.toFixed(0)} unit="%" color="#FF6B6B" />
+          <TelemetryMetricCard label="Gear" value={currentMetrics.gear} unit="" color="#FFD700" />
+          <TelemetryMetricCard label="RPM" value={Math.round(currentMetrics.rpm / 100)} unit="x100" color="#4AFF00" />
+          <TelemetryMetricCard label="Fuel" value={currentMetrics.fuel.toFixed(1)} unit="L" color="#FF9500" />
+          <TelemetryMetricCard label="Position" value={currentMetrics.position ?? "—"} unit="" color="#64C4FF" />
+          <TelemetryMetricCard label="Lap" value={currentMetrics.lap ?? "—"} unit="" color="#a855f7" />
         </div>
       )}
 
       {/* Charts Grid */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,marginBottom:24}}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 20, marginBottom: 24 }}>
         {/* Speed Chart */}
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-          <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Speed Profile</h3>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Speed Profile</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={telemetryData}>
-              <CartesianGrid stroke="#1a1a1a"/>
-              <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-              <YAxis stroke="#666" tick={{fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}/>
-              <Line type="monotone" dataKey="speed" stroke="#E10600" dot={false} strokeWidth={2}/>
+              <CartesianGrid stroke="#1a1a1a" />
+              <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} />
+              <Line type="monotone" dataKey="speed" stroke="#E10600" dot={false} strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Throttle & Brake */}
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-          <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Throttle & Brake</h3>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Throttle & Brake</h3>
           <ResponsiveContainer width="100%" height={250}>
             <ComposedChart data={telemetryData}>
-              <CartesianGrid stroke="#1a1a1a"/>
-              <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-              <YAxis stroke="#666" tick={{fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}/>
-              <Line type="monotone" dataKey="throttle" stroke="#27F4D2" dot={false} strokeWidth={2}/>
-              <Line type="monotone" dataKey="braking" stroke="#FF6B6B" dot={false} strokeWidth={2}/>
+              <CartesianGrid stroke="#1a1a1a" />
+              <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} />
+              <Line type="monotone" dataKey="throttle" stroke="#27F4D2" dot={false} strokeWidth={2} />
+              <Line type="monotone" dataKey="braking" stroke="#FF6B6B" dot={false} strokeWidth={2} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
 
         {/* Fuel Consumption */}
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-          <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Fuel Consumption</h3>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Fuel Consumption</h3>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={telemetryData}>
-              <CartesianGrid stroke="#1a1a1a"/>
-              <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-              <YAxis stroke="#666" tick={{fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}/>
-              <Area type="monotone" dataKey="fuel" fill="#FF9500" stroke="#FF9500" dot={false}/>
+              <CartesianGrid stroke="#1a1a1a" />
+              <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} />
+              <Area type="monotone" dataKey="fuel" fill="#FF9500" stroke="#FF9500" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         {/* Tire Temperature */}
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-          <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Tire Temperature</h3>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Tire Temperature</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={telemetryData}>
-              <CartesianGrid stroke="#1a1a1a"/>
-              <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-              <YAxis stroke="#666" tick={{fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}/>
-              <Line type="monotone" dataKey="tireTempF" stroke="#FF1493" dot={false} strokeWidth={2} name="Front"/>
-              <Line type="monotone" dataKey="tireTempR" stroke="#00FFFF" dot={false} strokeWidth={2} name="Rear"/>
-              <Legend wrapperStyle={{color:"#666",fontSize:11}}/>
+              <CartesianGrid stroke="#1a1a1a" />
+              <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} />
+              <Line type="monotone" dataKey="tireTempF" stroke="#FF1493" dot={false} strokeWidth={2} name="Front" />
+              <Line type="monotone" dataKey="tireTempR" stroke="#00FFFF" dot={false} strokeWidth={2} name="Rear" />
+              <Legend wrapperStyle={{ color: "#666", fontSize: 11 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Gear Selection */}
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-          <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Gear Selection</h3>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Gear Selection</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={telemetryData}>
-              <CartesianGrid stroke="#1a1a1a"/>
-              <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-              <YAxis stroke="#666" tick={{fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}/>
-              <Bar dataKey="gear" fill="#27F4D2"/>
+              <CartesianGrid stroke="#1a1a1a" />
+              <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} />
+              <Bar dataKey="gear" fill="#27F4D2" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* RPM Curve */}
-        <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-          <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>Engine RPM</h3>
+        <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>Engine RPM</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={telemetryData}>
-              <CartesianGrid stroke="#1a1a1a"/>
-              <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-              <YAxis stroke="#666" tick={{fontSize:11}}/>
-              <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}}/>
-              <Line type="monotone" dataKey="rpm" stroke="#7C3AED" dot={false} strokeWidth={2}/>
+              <CartesianGrid stroke="#1a1a1a" />
+              <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} />
+              <Line type="monotone" dataKey="rpm" stroke="#7C3AED" dot={false} strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* DRS Status */}
-      <div style={{background:"#0f0f0f",border:"1px solid #1e1e1e",borderRadius:8,padding:16}}>
-        <h3 style={{fontSize:14,fontWeight:600,color:"#fff",marginBottom:12}}>DRS Status</h3>
+      <div style={{ background: "#0f0f0f", border: "1px solid #1e1e1e", borderRadius: 8, padding: 16 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>DRS Status</h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={telemetryData}>
-            <CartesianGrid stroke="#1a1a1a"/>
-            <XAxis dataKey="distance" stroke="#666" tick={{fontSize:11}}/>
-            <YAxis stroke="#666" tick={{fontSize:11}} domain={[0,100]}/>
-            <Tooltip contentStyle={{background:"#0c0c0c",border:"1px solid #E10600",borderRadius:4,color:"#fff"}} formatter={v=>v>0?"OPEN":"CLOSED"}/>
-            <Bar dataKey="drs" fill="#4AFF00"/>
+            <CartesianGrid stroke="#1a1a1a" />
+            <XAxis dataKey="distance" stroke="#666" tick={{ fontSize: 11 }} />
+            <YAxis stroke="#666" tick={{ fontSize: 11 }} domain={[0, 100]} />
+            <Tooltip contentStyle={{ background: "#0c0c0c", border: "1px solid #E10600", borderRadius: 4, color: "#fff" }} formatter={v => v > 0 ? "OPEN" : "CLOSED"} />
+            <Bar dataKey="drs" fill="#4AFF00" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -5611,12 +5619,12 @@ function TelemetryPage({ season = "2026", isMobile = false }) {
 
 // ──  Main App ──────────────────────────────────────────────────────
 export default function F1AnalyticsHub() {
-  const [page, setPage]             = useState(DEFAULT_DASHBOARD_PAGE);
-  const [season, setSeason]         = useState("2026");
+  const [page, setPage] = useState(DEFAULT_DASHBOARD_PAGE);
+  const [season, setSeason] = useState("2026");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [scrolled, setScrolled]     = useState(false);
-  const [tabReady, setTabReady]     = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [tabReady, setTabReady] = useState(false);
   const {
     watchlist,
     toggle: toggleWatch,
@@ -5624,7 +5632,7 @@ export default function F1AnalyticsHub() {
     syncing: watchlistSyncing,
     trackedCount,
   } = useDashboardWatchlist();
-  const width    = useWindowWidth();
+  const width = useWindowWidth();
   const isMobile = width < 768;
   const isTablet = width >= 768 && width < 1100;
   const showSeasonSelector = SEASON_SELECTOR_PAGES.has(page);
@@ -5667,103 +5675,104 @@ export default function F1AnalyticsHub() {
   const topbarHeader = {
     standings: {
       icon: <NavIcon id="standings" active={true} size={18} color="#FFD700" />,
-      title:"Championship Standings",
-      subtitle:`${season} Formula 1 World Championship`,
-      accent:"#FFD700",
+      title: "Championship Standings",
+      subtitle: `${season} Formula 1 World Championship`,
+      accent: "#FFD700",
     },
     drivers: {
       icon: <NavIcon id="drivers" active={true} size={18} color="#27F4D2" />,
-      title:"Driver Profiles",
-      subtitle:`${season} · Driver profiles`,
-      accent:"#27F4D2",
+      title: "Driver Profiles",
+      subtitle: `${season} · Driver profiles`,
+      accent: "#27F4D2",
     },
     constructors: {
       icon: <NavIcon id="constructors" active={true} size={18} color="#FF8000" />,
-      title:"Constructor Standings",
-      subtitle:`${season} · Constructors`,
-      accent:"#FF8000",
+      title: "Constructor Standings",
+      subtitle: `${season} · Constructors`,
+      accent: "#FF8000",
     },
     races: {
       icon: <NavIcon id="races" active={true} size={18} color="#a855f7" />,
-      title:"Race Results",
-      subtitle:`${season} · Full results · qualifying · pit stops`,
-      accent:"#a855f7",
+      title: "Race Results",
+      subtitle: `${season} · Full results · qualifying · pit stops`,
+      accent: "#a855f7",
     },
     points: {
       icon: <NavIcon id="points" active={true} size={18} color="#27F4D2" />,
-      title:"Points Progression",
-      subtitle:`${season} · Round-by-round title fight and current gaps`,
-      accent:"#27F4D2",
+      title: "Points Progression",
+      subtitle: `${season} · Round-by-round title fight and current gaps`,
+      accent: "#27F4D2",
     },
     records: {
       icon: <NavIcon id="records" active={true} size={18} color="#FFD700" />,
-      title:"Season Records",
-      subtitle:`${season} · Wins, podiums, consistency and constructor leaders`,
-      accent:"#FFD700",
+      title: "Season Records",
+      subtitle: `${season} · Wins, podiums, consistency and constructor leaders`,
+      accent: "#FFD700",
     },
     strategy: {
       icon: <NavIcon id="strategy" active={true} size={18} color="#E10600" />,
-      title:"Pit Stop Strategy",
-      subtitle:`${season} · Stint visualizer · hover to isolate driver`,
-      accent:"#E10600",
+      title: "Pit Stop Strategy",
+      subtitle: `${season} · Stint visualizer · hover to isolate driver`,
+      accent: "#E10600",
     },
     h2h: {
       icon: <NavIcon id="h2h" active={true} size={18} color="#E10600" />,
-      title:"Head to Head",
-      subtitle:`${season} · Metric board, recent form and race-by-race duel`,
-      accent:"#E10600",
+      title: "Head to Head",
+      subtitle: `${season} · Metric board, recent form and race-by-race duel`,
+      accent: "#E10600",
     },
     circuits: {
       icon: <NavIcon id="circuits" active={true} size={18} color="#27F4D2" />,
-      title:"Circuit Explorer",
-      subtitle:`${season} · Wikipedia track maps`,
-      accent:"#27F4D2",
+      title: "Circuit Explorer",
+      subtitle: `${season} · Wikipedia track maps`,
+      accent: "#27F4D2",
     },
     live: {
       icon: <NavIcon id="live" active={true} size={18} color="#E10600" />,
-      title:"Live & Upcoming",
-      subtitle:"Next race countdown · Real-time when a race is live",
-      accent:"#E10600",
+      title: "Live & Upcoming",
+      subtitle: "Next race countdown · Real-time when a race is live",
+      accent: "#E10600",
     },
     watchlist: {
       icon: <NavIcon id="watchlist" active={true} size={18} color="#FFD700" />,
-      title:"Watchlist",
-      subtitle:`${trackedCount} tracked item${trackedCount !== 1 ? "s" : ""} · ${season} season`,
-      accent:"#FFD700",
+      title: "Watchlist",
+      subtitle: `${trackedCount} tracked item${trackedCount !== 1 ? "s" : ""} · ${season} season`,
+      accent: "#FFD700",
     },
     telemetry: {
       icon: <NavIcon id="telemetry" active={true} size={18} color="#7C3AED" />,
-      title:"Telemetry",
-      subtitle:"Real-time style driver telemetry",
-      accent:"#7C3AED",
+      title: "Telemetry",
+      subtitle: "Real-time style driver telemetry",
+      accent: "#7C3AED",
     },
     visualizer: {
       icon: <NavIcon id="visualizer" active={true} size={18} color="#FF9500" />,
-      title:"Lap Visualizer",
-      subtitle:`${season} · Dynamic telemetry lap trace and circuit visualization`,
-      accent:"#FF9500",
+      title: "Lap Visualizer",
+      subtitle: `${season} · Dynamic telemetry lap trace and circuit visualization`,
+      accent: "#FF9500",
     },
   }[page] || {
     icon: <NavIcon id={curNav?.id} active={true} size={18} color="#E10600" />,
-    title:curNav?.label,
-    subtitle:curGroupLabel,
-    accent:"#E10600",
+    title: curNav?.label,
+    subtitle: curGroupLabel,
+    accent: "#E10600",
   };
 
   // ── Sidebar nav items ────────────────────────────────────────────
   const navContent = (
-    <nav style={{ flex:1, padding:"8px 6px", overflowY:"hidden", overflowX:"hidden" }}>
+    <nav style={{ flex: 1, padding: "8px 6px", overflowY: "auto", overflowX: "hidden" }}>
       {NAV_GROUPS.map(group => (
         <div key={group.label}>
           {(sidebarOpen || isMobile) && (
             <div style={{
-              fontSize:9, color:"#333", textTransform:"uppercase",
-              letterSpacing:2, padding:"14px 12px 5px", fontWeight:700,
-              display:"flex", alignItems:"center", gap:6,
+              fontSize: 9, color: "#333", textTransform: "uppercase",
+              letterSpacing: 2, padding: "12px 12px 4px", fontWeight: 700,
+              display: "flex", alignItems: "center", gap: 6,
+              fontFamily: "'Orbitron', sans-serif",
             }}>
-              <div style={{ flex:1, height:"0.5px", background:"#1e1e1e" }}/>
+              <div style={{ flex: 1, height: "0.5px", background: "#1e1e1e" }} />
               <span>{group.label}</span>
-              <div style={{ flex:1, height:"0.5px", background:"#1e1e1e" }}/>
+              <div style={{ flex: 1, height: "0.5px", background: "#1e1e1e" }} />
             </div>
           )}
           {group.items.map(item => {
@@ -5774,54 +5783,56 @@ export default function F1AnalyticsHub() {
                 onClick={() => { setPage(item.id); if (isMobile) setMobileNavOpen(false); }}
                 title={!sidebarOpen && !isMobile ? item.label : undefined}
                 style={{
-                  display:"flex", alignItems:"center", gap:9,
-                  width:"100%", padding: sidebarOpen || isMobile ? "9px 12px" : "9px 0",
+                  display: "flex", alignItems: "center", gap: 9,
+                  width: "100%", padding: sidebarOpen || isMobile ? "7px 12px" : "7px 0",
                   justifyContent: sidebarOpen || isMobile ? "flex-start" : "center",
                   background: active ? "linear-gradient(90deg, rgba(225,6,0,0.12) 0%, rgba(225,6,0,0.04) 100%)" : "transparent",
-                  border:"none",
+                  border: "none",
                   borderLeft: active ? "2px solid #E10600" : "2px solid transparent",
-                  borderRadius:"0 6px 6px 0",
-                  cursor:"pointer",
+                  borderRadius: "0 6px 6px 0",
+                  cursor: "pointer",
                   color: active ? "#fff" : "#4a4a4a",
-                  transition:"all 0.15s ease",
-                  marginBottom:2, fontSize:13,
-                  fontWeight: active ? 600 : 400,
-                  textAlign:"left", whiteSpace:"nowrap",
-                  position:"relative",
+                  transition: "all 0.15s ease",
+                  marginBottom: 1, fontSize: 13,
+                  fontWeight: active ? 600 : 500,
+                  textAlign: "left", whiteSpace: "nowrap",
+                  position: "relative",
+                  fontFamily: "'Orbitron', sans-serif",
                 }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.color = "#888"; e.currentTarget.style.background = active ? "linear-gradient(90deg, rgba(225,6,0,0.12) 0%, rgba(225,6,0,0.04) 100%)" : "rgba(255,255,255,0.03)"; }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.color = "#4a4a4a"; e.currentTarget.style.background = active ? "linear-gradient(90deg, rgba(225,6,0,0.12) 0%, rgba(225,6,0,0.04) 100%)" : "transparent"; }}
               >
                 <span style={{
-                  display:"flex",
-                  alignItems:"center",
-                  justifyContent:"center",
-                  width:16,
-                  height:16,
-                  flexShrink:0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 16,
+                  height: 16,
+                  flexShrink: 0,
                 }}>
                   <NavIcon id={item.id} active={active} />
                 </span>
 
                 {(sidebarOpen || isMobile) && (
-                  <span style={{ flex:1, overflow:"hidden", textOverflow:"ellipsis" }}>{item.label}</span>
+                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</span>
                 )}
 
                 {item.id === "watchlist" && trackedCount > 0 && (sidebarOpen || isMobile) && (
                   <span style={{
-                    background:"#E10600", color:"#fff", fontSize:9, fontWeight:800,
-                    minWidth:16, height:16, borderRadius:8, display:"flex",
-                    alignItems:"center", justifyContent:"center",
-                    padding:"0 4px", flexShrink:0,
+                    background: "#E10600", color: "#fff", fontSize: 9, fontWeight: 800,
+                    minWidth: 16, height: 16, borderRadius: 8, display: "flex",
+                    alignItems: "center", justifyContent: "center",
+                    padding: "0 4px", flexShrink: 0,
+                    fontFamily: "'Orbitron', sans-serif",
                   }}>{trackedCount}</span>
                 )}
 
                 {item.id === "live" && (
                   <span style={{
-                    width:6, height:6, borderRadius:"50%", background:"#E10600",
-                    flexShrink:0, animation:"livePulse 1.5s ease-in-out infinite",
-                    ...((!sidebarOpen && !isMobile) ? { position:"absolute", top:6, right:6 } : {}),
-                  }}/>
+                    width: 6, height: 6, borderRadius: "50%", background: "#E10600",
+                    flexShrink: 0, animation: "livePulse 1.5s ease-in-out infinite",
+                    ...((!sidebarOpen && !isMobile) ? { position: "absolute", top: 6, right: 6 } : {}),
+                  }} />
                 )}
               </button>
             );
@@ -5834,35 +5845,35 @@ export default function F1AnalyticsHub() {
   // ── Sidebar header ───────────────────────────────────────────────
   const sidebarHeader = (
     <div style={{
-      padding:"0 14px", borderBottom:"1px solid #141414",
-      display:"flex", alignItems:"center",
-      gap:10, height:58, flexShrink:0,
-      overflow:"hidden",
+      padding: "0 14px", borderBottom: "1px solid #141414",
+      display: "flex", alignItems: "center",
+      gap: 10, height: 58, flexShrink: 0,
+      overflow: "hidden",
     }}>
       <button
         onClick={goHome}
         title="Go to Home"
         style={{
-          background:"transparent",
-          border:"none",
-          padding:0,
-          margin:0,
-          display:"flex",
-          alignItems:"center",
-          gap:10,
-          minWidth:0,
-          cursor:"pointer",
-          color:"inherit",
-          textAlign:"left",
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          margin: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          minWidth: 0,
+          cursor: "pointer",
+          color: "inherit",
+          textAlign: "left",
         }}
       >
-        <div style={{ flexShrink:0, display:"flex", alignItems:"center" }}>
-          <F1Logo width={sidebarOpen ? 52 : 38}/>
+        <div style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
+          <F1Logo width={sidebarOpen ? 52 : 38} />
         </div>
         {sidebarOpen && (
-          <div style={{ overflow:"hidden", lineHeight:1 }}>
-            <div style={{ fontWeight:800, fontSize:13, letterSpacing:0.3, color:"#fff", whiteSpace:"nowrap" }}>F1 Analytics</div>
-            <div style={{ color:"#333", fontSize:9, letterSpacing:2, marginTop:2, textTransform:"uppercase" }}>Hub · {season}</div>
+          <div style={{ overflow: "hidden", lineHeight: 1 }}>
+            <div style={{ fontWeight: 850, fontSize: 13, letterSpacing: 0.3, color: "#fff", whiteSpace: "nowrap", fontFamily: "'Orbitron', sans-serif" }}>Pitwall Analytics</div>
+            <div style={{ color: "#333", fontSize: 9, letterSpacing: 2, marginTop: 2, textTransform: "uppercase", fontFamily: "'Orbitron', sans-serif" }}>Hub · {season}</div>
           </div>
         )}
       </button>
@@ -5871,22 +5882,23 @@ export default function F1AnalyticsHub() {
 
   // ── Sidebar footer (collapse button) ────────────────────────────
   const sidebarFooter = (
-    <div style={{ padding:"10px 8px", borderTop:"1px solid #141414", flexShrink:0 }}>
+    <div style={{ padding: "10px 8px", borderTop: "1px solid #141414", flexShrink: 0 }}>
       <button
         onClick={() => setSidebarOpen(v => !v)}
         title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
         style={{
-          width:"100%", padding:"8px", background:"transparent",
-          border:"1px solid #1c1c1c", borderRadius:6, color:"#333",
-          cursor:"pointer", fontSize:12, display:"flex",
-          alignItems:"center", justifyContent: sidebarOpen ? "space-between" : "center",
-          gap:6, transition:"all 0.15s",
+          width: "100%", padding: "8px", background: "transparent",
+          border: "1px solid #1c1c1c", borderRadius: 6, color: "#333",
+          cursor: "pointer", fontSize: 11, display: "flex",
+          alignItems: "center", justifyContent: sidebarOpen ? "space-between" : "center",
+          gap: 6, transition: "all 0.15s",
+          fontFamily: "'Orbitron', sans-serif",
         }}
         onMouseEnter={e => { e.currentTarget.style.borderColor = "#E10600"; e.currentTarget.style.color = "#fff"; }}
         onMouseLeave={e => { e.currentTarget.style.borderColor = "#1c1c1c"; e.currentTarget.style.color = "#333"; }}
       >
-        {sidebarOpen && <span style={{ fontSize:11 }}>Collapse</span>}
-        <span style={{ fontSize:11, transition:"transform 0.25s", display:"inline-block", transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)" }}>◀</span>
+        {sidebarOpen && <span style={{ fontSize: 11 }}>Collapse</span>}
+        <span style={{ fontSize: 11, transition: "transform 0.25s", display: "inline-block", transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)" }}>◀</span>
       </button>
     </div>
   );
@@ -5900,7 +5912,7 @@ export default function F1AnalyticsHub() {
         alignItems: "center",
         justifyContent: "center",
         color: "#fff",
-        fontFamily: "'SF Pro Display','Segoe UI',sans-serif",
+        fontFamily: "'Titillium Web','SF Pro Display','Segoe UI',sans-serif",
       }}>
         <Spinner />
       </div>
@@ -5939,53 +5951,53 @@ export default function F1AnalyticsHub() {
         • Footer:        flexShrink:0                     → stays pinned at bottom
       */}
       <div style={{
-        display:"flex",
-        height:"100vh",       /* ← was minHeight which let page grow past viewport */
-        overflow:"hidden",    /* ← clips the entire shell to exactly the viewport */
-        background:"#080808",
-        fontFamily:"'SF Pro Display','Segoe UI',sans-serif",
-        color:"#fff",
+        display: "flex",
+        height: "100vh",       /* ← was minHeight which let page grow past viewport */
+        overflow: "hidden",    /* ← clips the entire shell to exactly the viewport */
+        background: "#080808",
+        fontFamily: "'Titillium Web','SF Pro Display','Segoe UI',sans-serif",
+        color: "#fff",
       }}>
 
         {/* ── Mobile overlay nav ─────────────────────────────────── */}
         {isMobile && mobileNavOpen && (
-          <div style={{ position:"fixed", inset:0, zIndex:999, display:"flex" }}>
+          <div style={{ position: "fixed", inset: 0, zIndex: 999, display: "flex" }}>
             <div style={{
-              width:272, background:"#0a0a0a",
-              borderRight:"1px solid #141414",
-              display:"flex", flexDirection:"column",
-              height:"100%",
-              boxShadow:"4px 0 24px rgba(0,0,0,0.6)",
+              width: 272, background: "#0a0a0a",
+              borderRight: "1px solid #141414",
+              display: "flex", flexDirection: "column",
+              height: "100%",
+              boxShadow: "4px 0 24px rgba(0,0,0,0.6)",
             }}>
               <div style={{
-                padding:"0 14px", borderBottom:"1px solid #141414",
-                display:"flex", alignItems:"center",
-                justifyContent:"space-between", height:58, flexShrink:0,
+                padding: "0 14px", borderBottom: "1px solid #141414",
+                display: "flex", alignItems: "center",
+                justifyContent: "space-between", height: 58, flexShrink: 0,
               }}>
                 <button
                   onClick={goHome}
                   title="Go to Home"
                   style={{
-                    background:"transparent",
-                    border:"none",
-                    padding:0,
-                    margin:0,
-                    display:"flex",
-                    alignItems:"center",
-                    gap:10,
-                    cursor:"pointer",
-                    color:"inherit",
-                    textAlign:"left",
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    margin: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    cursor: "pointer",
+                    color: "inherit",
+                    textAlign: "left",
                   }}
                 >
-                  <F1Logo width={50}/>
-                  <span style={{ fontWeight:800, fontSize:14 }}>F1 Analytics</span>
+                  <F1Logo width={50} />
+                  <span style={{ fontWeight: 800, fontSize: 14, fontFamily: "'Orbitron', sans-serif" }}>Pitwall Analytics</span>
                 </button>
-                <button onClick={() => setMobileNavOpen(false)} style={{ background:"transparent", border:"1px solid #222", color:"#888", width:28, height:28, borderRadius:6, cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" }}>✕</button>
+                <button onClick={() => setMobileNavOpen(false)} style={{ background: "transparent", border: "1px solid #222", color: "#888", width: 28, height: 28, borderRadius: 6, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
               {navContent}
             </div>
-            <div style={{ flex:1, background:"rgba(0,0,0,0.65)", backdropFilter:"blur(2px)" }} onClick={() => setMobileNavOpen(false)}/>
+            <div style={{ flex: 1, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(2px)" }} onClick={() => setMobileNavOpen(false)} />
           </div>
         )}
 
@@ -5993,14 +6005,14 @@ export default function F1AnalyticsHub() {
         {!isMobile && (
           <div style={{
             width: sidebarOpen ? (isTablet ? 206 : 230) : 52,
-            flexShrink:0,
-            height:"100vh",           /* ← CRITICAL: sidebar is always exactly viewport height */
-            background:"#0a0a0a",
-            borderRight:"1px solid #141414",
-            display:"flex",
-            flexDirection:"column",
-            transition:"width 0.22s cubic-bezier(0.4,0,0.2,1)",
-            overflow:"hidden",
+            flexShrink: 0,
+            height: "100vh",           /* ← CRITICAL: sidebar is always exactly viewport height */
+            background: "#0a0a0a",
+            borderRight: "1px solid #141414",
+            display: "flex",
+            flexDirection: "column",
+            transition: "width 0.22s cubic-bezier(0.4,0,0.2,1)",
+            overflow: "hidden",
           }}>
             {sidebarHeader}
             {navContent}
@@ -6010,56 +6022,56 @@ export default function F1AnalyticsHub() {
 
         {/* ── Main column ────────────────────────────────────────── */}
         <div style={{
-          flex:1,
-          display:"flex",
-          flexDirection:"column",
-          height:"100vh",             /* ← CRITICAL: main column is always exactly viewport height */
-          overflow:"hidden",          /* ← CRITICAL: clips main column so only content div scrolls */
-          minWidth:0,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",             /* ← CRITICAL: main column is always exactly viewport height */
+          overflow: "hidden",          /* ← CRITICAL: clips main column so only content div scrolls */
+          minWidth: 0,
         }}>
 
           {/* ── Topbar — IN FLOW, NOT position:fixed ─────────────
               Because the parent has overflow:hidden and is exactly 100vh tall,
               this topbar cannot scroll. No position:fixed, no left offset math. */}
           <div style={{
-            flexShrink:0,
+            flexShrink: 0,
             height: isMobile ? "auto" : (isTablet ? 66 : 72),
             minHeight: isMobile ? 58 : undefined,
-            padding:`${isMobile ? 10 : 0}px ${isMobile ? 14 : isTablet ? 16 : 24}px ${isMobile ? 10 : 0}`,
-            display:"flex",
-            alignItems:"center",
-            justifyContent:"space-between",
-            gap:12,
-            background:"#080808",
+            padding: `${isMobile ? 10 : 0}px ${isMobile ? 14 : isTablet ? 16 : 24}px ${isMobile ? 10 : 0}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            background: "#080808",
             borderBottom: scrolled
               ? "1px solid #1e1e1e"
               : "1px solid #141414",
             boxShadow: scrolled
               ? "0 2px 16px rgba(0,0,0,0.5)"
               : "none",
-            transition:"box-shadow 0.2s ease, border-color 0.2s ease",
-            zIndex:10,
+            transition: "box-shadow 0.2s ease, border-color 0.2s ease",
+            zIndex: 10,
           }}>
 
             {/* Nav toggle, title (+ season on mobile), sign out */}
             <div style={{
-              display:"flex",
-              alignItems:"center",
-              justifyContent:"space-between",
-              gap:10,
-              width:"100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 10,
+              width: "100%",
               minHeight: isMobile ? 44 : undefined,
             }}>
-              <div style={{ display:"flex", alignItems:"center", gap: isMobile ? 8 : 10, flex:1, minWidth:0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 10, flex: 1, minWidth: 0 }}>
                 {isMobile && (
                   <button
                     onClick={() => setMobileNavOpen(true)}
                     style={{
-                      background:"transparent", border:"1px solid #1e1e1e",
-                      color:"#888", width:34, height:34, borderRadius:7,
-                      cursor:"pointer", fontSize:16, flexShrink:0,
-                      display:"flex", alignItems:"center", justifyContent:"center",
-                      transition:"all 0.15s",
+                      background: "transparent", border: "1px solid #1e1e1e",
+                      color: "#888", width: 34, height: 34, borderRadius: 7,
+                      cursor: "pointer", fontSize: 16, flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      transition: "all 0.15s",
                     }}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = "#E10600"; e.currentTarget.style.color = "#fff"; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = "#1e1e1e"; e.currentTarget.style.color = "#888"; }}
@@ -6067,40 +6079,41 @@ export default function F1AnalyticsHub() {
                 )}
 
                 <div style={{
-                  display:"flex",
+                  display: "flex",
                   alignItems: isMobile ? "flex-start" : "center",
                   gap: isMobile ? 8 : 12,
-                  minWidth:0,
-                  flex:1,
+                  minWidth: 0,
+                  flex: 1,
                   overflow: isMobile ? "visible" : "hidden",
-                  position:"relative",
+                  position: "relative",
                   paddingBottom: isMobile ? 0 : 4,
                 }}>
                   <div style={{
                     width: isMobile ? 32 : 44,
                     height: isMobile ? 32 : 44,
                     borderRadius: isMobile ? 9 : 12,
-                    background:`linear-gradient(135deg, ${topbarHeader.accent}22, ${topbarHeader.accent}08)`,
-                    border:`1px solid ${topbarHeader.accent}33`,
-                    display:"flex", alignItems:"center", justifyContent:"center",
+                    background: `linear-gradient(135deg, ${topbarHeader.accent}22, ${topbarHeader.accent}08)`,
+                    border: `1px solid ${topbarHeader.accent}33`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: isMobile ? 16 : 22,
-                    flexShrink:0,
+                    flexShrink: 0,
                     marginTop: isMobile ? 1 : 0,
                   }}>
                     {topbarHeader.icon}
                   </div>
 
-                  <div style={{ minWidth:0, flex:1, overflow: isMobile ? "visible" : "hidden" }}>
+                  <div style={{ minWidth: 0, flex: 1, overflow: isMobile ? "visible" : "hidden" }}>
                     <h2 style={{
-                      margin:0,
+                      margin: 0,
                       fontSize: isMobile ? 15 : isTablet ? 20 : 22,
-                      fontWeight:900,
-                      letterSpacing:-0.5,
-                      color:"#fff",
+                      fontWeight: 900,
+                      letterSpacing: "-0.2px",
+                      color: "#fff",
                       lineHeight: isMobile ? 1.25 : 1.1,
+                      fontFamily: "'Orbitron', sans-serif",
                       ...(isMobile
-                        ? { whiteSpace:"normal", overflow:"visible", textOverflow:"unset" }
-                        : { whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }),
+                        ? { whiteSpace: "normal", overflow: "visible", textOverflow: "unset" }
+                        : { whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }),
                     }}>
                       {topbarHeader.title}
                     </h2>
@@ -6110,19 +6123,19 @@ export default function F1AnalyticsHub() {
                         onChange={e => setSeason(e.target.value)}
                         aria-label="Season"
                         style={{
-                          marginTop:6,
-                          background:"#111",
-                          border:`1px solid ${topbarHeader.accent}44`,
-                          color:topbarHeader.accent,
-                          padding:"4px 8px",
-                          borderRadius:6,
-                          fontSize:11,
-                          fontWeight:700,
-                          cursor:"pointer",
-                          fontFamily:"monospace",
-                          outline:"none",
-                          width:"auto",
-                          maxWidth:"100%",
+                          marginTop: 6,
+                          background: "#111",
+                          border: `1px solid ${topbarHeader.accent}44`,
+                          color: topbarHeader.accent,
+                          padding: "4px 8px",
+                          borderRadius: 6,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: "monospace",
+                          outline: "none",
+                          width: "auto",
+                          maxWidth: "100%",
                         }}
                       >
                         {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -6130,8 +6143,8 @@ export default function F1AnalyticsHub() {
                     )}
                     {!isMobile && !isTablet && (
                       <p style={{
-                        margin:"3px 0 0", fontSize:12, color:"#444",
-                        whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+                        margin: "3px 0 0", fontSize: 12, color: "#444",
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                       }}>
                         {topbarHeader.subtitle}
                       </p>
@@ -6140,32 +6153,32 @@ export default function F1AnalyticsHub() {
 
                   {!isMobile && !isTablet && (
                     <div style={{
-                      position:"absolute",
-                      left:56,
-                      bottom:0,
-                      width:60,
-                      height:2,
-                      background:`linear-gradient(90deg, ${topbarHeader.accent}, transparent)`,
-                      borderRadius:1,
-                    }}/>
+                      position: "absolute",
+                      left: 56,
+                      bottom: 0,
+                      width: 60,
+                      height: 2,
+                      background: `linear-gradient(90deg, ${topbarHeader.accent}, transparent)`,
+                      borderRadius: 1,
+                    }} />
                   )}
                 </div>
               </div>
 
-              <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
                 {showSeasonSelector && !isMobile && (
                   <>
                     {!isTablet && (
-                      <span style={{ color:"#333", fontSize:10, textTransform:"uppercase", letterSpacing:1 }}>Season</span>
+                      <span style={{ color: "#333", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>Season</span>
                     )}
                     <select
                       value={season}
                       onChange={e => setSeason(e.target.value)}
                       style={{
-                        background:"#111", border:"1px solid #222",
-                        color:"#fff", padding:"6px 10px", borderRadius:7,
-                        fontSize:13, cursor:"pointer", fontFamily:"monospace",
-                        outline:"none",
+                        background: "#111", border: "1px solid #222",
+                        color: "#fff", padding: "6px 10px", borderRadius: 7,
+                        fontSize: 13, cursor: "pointer", fontFamily: "monospace",
+                        outline: "none",
                       }}
                     >
                       {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -6173,9 +6186,9 @@ export default function F1AnalyticsHub() {
                   </>
                 )}
 
-                {!isTablet && !isMobile && <div style={{ width:1, height:22, background:"#1c1c1c", flexShrink:0 }}/>}
+                {!isTablet && !isMobile && <div style={{ width: 1, height: 22, background: "#1c1c1c", flexShrink: 0 }} />}
 
-                <SignOutButton/>
+                <SignOutButton />
               </div>
             </div>
           </div>
@@ -6187,30 +6200,30 @@ export default function F1AnalyticsHub() {
           <div
             ref={contentRef}
             style={{
-              flex:1,                  /* fills remaining vertical space */
-              overflowY:"auto",        /* ← ONLY THIS SCROLLS — topbar above and footer below stay put */
-              overflowX:"hidden",
-              padding:`${isMobile ? 16 : isTablet ? 18 : 22}px ${isMobile ? 14 : isTablet ? 16 : 24}px`,
+              flex: 1,                  /* fills remaining vertical space */
+              overflowY: "auto",        /* ← ONLY THIS SCROLLS — topbar above and footer below stay put */
+              overflowX: "hidden",
+              padding: `${isMobile ? 16 : isTablet ? 18 : 22}px ${isMobile ? 14 : isTablet ? 16 : 24}px`,
               /* Subtle page-change animation */
-              animation:"slideIn 0.18s ease-out",
+              animation: "slideIn 0.18s ease-out",
             }}
             key={page} /* re-mount animation on page change */
           >
             {tabReady ? (
               <>
-                {page === "standings"    && <StandingsPage    season={season}/>}
-                {page === "drivers"      && <DriversPage      season={season} watchlist={watchlist} onToggle={toggleWatch} watchlistDisabled={!watchlistLoaded || watchlistSyncing} isMobile={isMobile}/>}
-                {page === "constructors" && <ConstructorsPage season={season} watchlist={watchlist} onToggle={toggleWatch} watchlistDisabled={!watchlistLoaded || watchlistSyncing} isMobile={isMobile}/>}
-                {page === "races"        && <RaceResultsPage  season={season} isMobile={isMobile}/>}
-                {page === "points"       && <PointsChartPage  season={season} isMobile={isMobile}/>}
-                {page === "records"      && <SeasonRecordsPage season={season} isMobile={isMobile}/>}
-                {page === "strategy"     && <StrategyPage     season={season}/>}
-                {page === "h2h"          && <HeadToHeadPage   season={season} isMobile={isMobile}/>}
-                {page === "circuits"     && <CircuitsPage     season={season} isMobile={isMobile}/>}
-                {page === "telemetry"    && <TelemetryPage season={season} isMobile={isMobile}/>}
-                {page === "visualizer"   && <LapVisualizerPage season={season} isMobile={isMobile}/>}
-                {page === "live"         && <LivePage isMobile={isMobile}/>}
-                {page === "watchlist"    && <WatchlistPage    season={season} watchlist={watchlist} onToggle={toggleWatch} trackedCount={trackedCount} watchlistReady={watchlistLoaded} watchlistDisabled={!watchlistLoaded || watchlistSyncing}/>}
+                {page === "standings" && <StandingsPage season={season} />}
+                {page === "drivers" && <DriversPage season={season} watchlist={watchlist} onToggle={toggleWatch} watchlistDisabled={!watchlistLoaded || watchlistSyncing} isMobile={isMobile} />}
+                {page === "constructors" && <ConstructorsPage season={season} watchlist={watchlist} onToggle={toggleWatch} watchlistDisabled={!watchlistLoaded || watchlistSyncing} isMobile={isMobile} />}
+                {page === "races" && <RaceResultsPage season={season} isMobile={isMobile} />}
+                {page === "points" && <PointsChartPage season={season} isMobile={isMobile} />}
+                {page === "records" && <SeasonRecordsPage season={season} isMobile={isMobile} />}
+                {page === "strategy" && <StrategyPage season={season} />}
+                {page === "h2h" && <HeadToHeadPage season={season} isMobile={isMobile} />}
+                {page === "circuits" && <CircuitsPage season={season} isMobile={isMobile} />}
+                {page === "telemetry" && <TelemetryPage season={season} isMobile={isMobile} />}
+                {page === "visualizer" && <LapVisualizerPage season={season} isMobile={isMobile} />}
+                {page === "live" && <LivePage isMobile={isMobile} />}
+                {page === "watchlist" && <WatchlistPage season={season} watchlist={watchlist} onToggle={toggleWatch} trackedCount={trackedCount} watchlistReady={watchlistLoaded} watchlistDisabled={!watchlistLoaded || watchlistSyncing} />}
               </>
             ) : (
               <Spinner />
@@ -6219,18 +6232,18 @@ export default function F1AnalyticsHub() {
 
           {/* ── Footer — stays pinned at very bottom ────────────── */}
           <div style={{
-            flexShrink:0,
-            padding:`8px ${isMobile ? 14 : 24}px`,
-            borderTop:"1px solid #101010",
-            display:"flex",
-            justifyContent:"space-between",
-            alignItems:"center",
+            flexShrink: 0,
+            padding: `8px ${isMobile ? 14 : 24}px`,
+            borderTop: "1px solid #101010",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}>
-            <span style={{ color:"#1e1e1e", fontSize:10, fontFamily:"monospace" }}>
+            <span style={{ color: "#1e1e1e", fontSize: 10, fontFamily: "monospace" }}>
               JOLPICA · ERGAST · OPENF1
             </span>
-            <span style={{ color:"#1e1e1e", fontSize:10, fontFamily:"monospace" }}>
-              F1 ANALYTICS HUB · v2.0
+            <span style={{ color: "#1e1e1e", fontSize: 10, fontFamily: "monospace" }}>
+              PITWALL ANALYTICS HUB · v2.0
             </span>
           </div>
         </div>

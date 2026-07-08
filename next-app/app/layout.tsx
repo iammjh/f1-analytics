@@ -7,12 +7,17 @@ import ScrollToTop from '@/components/ScrollToTop';
 const googleSiteVerification = getGoogleSiteVerification();
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://f1-analytic.vercel.app'),
+  metadataBase: new URL('https://pitwall-analytics.vercel.app'),
   title: {
-    default: 'F1 Analytics Hub — Real-Time Telemetry & Strategy',
-    template: '%s | F1 Analytics Hub',
+    default: 'Pitwall Analytics Hub — Real-Time Telemetry & Strategy',
+    template: '%s | Pitwall Analytics Hub',
   },
   description: 'Unleash live Formula 1 telemetry, race strategy simulations, driver rankings, and head-to-head comparisons in a high-tech dashboard interface.',
+  icons: {
+    icon: '/F1-Logo.png',
+    shortcut: '/F1-Logo.png',
+    apple: '/F1-Logo.png',
+  },
   keywords: [
     'F1',
     'Formula 1',
@@ -43,27 +48,27 @@ export const metadata: Metadata = {
     ? { google: googleSiteVerification }
     : undefined,
   alternates: {
-    canonical: 'https://f1-analytic.vercel.app',
+    canonical: 'https://pitwall-analytics.vercel.app',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://f1-analytic.vercel.app',
-    title: 'F1 Analytics Hub — Real-Time Telemetry & Strategy',
+    url: 'https://pitwall-analytics.vercel.app',
+    title: 'Pitwall Analytics Hub — Real-Time Telemetry & Strategy',
     description: 'Unleash live Formula 1 telemetry, race strategy simulations, driver rankings, and head-to-head comparisons in a high-tech dashboard interface.',
-    siteName: 'F1 Analytics Hub',
+    siteName: 'Pitwall Analytics Hub',
     images: [
       {
         url: '/f1_home.png',
         width: 1200,
         height: 630,
-        alt: 'F1 Analytics Hub Dashboard Preview',
+        alt: 'Pitwall Analytics Hub Dashboard Preview',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'F1 Analytics Hub — Real-Time Telemetry & Strategy',
+    title: 'Pitwall Analytics Hub — Real-Time Telemetry & Strategy',
     description: 'Unleash live Formula 1 telemetry, race strategy simulations, driver rankings, and head-to-head comparisons in a high-tech dashboard interface.',
     images: ['/f1_home.png'],
     creator: '@iammjh',
@@ -83,6 +88,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+      </head>
       <body className="bg-f1-black text-white">
         <AuthProvider>
           {children}
